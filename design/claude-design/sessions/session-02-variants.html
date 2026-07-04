@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 2: palette</title>
+<style>
+  /* Prose is set in a plain system serif; values in system mono.
+     Typefaces are session 3's question — nothing here chooses them. */
+  :root {
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #c8c8c5;            /* neutral gallery ground so washi temperatures are judgeable */
+    color: #1c1c1c;
+    font-family: var(--serif);
+    padding: 2.5rem clamp(1rem, 4vw, 4rem) 5rem;
+    line-height: 1.5;
+  }
+  header { max-width: 72rem; margin: 0 auto 2.5rem; }
+  h1 { font-size: 1.5rem; font-weight: normal; margin-bottom: .35rem; }
+  .q { font-size: 1.05rem; margin-bottom: 1rem; }
+  .meta { font-family: var(--mono); font-size: .72rem; color: #3d3d3a; max-width: 60rem; }
+  .meta p { margin-bottom: .3rem; }
+
+  .brandstrip { display: flex; gap: .6rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+  .brandstrip .chip { width: 2.2rem; height: 2.2rem; border: 1px solid rgba(0,0,0,.25); }
+  .brandstrip .lbl { font-family: var(--mono); font-size: .68rem; }
+  .sep { width: 1px; height: 2.2rem; background: rgba(0,0,0,.3); margin: 0 .5rem; }
+
+  main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(370px, 1fr));
+    gap: 1.5rem;
+    max-width: 110rem;
+    margin: 0 auto;
+  }
+  .sheet {
+    border: 1px solid rgba(0,0,0,.22);
+    padding: 1.4rem 1.5rem 1.7rem;
+  }
+  .sheet h2 { font-size: 1.05rem; font-weight: bold; margin-bottom: .15rem; }
+  .commit { font-family: var(--mono); font-size: .72rem; margin-bottom: 1.2rem; }
+  .sheet h3 {
+    font-family: var(--mono); font-size: .68rem; font-weight: normal;
+    text-transform: uppercase; letter-spacing: .08em;
+    margin: 1.3rem 0 .5rem; opacity: .65;
+  }
+  .sheet h3:first-of-type { margin-top: 0; }
+
+  table.sw { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: .72rem; }
+  table.sw td { padding: .22rem .5rem .22rem 0; vertical-align: middle; }
+  .swchip { width: 3.2rem; height: 1.7rem; border: 1px solid rgba(0,0,0,.18); display: block; }
+  .role { opacity: .7; }
+
+  .ladder { display: flex; gap: .35rem; align-items: center; font-family: var(--mono); font-size: .66rem; }
+  .ladder .cell { width: 2.6rem; height: 1.3rem; border: 1px solid rgba(0,0,0,.12); }
+
+  .overlaps { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+  .ovl { font-family: var(--mono); font-size: .68rem; }
+  .ovl .demo { position: relative; width: 6.4rem; height: 3.4rem; margin-bottom: .3rem; }
+  .ovl .demo .a, .ovl .demo .b { position: absolute; width: 4.2rem; height: 2.4rem; }
+  .ovl .demo .a { left: 0; top: 0; }
+  .ovl .demo .b { left: 2.2rem; top: 1rem; mix-blend-mode: multiply; }
+
+  .states { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+  .st { font-family: var(--mono); font-size: .64rem; line-height: 1.35; }
+  .st .mark { width: 100%; height: 1.9rem; margin-bottom: .3rem; border: 1px solid rgba(0,0,0,.1); }
+  .st b { display: block; font-size: .7rem; }
+  .stnote { font-family: var(--mono); font-size: .66rem; opacity: .75; margin-top: .5rem; }
+
+  .pieces { display: flex; align-items: flex-end; gap: 1.6rem; }
+  .pieces figure { text-align: center; font-family: var(--mono); font-size: .62rem; }
+  .pieces figcaption { margin-top: .35rem; opacity: .75; }
+  .solidpair { display: flex; gap: .5rem; align-items: flex-end; height: 100px; }
+
+  .prose { font-size: .95rem; line-height: 1.65; margin-top: .4rem; }
+  .prose .landed { font-family: var(--mono); font-size: .8em; font-weight: bold; white-space: nowrap; }
+  .prose svg { vertical-align: -0.12em; }
+
+  .contrasts { font-family: var(--mono); font-size: .64rem; opacity: .8; margin-top: 1.2rem; line-height: 1.6; }
+
+  section.verdict {
+    max-width: 72rem; margin: 3rem auto 0;
+    border: 1px solid rgba(0,0,0,.22);
+    background: #eef1ef; color: #1f2123;
+    padding: 1.8rem 2rem;
+  }
+  section.verdict h2 { font-size: 1.1rem; margin-bottom: .8rem; }
+  section.verdict p, section.verdict li { font-size: .93rem; line-height: 1.6; }
+  section.verdict ol { margin: .4rem 0 1rem 1.4rem; }
+  section.verdict li { margin-bottom: .5rem; }
+  .frozen {
+    font-family: var(--mono); font-size: .74rem; line-height: 1.8;
+    border-top: 1px solid rgba(0,0,0,.25); margin-top: 1.4rem; padding-top: 1rem;
+    white-space: pre-wrap;
+  }
+  .parked { font-family: var(--mono); font-size: .72rem; line-height: 1.7; margin-top: 1.2rem; }
+  .parked b { font-family: var(--serif); font-size: .9rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>hosystem — design session 2 · palette</h1>
+  <p class="q">Exact values for the three inks + paper, and the state semantics.</p>
+  <div class="meta">
+    <p>Prose samples: plain system serif. Values: system mono. Typefaces are session 3's question.</p>
+    <p>States apply to hos and records: <strong>open</strong> = declared, not yet worked · <strong>current</strong> = the step underway · <strong>closed</strong> = landed · <strong>superseded</strong> = closed, later overtaken by a newer ho (forward-only: it stays closed).</p>
+    <p>All contrast figures computed (sRGB, WCAG 2.x). Body pairs must pass AA (4.5:1). Gold is a mark, never body text; it is held to the 3:1 non-text minimum instead.</p>
+  </div>
+  <div class="brandstrip">
+    <span class="chip" style="background:#f5f2ed"></span>
+    <span class="chip" style="background:#c45a2d"></span>
+    <span class="lbl">atmarcus.net (must be distinct from)</span>
+    <span class="sep"></span>
+    <span class="chip" style="background:#eef1ef"></span>
+    <span class="chip" style="background:#efeee8"></span>
+    <span class="chip" style="background:#ece9e2"></span>
+    <span class="chip" style="background:#f7f7f4"></span>
+    <span class="lbl">the four washi candidates (A–D): cooler, greyer, or whiter — never cream; and gold, never orange</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ A -->
+<article class="sheet" style="background:#eef1ef; color:#1f2123;">
+  <h2>A — Aizuri</h2>
+  <p class="commit">commits to: a bero you can read <em>as blue</em> at body size · the coolest paper · one flat mineral gold</p>
+
+  <h3>Base values</h3>
+  <table class="sw">
+    <tr><td><span class="swchip" style="background:#eef1ef"></span></td><td>washi</td><td>#eef1ef</td><td class="role">ground</td><td></td></tr>
+    <tr><td><span class="swchip" style="background:#1f2123"></span></td><td>sumi</td><td>#1f2123</td><td class="role">text · structure · doing</td><td>14.2:1</td></tr>
+    <tr><td><span class="swchip" style="background:#29618e"></span></td><td>bero-ai</td><td>#29618e</td><td class="role">thinking tier</td><td>5.8:1 AA</td></tr>
+    <tr><td><span class="swchip" style="background:#a9832a"></span></td><td>gold</td><td>#a9832a</td><td class="role">state only</td><td>3.1:1 mark</td></tr>
+  </table>
+
+  <h3>Opacity ladder (all inks)</h3>
+  <div class="ladder">
+    <span class="cell" style="background:#1f2123"></span>
+    <span class="cell" style="background:#1f2123; opacity:.7"></span>
+    <span class="cell" style="background:#1f2123; opacity:.4"></span>
+    <span class="cell" style="background:#1f2123; opacity:.12"></span>
+    <span>1.00 / 0.70 / 0.40 / 0.12</span>
+  </div>
+
+  <h3>Overlaps (multiply)</h3>
+  <div class="overlaps">
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#1f2123"></span><span class="b" style="background:#29618e"></span></div>
+      kachi · sumi×bero · #040c13
+    </div>
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#29618e"></span><span class="b" style="background:#a9832a"></span></div>
+      matsuba · bero×gold · #1b3117
+    </div>
+  </div>
+
+  <h3>State map</h3>
+  <div class="states">
+    <div class="st"><span class="mark" style="background:#1f2123; opacity:.4"></span><b>open</b>sumi @ 0.40<br>→ #9b9e9d</div>
+    <div class="st"><span class="mark" style="background:#1f2123"></span><b>current</b>sumi @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#a9832a"></span><b>closed</b>gold @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#a9832a; opacity:.4"></span><b>superseded</b>gold @ 0.40<br>→ #d2c5a0</div>
+  </div>
+  <p class="stnote">Closure is permanent; recession is opacity. A superseded ho keeps its gold — it just recedes.</p>
+
+  <h3>The piece, inked</h3>
+  <div class="pieces">
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#eef1ef" stroke="#1f2123" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#1f2123" text-anchor="middle" dominant-baseline="central">歩</text></svg>
+      <figcaption>keyline · front</figcaption>
+    </figure>
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#eef1ef" stroke="#1f2123" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#a9832a" text-anchor="middle" dominant-baseline="central">と</text></svg>
+      <figcaption>keyline · promoted</figcaption>
+    </figure>
+    <figure>
+      <div class="solidpair">
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a9832a"/></svg>
+      </div>
+      <figcaption>solid · 16 px</figcaption>
+    </figure>
+  </div>
+
+  <h3>Prose, judged as text</h3>
+  <p class="prose">A ho is one bounded step: it opens against a plan, holds one session of work, and closes with a commit. Closed hos stay closed. <span style="color:#29618e">The thinking that shaped the step lives apart from the step itself — the argument, the rejected alternatives, the reason the decision went the way it did — and the record links into that depth instead of inlining it.</span> When the step lands, the record says so once: <span class="landed" style="color:#a9832a"><svg width="9" height="12" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a9832a"/></svg> landed 2026-07-04</span>.</p>
+
+  <p class="contrasts">sumi/washi 14.2:1 · bero/washi 5.8:1 (AA) · gold/washi 3.1:1 (non-text) · washi vs atmarcus cream: cooler by temperature, green-grey cast</p>
+</article>
+
+<!-- ============================================================ B -->
+<article class="sheet" style="background:#efeee8; color:#232326;">
+  <h2>B — Great Wave</h2>
+  <p class="commit">commits to: bero as depth, near-ink · gold as a two-value metal (face + shade) · neutral toothy paper</p>
+
+  <h3>Base values</h3>
+  <table class="sw">
+    <tr><td><span class="swchip" style="background:#efeee8"></span></td><td>washi</td><td>#efeee8</td><td class="role">ground</td><td></td></tr>
+    <tr><td><span class="swchip" style="background:#232326"></span></td><td>sumi</td><td>#232326</td><td class="role">text · structure · doing</td><td>13.5:1</td></tr>
+    <tr><td><span class="swchip" style="background:#16344f"></span></td><td>bero-ai</td><td>#16344f</td><td class="role">thinking tier</td><td>11.0:1 AA</td></tr>
+    <tr><td><span class="swchip" style="background:#c3a24a"></span></td><td>gold · face</td><td>#c3a24a</td><td class="role">state only — fields</td><td>2.1:1</td></tr>
+    <tr><td><span class="swchip" style="background:#8a6d1f"></span></td><td>gold · shade</td><td>#8a6d1f</td><td class="role">state only — edges, small</td><td>4.2:1 mark</td></tr>
+  </table>
+
+  <h3>Opacity ladder (all inks)</h3>
+  <div class="ladder">
+    <span class="cell" style="background:#232326"></span>
+    <span class="cell" style="background:#232326; opacity:.7"></span>
+    <span class="cell" style="background:#232326; opacity:.4"></span>
+    <span class="cell" style="background:#232326; opacity:.12"></span>
+    <span>1.00 / 0.70 / 0.40 / 0.12</span>
+  </div>
+
+  <h3>Overlaps (multiply)</h3>
+  <div class="overlaps">
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#232326"></span><span class="b" style="background:#16344f"></span></div>
+      kachi · sumi×bero · #03070b
+    </div>
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#16344f"></span><span class="b" style="background:#c3a24a"></span></div>
+      matsuba · bero×gold(face) · #102116
+    </div>
+  </div>
+
+  <h3>State map</h3>
+  <div class="states">
+    <div class="st"><span class="mark" style="background:#232326; opacity:.4"></span><b>open</b>sumi @ 0.40<br>→ #9d9d9a</div>
+    <div class="st"><span class="mark" style="background:#232326"></span><b>current</b>sumi @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#c3a24a; border:2px solid #8a6d1f"></span><b>closed</b>face #c3a24a<br>+ shade #8a6d1f</div>
+    <div class="st"><span class="mark" style="background:#8a6d1f"></span><b>superseded</b>shade only<br>#8a6d1f @ 1.00</div>
+  </div>
+  <p class="stnote">The metal is a pair of flats — face and shade. Superseded loses the light and keeps the metal.</p>
+
+  <h3>The piece, inked</h3>
+  <div class="pieces">
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#efeee8" stroke="#232326" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#232326" text-anchor="middle" dominant-baseline="central">歩</text></svg>
+      <figcaption>keyline · front</figcaption>
+    </figure>
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#efeee8" stroke="#232326" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#c3a24a" stroke="#8a6d1f" stroke-width="0.75" text-anchor="middle" dominant-baseline="central">と</text></svg>
+      <figcaption>keyline · promoted</figcaption>
+    </figure>
+    <figure>
+      <div class="solidpair">
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#232326"/></svg>
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#8a6d1f"/></svg>
+      </div>
+      <figcaption>solid · 16 px (shade carries small sizes)</figcaption>
+    </figure>
+  </div>
+
+  <h3>Prose, judged as text</h3>
+  <p class="prose">A ho is one bounded step: it opens against a plan, holds one session of work, and closes with a commit. Closed hos stay closed. <span style="color:#16344f">The thinking that shaped the step lives apart from the step itself — the argument, the rejected alternatives, the reason the decision went the way it did — and the record links into that depth instead of inlining it.</span> When the step lands, the record says so once: <span class="landed" style="color:#8a6d1f"><svg width="9" height="12" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#c3a24a" stroke="#8a6d1f" stroke-width="6"/></svg> landed 2026-07-04</span>.</p>
+
+  <p class="contrasts">sumi/washi 13.5:1 · bero/washi 11.0:1 (AA — but is it still blue at 16 px?) · gold face 2.1:1, shade 4.2:1 · washi vs atmarcus cream: greyer, green-shifted</p>
+</article>
+
+<!-- ============================================================ C -->
+<article class="sheet" style="background:#ece9e2; color:#2e2c28;">
+  <h2>C — Tooth</h2>
+  <p class="commit">commits to: paper with visible tooth (stone-grey, not cream) · soft warm sumi · gold only on live closures</p>
+
+  <h3>Base values</h3>
+  <table class="sw">
+    <tr><td><span class="swchip" style="background:#ece9e2"></span></td><td>washi</td><td>#ece9e2</td><td class="role">ground</td><td></td></tr>
+    <tr><td><span class="swchip" style="background:#2e2c28"></span></td><td>sumi</td><td>#2e2c28</td><td class="role">text · structure · doing</td><td>11.5:1</td></tr>
+    <tr><td><span class="swchip" style="background:#33597d"></span></td><td>bero-ai</td><td>#33597d</td><td class="role">thinking tier</td><td>6.0:1 AA</td></tr>
+    <tr><td><span class="swchip" style="background:#a07c26"></span></td><td>gold</td><td>#a07c26</td><td class="role">state only</td><td>3.2:1 mark</td></tr>
+  </table>
+
+  <h3>Opacity ladder (all inks)</h3>
+  <div class="ladder">
+    <span class="cell" style="background:#2e2c28"></span>
+    <span class="cell" style="background:#2e2c28; opacity:.7"></span>
+    <span class="cell" style="background:#2e2c28; opacity:.4"></span>
+    <span class="cell" style="background:#2e2c28; opacity:.12"></span>
+    <span>1.00 / 0.70 / 0.40 / 0.12</span>
+  </div>
+
+  <h3>Overlaps (multiply)</h3>
+  <div class="overlaps">
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#2e2c28"></span><span class="b" style="background:#33597d"></span></div>
+      kachi · sumi×bero · #090f13
+    </div>
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#33597d"></span><span class="b" style="background:#a07c26"></span></div>
+      matsuba · bero×gold · #202b12
+    </div>
+  </div>
+
+  <h3>State map</h3>
+  <div class="states">
+    <div class="st"><span class="mark" style="background:transparent; border:1.5px solid rgba(46,44,40,.4)"></span><b>open</b>sumi @ 0.40<br>keyline, no fill</div>
+    <div class="st"><span class="mark" style="background:#2e2c28"></span><b>current</b>sumi @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#a07c26"></span><b>closed</b>gold @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#2e2c28; opacity:.7"></span><b>superseded</b>sumi @ 0.70<br>gold revoked</div>
+  </div>
+  <p class="stnote">Gold marks only the live closure; a superseded ho returns to structure. (Tension: forward-only says closure is permanent — this map un-gilds it.)</p>
+
+  <h3>The piece, inked</h3>
+  <div class="pieces">
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#ece9e2" stroke="#2e2c28" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#2e2c28" text-anchor="middle" dominant-baseline="central">歩</text></svg>
+      <figcaption>keyline · front</figcaption>
+    </figure>
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#ece9e2" stroke="#2e2c28" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#a07c26" text-anchor="middle" dominant-baseline="central">と</text></svg>
+      <figcaption>keyline · promoted</figcaption>
+    </figure>
+    <figure>
+      <div class="solidpair">
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#2e2c28"/></svg>
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a07c26"/></svg>
+      </div>
+      <figcaption>solid · 16 px</figcaption>
+    </figure>
+  </div>
+
+  <h3>Prose, judged as text</h3>
+  <p class="prose">A ho is one bounded step: it opens against a plan, holds one session of work, and closes with a commit. Closed hos stay closed. <span style="color:#33597d">The thinking that shaped the step lives apart from the step itself — the argument, the rejected alternatives, the reason the decision went the way it did — and the record links into that depth instead of inlining it.</span> When the step lands, the record says so once: <span class="landed" style="color:#a07c26"><svg width="9" height="12" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a07c26"/></svg> landed 2026-07-04</span>.</p>
+
+  <p class="contrasts">sumi/washi 11.5:1 · bero/washi 6.0:1 (AA) · gold/washi 3.2:1 (non-text) · washi vs atmarcus cream: darker, grey — stone rather than cream</p>
+</article>
+
+<!-- ============================================================ D -->
+<article class="sheet" style="background:#f7f7f4; color:#141517;">
+  <h2>D — High key</h2>
+  <p class="commit">commits to: maximum print contrast on near-white paper · saturated bero · supersession as tarnish (a named multiply)</p>
+
+  <h3>Base values</h3>
+  <table class="sw">
+    <tr><td><span class="swchip" style="background:#f7f7f4"></span></td><td>washi</td><td>#f7f7f4</td><td class="role">ground</td><td></td></tr>
+    <tr><td><span class="swchip" style="background:#141517"></span></td><td>sumi</td><td>#141517</td><td class="role">text · structure · doing</td><td>17.0:1</td></tr>
+    <tr><td><span class="swchip" style="background:#1e4d80"></span></td><td>bero-ai</td><td>#1e4d80</td><td class="role">thinking tier</td><td>8.1:1 AA</td></tr>
+    <tr><td><span class="swchip" style="background:#a8841f"></span></td><td>gold</td><td>#a8841f</td><td class="role">state only</td><td>3.3:1 mark</td></tr>
+  </table>
+
+  <h3>Opacity ladder (all inks)</h3>
+  <div class="ladder">
+    <span class="cell" style="background:#141517"></span>
+    <span class="cell" style="background:#141517; opacity:.7"></span>
+    <span class="cell" style="background:#141517; opacity:.4"></span>
+    <span class="cell" style="background:#141517; opacity:.12"></span>
+    <span>1.00 / 0.70 / 0.40 / 0.12</span>
+  </div>
+
+  <h3>Overlaps (multiply)</h3>
+  <div class="overlaps">
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#141517"></span><span class="b" style="background:#1e4d80"></span></div>
+      kachi · sumi×bero · #02060b
+    </div>
+    <div class="ovl">
+      <div class="demo"><span class="a" style="background:#1e4d80"></span><span class="b" style="background:#a8841f"></span></div>
+      matsuba · bero×gold · #13270f
+    </div>
+  </div>
+
+  <h3>State map</h3>
+  <div class="states">
+    <div class="st"><span class="mark" style="background:#141517; opacity:.4"></span><b>open</b>sumi @ 0.40<br>→ #9c9d9c</div>
+    <div class="st"><span class="mark" style="background:#141517"></span><b>current</b>sumi @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#a8841f"></span><b>closed</b>gold @ 1.00</div>
+    <div class="st"><span class="mark" style="background:#6a5314"></span><b>superseded</b>tarnish #6a5314<br>= gold × sumi@0.40 veil</div>
+  </div>
+  <p class="stnote">Supersession is tarnish — gold seen through a sumi veil, kept as a named flat. Closure stays gold under the grey.</p>
+
+  <h3>The piece, inked</h3>
+  <div class="pieces">
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#f7f7f4" stroke="#141517" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#141517" text-anchor="middle" dominant-baseline="central">歩</text></svg>
+      <figcaption>keyline · front</figcaption>
+    </figure>
+    <figure>
+      <svg width="80" height="106" viewBox="-3 -3 80 106"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#f7f7f4" stroke="#141517" stroke-width="4" stroke-linejoin="miter"/><text x="37" y="61" font-family="Georgia, serif" font-size="42" fill="#a8841f" text-anchor="middle" dominant-baseline="central">と</text></svg>
+      <figcaption>keyline · promoted</figcaption>
+    </figure>
+    <figure>
+      <div class="solidpair">
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#141517"/></svg>
+        <svg width="12" height="16" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a8841f"/></svg>
+      </div>
+      <figcaption>solid · 16 px</figcaption>
+    </figure>
+  </div>
+
+  <h3>Prose, judged as text</h3>
+  <p class="prose">A ho is one bounded step: it opens against a plan, holds one session of work, and closes with a commit. Closed hos stay closed. <span style="color:#1e4d80">The thinking that shaped the step lives apart from the step itself — the argument, the rejected alternatives, the reason the decision went the way it did — and the record links into that depth instead of inlining it.</span> When the step lands, the record says so once: <span class="landed" style="color:#a8841f"><svg width="9" height="12" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#a8841f"/></svg> landed 2026-07-04</span>.</p>
+
+  <p class="contrasts">sumi/washi 17.0:1 · bero/washi 8.1:1 (AA) · gold/washi 3.3:1 (non-text) · washi vs atmarcus cream: neutral white, no warmth at all</p>
+</article>
+
+</main>
+
+<!-- ============================================================ verdict -->
+<section class="verdict">
+  <h2>Recommendation — A (Aizuri)</h2>
+  <ol>
+    <li><strong>The two-register system lives or dies at body size.</strong> Sumi is the doing tier, bero the thinking tier; the reader must see the register change in running text. A's aizuri blue (5.8:1) is unmistakably <em>blue</em> at 16&nbsp;px and still passes AA. B's Great Wave blue (11.0:1) is the more beautiful swatch, but at body size it collapses toward a second black — the register shift disappears exactly where it matters most. Compare the two prose paragraphs before anything else.</li>
+    <li><strong>The distinction constraint is carried by the paper itself.</strong> A's washi is the coolest of the four — a green-grey cast that no one will read as atmarcus cream — so the brand separation doesn't depend only on gold-instead-of-orange. It also makes gold the sole warm note on the page, which protects gold's state semantics: warmth itself becomes a signal of closure.</li>
+    <li><strong>Flat mineral gold honors "flat fields."</strong> B's two-value metal is handsome, but it is a gradient smuggled in as a pair, and it doubles gold's presence when gold should be rare.</li>
+    <li><strong>A's state map matches forward-only exactly.</strong> Closure is permanent; recession is opacity — a superseded ho keeps its gold and simply recedes. C's map revokes gold on supersession, which contradicts the framework (superseding never un-lands anything). D's tarnish is defensible and kept as a parked idea, but it adds a fifth named flat for one rare state.</li>
+    <li><strong>A finding from D:</strong> the whiter the washi, the deeper gold must sit to reach 3:1 — bright paper dulls the metal. A's washi lets gold stay bright enough to read as metal while making the mark minimum. This is another reason the paper should not be near-white.</li>
+  </ol>
+
+  <div class="frozen"><strong>Frozen if accepted:</strong>
+washi   #eef1ef   ground
+sumi    #1f2123   text · structure · the doing tier      (14.2:1 on washi, AA)
+bero-ai #29618e   thinking tier · discursive register    (5.8:1 on washi, AA)
+gold    #a9832a   state only — closure, landing, promotion (3.1:1, mark only, never body text)
+
+opacity ladder, all inks: 1.00 / 0.70 / 0.40 / 0.12
+  (1.00 full ink · 0.70 secondary · 0.40 receded · 0.12 field wash / bokashi endpoint)
+
+overlaps (multiply, named flats):
+  kachi   = sumi × bero = #040c13
+  matsuba = bero × gold = #1b3117
+
+state map:
+  open        sumi @ 0.40    (→ #9b9e9d on washi)
+  current     sumi @ 1.00
+  closed      gold @ 1.00
+  superseded  gold @ 0.40    (→ #d2c5a0 on washi — closure permanent, recession by opacity)
+  state tints are marks; adjacent labels carry the reading at full sumi.
+
+dark mode: exists — a second printing on dark ground, not an inversion; designed in its own later session, and nothing frozen here presumes it.</div>
+
+  <div class="parked">
+    <b>Parked</b><br>
+    — Type faces: prose above is plain system serif, values system mono (session 3).<br>
+    — Motion, including how a state change is shown moving (session 4).<br>
+    — Bero 0.12 field washes for document grounds and asides — usage rules (session 5).<br>
+    — Bokashi: where the wipe is permitted, its length and direction (first needed in sessions 5–6).<br>
+    — Dark-mode printing: only its existence is decided here; its values are a later session.<br>
+    — Link color and affordance (session 3, with type).<br>
+    — State marks' shape and size in the trail — only their inks are frozen here (session 8).<br>
+    — D's tarnish idea (gold × sumi veil) — kept as a candidate if the trail needs a stronger superseded mark (session 8).
+  </div>
+</section>
+
+<section class="verdict" style="margin-top:1.5rem">
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>A (Aizuri)</strong>, accepted as recommended. Reasons: bero must read
+  as blue in running text for the two-register system to work (5.8:1 is blue and AA;
+  the Great Wave depth collapses toward black at body size); the cool washi carries the
+  atmarcus-distinction in the paper itself and leaves gold the only warm note; flat
+  mineral gold honors flat fields; the state map matches forward-only — closure is
+  permanent, recession is opacity. Dark mode decided: exists, designed later.
+  Parked items as listed above. Values landed in <code>design/basis-of-design.md</code> §2.</p>
+</section>
+
+</body>
+</html>

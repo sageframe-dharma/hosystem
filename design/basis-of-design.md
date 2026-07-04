@@ -31,7 +31,7 @@ never silently.
 | # | Question | Status | Landed values |
 |---|---|---|---|
 | 1 | the piece | landed 2026-07-04 | [§1](#1--the-piece) |
-| 2 | palette | open | — |
+| 2 | palette | landed 2026-07-04 | [§2](#2--palette) |
 | 3 | type | open | — |
 | 4 | the step | open | — |
 | 5 | documents | open | — |
@@ -73,6 +73,34 @@ inside the gold rule.
 **Favicon.** Solid form, front face, 16 px.
 
 **Reference path** (100-unit height): `M37 0 L66 22 L74 100 L0 100 L8 22 Z`.
+
+## 2 — palette
+
+_Landed 2026-07-04. Winner: variant A (aizuri). Session record:
+`claude-design/sessions/session-02-variants.html`._
+
+Three inks + paper:
+
+| ink | value | role | contrast on washi |
+|---|---|---|---|
+| washi | `#eef1ef` | ground | — |
+| sumi | `#1f2123` | text, structure, the doing tier | 14.2:1 (AA) |
+| bero-ai | `#29618e` | thinking tier, discursive register | 5.8:1 (AA) |
+| gold | `#a9832a` | state only — closure, landing, promotion | 3.1:1 (mark only, never body text) |
+
+**Opacity ladder (all inks):** 1.00 / 0.70 / 0.40 / 0.12 — full ink / secondary /
+receded / field wash & bokashi endpoint.
+
+**Overlaps (multiply, named flats):** kachi = sumi × bero = `#040c13`;
+matsuba = bero × gold = `#1b3117`.
+
+**State map:** open = sumi @ 0.40 (→ `#9b9e9d` on washi); current = sumi @ 1.00;
+closed = gold @ 1.00; superseded = gold @ 0.40 (→ `#d2c5a0` on washi). Closure is
+permanent; recession is opacity. State tints are marks; adjacent labels read at
+full sumi.
+
+**Dark mode:** exists — a second printing on dark ground, not an inversion;
+designed in its own later session. Nothing frozen here presumes it.
 
 ## Propagation ledger
 

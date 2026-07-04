@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>hosystem — design session 1: the piece</title>
+<style>
+  :root {
+    --washi: #f7f4ec;
+    --sumi: #1a1a1a;
+    --gold: #b8860b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--washi);
+    color: var(--sumi);
+    font: 15px/1.55 -apple-system, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 3rem 2rem 5rem;
+    max-width: 1180px;
+    margin-inline: auto;
+  }
+  h1 { font-size: 1.4rem; font-weight: 600; margin: 0 0 .25rem; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 3rem 0 1rem; border-top: 1px solid var(--sumi); padding-top: 1rem; }
+  .note { font-size: .85rem; opacity: .7; margin-bottom: 2.5rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .card {
+    border: 1px solid rgba(26,26,26,.25);
+    padding: 1.25rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+  }
+  .card h3 { font-size: 1rem; margin: 0 0 .75rem; align-self: flex-start; }
+  .pair { display: flex; align-items: flex-end; gap: 1.25rem; margin-bottom: 1rem; }
+  .pair.small { gap: .75rem; margin-bottom: .5rem; }
+  .sizelabel { font-size: .7rem; opacity: .55; margin: 0 0 .75rem; }
+  .caption { font-size: .8rem; margin-top: .9rem; opacity: .85; align-self: flex-start; }
+  svg { display: block; }
+  .demo-row { display: flex; align-items: flex-end; gap: 2rem; margin: 1rem 0 1.5rem; }
+  .demo-item { display: flex; flex-direction: column; align-items: center; gap: .4rem; font-size: .7rem; opacity: .8; }
+  .numbers { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .82rem; }
+  .numbers li { margin-bottom: .35rem; }
+  ul { padding-left: 1.2rem; }
+  p.rec { max-width: 62ch; }
+</style>
+</head>
+<body>
+
+<h1>Session 1 — the piece</h1>
+<p class="note">
+  Pentagon shōgi-piece glyph: geometry and both faces. Front face 歩 in sumi; promoted face と in gold.<br>
+  <strong>Ink values on this page are placeholders</strong> — sumi #1a1a1a, gold #b8860b, washi #f7f4ec — for display only. Real values are session 2.
+</p>
+
+<div class="grid" id="variants"></div>
+
+<h2>Recommendation</h2>
+<p class="rec">
+  <strong>A — true koma ratios, sumi keyline, character at 0.42H — with B's solid silhouette
+  frozen as the sub-24px form.</strong>
+</p>
+<p class="rec">
+  Reasons. The true koma proportions (flared sides, off-square shoulders) are what make this
+  the shōgi pawn and not a generic pentagon — C and D read as "home" or "arrow up" icons the
+  moment the flare goes. The keyline-and-ink-character treatment is the woodblock production
+  logic itself: a keyblock line printed on paper, the character in the same sumi ink. B inverts
+  that (character as paper cut from an ink field), which is honest but heavier, and D's
+  oversized character crowds the shoulders.
+</p>
+<p class="rec">
+  The honest finding at 16 px: no face character survives, and a 0.04H keyline scales to
+  under one pixel. So the small-scale form is not a smaller drawing of the large one — it is
+  a second inking of the same block. Below 24 px rendered height the piece drops its character
+  and prints solid: sumi fill for the front face, gold fill for the promoted face. One geometry,
+  two inkings, chosen by scale. Gold-as-fill at that scale is state marking (a closed ho), not
+  emphasis, so it stays inside the gold rule.
+</p>
+<div class="demo-row" id="demo"></div>
+<p class="note" style="margin-bottom:0">The scale rule demonstrated: 160 / 48 / 32 px keyline form; 16 px solid form, front (sumi) and promoted (gold).</p>
+
+<h2>Frozen if accepted</h2>
+<ul class="numbers">
+  <li>Silhouette, unit height H = 1.000, base width 0.740H. Vertices (x, y), y down:
+      apex (0.370, 0.000) · right shoulder (0.660, 0.220) · right base (0.740, 1.000) ·
+      left base (0.000, 1.000) · left shoulder (0.080, 0.220). Closed, miter joins.</li>
+  <li>Keyline form (≥ 24 px rendered height): stroke 0.040H sumi, fill washi (ground shows through).</li>
+  <li>Face character: mincho, font-size 0.420H, centered at (0.370H, 0.610H), dominant-baseline central.
+      Front 歩 in sumi; promoted と in gold. Same metrics both faces.</li>
+  <li>Solid form (&lt; 24 px rendered height): no character, no keyline. Front = sumi fill; promoted = gold fill.</li>
+  <li>Favicon = solid form, front face, 16 px.</li>
+</ul>
+
+<h2>Parked</h2>
+<ul>
+  <li>The flip animation between faces — session 9.</li>
+  <li>Real ink values (this page uses placeholders) — session 2.</li>
+  <li>The mincho typeface for 歩 / と (Hiragino Mincho is a display placeholder here) — session 3.</li>
+  <li>How pieces sit in chain diagrams and arc trees (spacing, connectors, any bero-ai state) — sessions 6 and 8.</li>
+</ul>
+
+<script>
+const SUMI = '#1a1a1a', GOLD = '#b8860b', WASHI = '#f7f4ec';
+const MINCHO = '"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif';
+
+// Shapes drawn in a 100-unit-height space, viewBox padded 4 units for stroke.
+const SHAPES = {
+  koma: { // true shōgi-pawn ratios: base 0.74H, shoulders at 0.22H with side flare
+    vb: '-4 -4 82 108',
+    path: 'M37 0 L66 22 L74 100 L0 100 L8 22 Z',
+    cx: 37, cy: 61, ar: 82 / 108
+  },
+  geo: { // simplified geometric pentagon: base 0.78H, vertical sides, shoulders at 0.28H
+    vb: '-4 -4 86 108',
+    path: 'M39 0 L78 28 L78 100 L0 100 L0 28 Z',
+    cx: 39, cy: 63, ar: 86 / 108
+  }
+};
+
+const VARIANTS = [
+  { id: 'A', shape: 'koma', mode: 'outline', charSize: 42,
+    caption: 'A — true koma ratios; sumi keyline on washi; character 0.42H in ink.' },
+  { id: 'B', shape: 'koma', mode: 'solid', charSize: 42,
+    caption: 'B — true koma ratios; solid sumi; character 0.42H cut to paper.' },
+  { id: 'C', shape: 'geo', mode: 'outline', charSize: 36,
+    caption: 'C — geometric pentagon, vertical sides; keyline; lighter character 0.36H.' },
+  { id: 'D', shape: 'geo', mode: 'solid', charSize: 54,
+    caption: 'D — geometric pentagon; solid; oversized character 0.54H.' }
+];
+
+function pieceSVG(shapeKey, mode, face, heightPx, charSize) {
+  const s = SHAPES[shapeKey];
+  const w = Math.round(heightPx * s.ar * 10) / 10;
+  const promoted = face === 'promoted';
+  let pathAttrs, charFill;
+  if (mode === 'outline') {
+    pathAttrs = `fill="${WASHI}" stroke="${SUMI}" stroke-width="4" stroke-linejoin="miter"`;
+    charFill = promoted ? GOLD : SUMI;
+  } else {
+    pathAttrs = `fill="${SUMI}"`;
+    charFill = promoted ? GOLD : WASHI;
+  }
+  const ch = promoted ? 'と' : '歩';
+  return `<svg width="${w}" height="${heightPx}" viewBox="${s.vb}" role="img" aria-label="piece ${face}">
+    <path d="${s.path}" ${pathAttrs}/>
+    <text x="${s.cx}" y="${s.cy}" text-anchor="middle" dominant-baseline="central"
+          font-family='${MINCHO}' font-size="${charSize}" fill="${charFill}">${ch}</text>
+  </svg>`;
+}
+
+// Solid-silhouette form used by the recommendation's scale rule (no character).
+function solidSVG(shapeKey, fill, heightPx) {
+  const s = SHAPES[shapeKey];
+  const w = Math.round(heightPx * s.ar * 10) / 10;
+  return `<svg width="${w}" height="${heightPx}" viewBox="${s.vb}">
+    <path d="${s.path}" fill="${fill}"/>
+  </svg>`;
+}
+
+const grid = document.getElementById('variants');
+for (const v of VARIANTS) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  let html = `<h3>${v.id}</h3>`;
+  for (const size of [160, 32, 16]) {
+    html += `<div class="pair${size < 160 ? ' small' : ''}">
+      ${pieceSVG(v.shape, v.mode, 'front', size, v.charSize)}
+      ${pieceSVG(v.shape, v.mode, 'promoted', size, v.charSize)}
+    </div>
+    <div class="sizelabel">${size} px</div>`;
+  }
+  html += `<div class="caption">${v.caption}</div>`;
+  card.innerHTML = html;
+  grid.appendChild(card);
+}
+
+const demo = document.getElementById('demo');
+const items = [
+  ['160 px · keyline', pieceSVG('koma', 'outline', 'front', 160, 42)],
+  ['48 px · keyline', pieceSVG('koma', 'outline', 'front', 48, 42)],
+  ['32 px · keyline', pieceSVG('koma', 'outline', 'front', 32, 42)],
+  ['16 px · solid front', solidSVG('koma', SUMI, 16)],
+  ['16 px · solid promoted', solidSVG('koma', GOLD, 16)]
+];
+for (const [label, svg] of items) {
+  const d = document.createElement('div');
+  d.className = 'demo-item';
+  d.innerHTML = `${svg}<span>${label}</span>`;
+  demo.appendChild(d);
+}
+</script>
+
+<!--
+SESSION RECORD — landed 2026-07-04
+
+Winner: A — true koma ratios, sumi keyline, character 0.42H in ink — with B's
+solid silhouette adopted as the sub-24px inking (front = sumi fill, promoted =
+gold fill, no character). Favicon = solid form, front face.
+
+Reasons for A over solid-as-canonical (B):
+- Repeated at text scale (list markers, chain nodes), solid pieces become heavy
+  black spots; keyline sits at the weight of the surrounding text.
+- Solid-with-knockout shares the production logic of the hanko (ink field,
+  character reversed out); keyline-with-ink-character keeps the piece and the
+  seal structurally different marks.
+- "Front face carries 歩 in sumi": only the keyline variants print the character
+  in ink; knockout renders it as the absence of ink.
+- Knockout degrades worse: the reversed-out character's counters clog by 32 px,
+  so solid buys no extra legible range anyway.
+
+C and D rejected: without the koma side-flare the pentagon reads as a generic
+"home"/"arrow" icon.
+
+Frozen values landed in design/basis-of-design.md §1.
+
+Parked:
+- The flip animation between faces — session 9.
+- Real ink values (this page used placeholders) — session 2.
+- The mincho typeface for 歩 / と — session 3.
+- Piece behavior in chain diagrams and arc trees — sessions 6 and 8.
+-->
+
+</body>
+</html>

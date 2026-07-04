@@ -32,7 +32,7 @@ never silently.
 |---|---|---|---|
 | 1 | the piece | landed 2026-07-04 | [§1](#1--the-piece) |
 | 2 | palette | landed 2026-07-04 | [§2](#2--palette) |
-| 3 | type | open | — |
+| 3 | type | landed 2026-07-04 | [§3](#3--type) |
 | 4 | the step | open | — |
 | 5 | documents | open | — |
 | 6 | diagrams | open | — |
@@ -101,6 +101,49 @@ full sumi.
 
 **Dark mode:** exists — a second printing on dark ground, not an inversion;
 designed in its own later session. Nothing frozen here presumes it.
+
+## 3 — type
+
+_Landed 2026-07-04. Winner: variant A (Source Serif 4 + Source Code Pro). Session
+record: `claude-design/sessions/session-03-variants.html`._
+
+**Families (two + CJK fallback, per budget):**
+
+- serif — `'Source Serif 4'`, weights 400, 400 italic, 600
+- mono — `'Source Code Pro'`, weights 400, 600
+- CJK fallback — `'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif`,
+  appended to both stacks; no CJK webfont is downloaded. The piece's face
+  characters (歩 / と) render in this stack — resolving session 1's deferred
+  mincho-face question.
+
+**Registers:**
+
+- discursive — serif 400, sumi (14.2:1)
+- procedural — mono 400 at 0.875rem/1.6, sumi; frontmatter keys sumi @0.70
+  `#5d5f60` (5.6:1), values sumi 1.00
+- emergent — serif 400 italic, bero-ai (5.8:1), 2px left rule bero @0.40
+  `#9fb7c8`, padding-left 1rem
+
+**Scale (rem / unitless leading):**
+
+| role | size / leading | weight |
+|---|---|---|
+| body | 1.0625 / 1.65 | 400 |
+| h1 | 1.75 / 1.25 | 600 |
+| h2 | 1.375 / 1.3 | 600 |
+| h3 | 1.125 / 1.4 | 600 |
+| mono blocks | 0.875 / 1.6 (inline code 0.875em) | 400 |
+| caption | 0.8125 / 1.5, sumi @0.70 | 400 |
+
+**Marked term (resting look only):** text sumi 1.00; `underline dotted 1px`,
+decoration color bero @0.70 `#648cab` (3.1:1 as a mark);
+`text-underline-offset: 0.2em`; no background, no weight change.
+(The touch interaction is session 7's question.)
+
+**Register-by-position ruled out (2026-07-04):** the practitioner asked whether a
+document's first paragraph should print in bero. Decision: no — bero is earned by
+register, never by position. Which blocks of a document belong to which register
+is session 5's question.
 
 ## Propagation ledger
 

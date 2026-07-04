@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 3 — type</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&family=Spectral:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Literata:ital,wght@0,400;0,600;1,400&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  /* ---- frozen palette (session 2, aizuri) ---- */
+  :root {
+    --washi: #eef1ef;
+    --sumi:  #1f2123;
+    --bero:  #29618e;
+    --gold:  #a9832a;
+    /* alpha composites on washi, computed (sRGB over) */
+    --sumi-70: #5d5f60;   /* 5.6:1  */
+    --sumi-40: #9b9e9d;   /* 2.4:1  */
+    --bero-70: #648cab;   /* 3.1:1  */
+    --bero-40: #9fb7c8;   /* 1.8:1  */
+    --bero-12: #d6e0e3;   /* field  */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--washi);
+    color: var(--sumi);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 3rem 2rem 5rem;
+  }
+  .page { max-width: 1440px; margin: 0 auto; }
+
+  /* ---- page chrome ---- */
+  header.session { margin-bottom: 2.5rem; max-width: 72ch; }
+  header.session h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; }
+  header.session p { margin-top: 0.75rem; color: var(--sumi-70); }
+  .frozen-inputs { margin-top: 1.25rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; }
+  .swatch { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
+  .swatch i { width: 1.1em; height: 1.1em; display: inline-block; border: 1px solid var(--sumi-40); }
+
+  /* ---- variant grid ---- */
+  .variants {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+    gap: 2.5rem;
+  }
+  @media (max-width: 620px) { .variants { grid-template-columns: 1fr; } }
+  .variant {
+    border-top: 3px solid var(--sumi);
+    padding-top: 1rem;
+  }
+  .variant > .tag { font-weight: 600; font-size: 0.9375rem; }
+  .variant > .commit { color: var(--sumi-70); font-size: 0.8125rem; margin-top: 0.25rem; max-width: 60ch; }
+  table.spec {
+    border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.75rem; width: 100%;
+  }
+  table.spec td { padding: 0.2rem 1rem 0.2rem 0; vertical-align: top; border-bottom: 1px solid var(--bero-12); }
+  table.spec td:first-child { color: var(--sumi-70); white-space: nowrap; width: 9rem; }
+
+  /* ---- specimen frame ---- */
+  .specimen {
+    background: var(--washi);
+    border: 1px solid var(--sumi-40);
+    padding: 2.25rem 2.5rem 2.5rem;
+    max-width: 46rem;
+  }
+  .specimen .reg-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--sumi-40); margin: 2rem 0 0.5rem;
+  }
+  .specimen .reg-label:first-child { margin-top: 0; }
+  .specimen pre { overflow-x: auto; }
+
+  /* ================= VARIANT A — Source Serif 4 + Source Code Pro ================= */
+  .vA .specimen { font-family: 'Source Serif 4', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+                  font-size: 1.0625rem; line-height: 1.65; }
+  .vA .specimen h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 600; margin-bottom: 0.75rem; }
+  .vA .specimen p + p { margin-top: 0.75em; }
+  .vA .specimen pre { font-family: 'Source Code Pro', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+                      font-size: 0.875rem; line-height: 1.6; }
+  .vA .specimen .fm { color: var(--sumi-70); }
+  .vA .specimen .fm b { font-weight: 400; color: var(--sumi); }
+  .vA .specimen .emergent { font-style: italic; color: var(--bero);
+                            border-left: 2px solid var(--bero-40); padding-left: 1rem; }
+  .vA .specimen .cap { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); margin-top: 0.5rem; }
+  .vA .specimen .term { text-decoration: underline dotted var(--bero-70) 1px; text-underline-offset: 0.2em; }
+
+  /* ================= VARIANT B — IBM Plex Serif + IBM Plex Mono ================= */
+  .vB .specimen { font-family: 'IBM Plex Serif', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+                  font-size: 1rem; line-height: 1.6; }
+  .vB .specimen h2 { font-size: 1.25rem; line-height: 1.35; font-weight: 600; margin-bottom: 0.75rem; color: var(--sumi); }
+  .vB .specimen p + p { margin-top: 0.75em; }
+  .vB .specimen .discursive { color: var(--bero); }
+  .vB .specimen pre { font-family: 'IBM Plex Mono', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+                      font-size: 0.875rem; line-height: 1.55; color: var(--sumi); }
+  .vB .specimen .fm b { font-weight: 600; }
+  .vB .specimen .emergent { font-style: italic; color: var(--sumi); }
+  .vB .specimen .cap { font-size: 0.75rem; line-height: 1.5; color: var(--sumi-70); margin-top: 0.5rem; }
+  .vB .specimen .term { background: var(--bero-12); padding: 0.05em 0.2em; border-radius: 1px; }
+
+  /* ================= VARIANT C — Spectral + JetBrains Mono ================= */
+  .vC .specimen { font-family: 'Spectral', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+                  font-size: 1.125rem; line-height: 1.6; }
+  .vC .specimen h2 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; margin-bottom: 0.75rem; }
+  .vC .specimen p + p { margin-top: 0.75em; }
+  .vC .specimen pre { font-family: 'JetBrains Mono', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+                      font-size: 0.9375rem; line-height: 1.6; }
+  .vC .specimen .fm { color: var(--sumi-70); }
+  .vC .specimen .fm b { font-weight: 400; color: var(--sumi); }
+  .vC .specimen .emergent { font-style: italic; color: var(--sumi-70); }
+  .vC .specimen .cap { font-size: 0.875rem; line-height: 1.5; color: var(--sumi-70); margin-top: 0.5rem; }
+  .vC .specimen .term { color: var(--bero); }
+
+  /* ================= VARIANT D — Literata + Fragment Mono ================= */
+  .vD .specimen { font-family: 'Literata', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+                  font-size: 1.0625rem; line-height: 1.7; }
+  .vD .specimen h2 { font-size: 1.375rem; line-height: 1.35; font-weight: 600; margin-bottom: 0.75rem; }
+  .vD .specimen p + p { margin-top: 0.75em; }
+  .vD .specimen pre { font-family: 'Fragment Mono', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+                      font-size: 0.875rem; line-height: 1.7; }
+  .vD .specimen .fm { color: var(--sumi-70); }
+  .vD .specimen .fm b { color: var(--sumi); font-weight: 400; }
+  .vD .specimen .emergent { color: var(--bero); line-height: 1.8; }
+  .vD .specimen .cap { font-size: 0.8125rem; line-height: 1.6; color: var(--sumi-70); margin-top: 0.5rem; }
+  .vD .specimen .term { text-decoration: underline dotted var(--sumi-40) 1px; text-underline-offset: 0.2em; }
+
+  /* ---- recommendation / frozen / parked ---- */
+  section.close { margin-top: 4rem; max-width: 78ch; }
+  section.close h2 { font-size: 1rem; font-weight: 600; border-top: 3px solid var(--sumi); padding-top: 1rem; margin-bottom: 0.75rem; }
+  section.close p, section.close li { font-size: 0.875rem; }
+  section.close ul, section.close ol { padding-left: 1.5rem; margin: 0.5rem 0 1rem; }
+  section.close li { margin-bottom: 0.4rem; }
+  pre.frozen {
+    background: var(--washi); border: 1px solid var(--sumi-40);
+    padding: 1.25rem 1.5rem; font-size: 0.8125rem; line-height: 1.7; overflow-x: auto;
+  }
+  .note { color: var(--sumi-70); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="session">
+  <h1>Session 3 — type · the three register faces and the scale</h1>
+  <p>Same four passages set four ways: a Kamae paragraph (discursive), an agent-task
+     block (procedural), a Reflect note (emergent), and one term-dense paragraph
+     showing that variant's marked-term treatment at rest. All inks are the frozen
+     aizuri palette; all contrast figures are computed WCAG&nbsp;2.x ratios on washi
+     <code>#eef1ef</code>.</p>
+  <div class="frozen-inputs">
+    <span class="swatch"><i style="background:#eef1ef"></i>washi #eef1ef</span>
+    <span class="swatch"><i style="background:#1f2123"></i>sumi #1f2123 · 14.2:1</span>
+    <span class="swatch"><i style="background:#29618e"></i>bero-ai #29618e · 5.8:1</span>
+    <span class="swatch"><i style="background:#a9832a"></i>gold #a9832a · 3.1:1, state only</span>
+    <span class="swatch">opacity ladder 1.00 / 0.70 / 0.40 / 0.12</span>
+  </div>
+</header>
+
+<div class="variants">
+
+<!-- ================================ A ================================ -->
+<article class="variant vA">
+  <div class="tag">A — Source Serif 4 + Source Code Pro</div>
+  <p class="commit">Commits to one foundry: a bookish-but-crisp serif and a mono that
+     reads as record, registers split by style and ink only at the edges.</p>
+  <table class="spec">
+    <tr><td>families</td><td>Source Serif 4 (400, 400 italic, 600) · Source Code Pro (400, 600)</td></tr>
+    <tr><td>scale</td><td>body 1.0625rem/1.65 · h1 1.75/1.25 · h2 1.375/1.3 · h3 1.125/1.4 (all 600) · mono 0.875rem/1.6 · caption 0.8125rem/1.5</td></tr>
+    <tr><td>emergent</td><td>italic 400, bero-ai #29618e (5.8:1), 2px left rule bero @0.40 #9fb7c8</td></tr>
+    <tr><td>marked term</td><td>sumi text, 1px dotted underline bero @0.70 #648cab (3.1:1 as a mark — passes non-text 3:1), offset 0.2em</td></tr>
+    <tr><td>frontmatter</td><td>keys sumi @0.70 #5d5f60 (5.6:1), values sumi 1.00</td></tr>
+  </table>
+  <div class="specimen">
+    <div class="reg-label">discursive — Kamae</div>
+    <h2>構え — deciding before doing</h2>
+    <p>A Kamae document is written before the work starts and read long after it
+       ends. The seed names what the project is and refuses what it is not. The
+       system design turns that refusal into commitments: this stack, this boundary,
+       this test. Nothing downstream reopens them. When a session finds a decision
+       the chain never made, the session stops and the question goes back up. That
+       is the whole discipline — decide where deciding is cheap.</p>
+    <div class="reg-label">procedural — agent task</div>
+    <pre><span class="fm">---
+task:     <b>ho-12.2</b>
+parent:   <b>ho-12</b>
+scope:    <b>parser/frontmatter.py</b>
+verify:   <b>uv run pytest tests/test_frontmatter.py</b>
+coverage: <b>90</b>
+---</span>
+GOAL   Extract frontmatter keys without reading the body.
+FILES  parser/frontmatter.py, tests/test_frontmatter.py
+DONE   All six fixture documents parse; malformed
+       frontmatter raises ParseError with a line number.</pre>
+    <div class="reg-label">emergent — Reflect</div>
+    <p class="emergent">Reflect, ho-12 closed. The parser grew a second mode nobody
+       planned: early vault documents often have no frontmatter at all. We answered
+       with a default header instead of an error. Worth watching — a default that
+       quiet can hide real omissions. Parked for the ho-14 review.</p>
+    <div class="reg-label">term-dense — marked terms at rest</div>
+    <p>Every <span class="term">ho</span> (歩) is one bounded step, sized to one
+       session. The <span class="term">Kamae</span> (構え) chain decides before the
+       step; <span class="term">dandori</span> (段取り) orders the work inside it;
+       <span class="term">Reflect</span> records what the step learned. A step that
+       outgrows its bounds is split, never stretched — ho-7 becomes ho-7.1 and
+       ho-7.2, and the abandoned number stays dead. The rhythm underneath is
+       <span class="term">shu-ha-ri</span>: follow the form, adapt the form, leave
+       the form.</p>
+    <p class="cap">Caption scale — 0.8125rem, sumi @0.70. Session record, 2026-07-04.</p>
+  </div>
+</article>
+
+<!-- ================================ B ================================ -->
+<article class="variant vB">
+  <div class="tag">B — IBM Plex Serif + IBM Plex Mono</div>
+  <p class="commit">Commits to a true superfamily on a compact scale; the thinking
+     tier prints its running prose in bero-ai, registers differ by construction.</p>
+  <table class="spec">
+    <tr><td>families</td><td>IBM Plex Serif (400, 400 italic, 600) · IBM Plex Mono (400, 600)</td></tr>
+    <tr><td>scale</td><td>body 1rem/1.6 · h1 1.625/1.25 · h2 1.25/1.35 · h3 1.0625/1.45 (all 600) · mono 0.875rem/1.55 · caption 0.75rem/1.5</td></tr>
+    <tr><td>discursive ink</td><td>body bero-ai #29618e (5.8:1 — AA for normal text); headings sumi</td></tr>
+    <tr><td>emergent</td><td>italic 400, sumi 1.00</td></tr>
+    <tr><td>marked term</td><td>undertone field bero @0.12 #d6e0e3, no underline; sumi text on field 12.0:1</td></tr>
+    <tr><td>frontmatter</td><td>keys mono 600 sumi, values 400</td></tr>
+  </table>
+  <div class="specimen">
+    <div class="reg-label">discursive — Kamae</div>
+    <h2>構え — deciding before doing</h2>
+    <div class="discursive">
+    <p>A Kamae document is written before the work starts and read long after it
+       ends. The seed names what the project is and refuses what it is not. The
+       system design turns that refusal into commitments: this stack, this boundary,
+       this test. Nothing downstream reopens them. When a session finds a decision
+       the chain never made, the session stops and the question goes back up. That
+       is the whole discipline — decide where deciding is cheap.</p>
+    </div>
+    <div class="reg-label">procedural — agent task</div>
+    <pre><span class="fm">---
+task:     <b>ho-12.2</b>
+parent:   <b>ho-12</b>
+scope:    <b>parser/frontmatter.py</b>
+verify:   <b>uv run pytest tests/test_frontmatter.py</b>
+coverage: <b>90</b>
+---</span>
+GOAL   Extract frontmatter keys without reading the body.
+FILES  parser/frontmatter.py, tests/test_frontmatter.py
+DONE   All six fixture documents parse; malformed
+       frontmatter raises ParseError with a line number.</pre>
+    <div class="reg-label">emergent — Reflect</div>
+    <p class="emergent">Reflect, ho-12 closed. The parser grew a second mode nobody
+       planned: early vault documents often have no frontmatter at all. We answered
+       with a default header instead of an error. Worth watching — a default that
+       quiet can hide real omissions. Parked for the ho-14 review.</p>
+    <div class="reg-label">term-dense — marked terms at rest</div>
+    <p>Every <span class="term">ho</span> (歩) is one bounded step, sized to one
+       session. The <span class="term">Kamae</span> (構え) chain decides before the
+       step; <span class="term">dandori</span> (段取り) orders the work inside it;
+       <span class="term">Reflect</span> records what the step learned. A step that
+       outgrows its bounds is split, never stretched — ho-7 becomes ho-7.1 and
+       ho-7.2, and the abandoned number stays dead. The rhythm underneath is
+       <span class="term">shu-ha-ri</span>: follow the form, adapt the form, leave
+       the form.</p>
+    <p class="cap">Caption scale — 0.75rem, sumi @0.70. Session record, 2026-07-04.</p>
+  </div>
+</article>
+
+<!-- ================================ C ================================ -->
+<article class="variant vC">
+  <div class="tag">C — Spectral + JetBrains Mono</div>
+  <p class="commit">Commits to a sharp, incised serif at a larger reading size; the
+     marked term is carried by ink alone, no decoration anywhere.</p>
+  <table class="spec">
+    <tr><td>families</td><td>Spectral (400, 400 italic, 600) · JetBrains Mono (400, 600)</td></tr>
+    <tr><td>scale</td><td>body 1.125rem/1.6 · h1 2/1.2 · h2 1.5/1.3 · h3 1.1875/1.4 (all 600) · mono 0.9375rem/1.6 · caption 0.875rem/1.5</td></tr>
+    <tr><td>emergent</td><td>italic 400, sumi @0.70 #5d5f60 (5.6:1)</td></tr>
+    <tr><td>marked term</td><td>full bero-ai ink #29618e (5.8:1), no underline — hue is the only mark</td></tr>
+    <tr><td>frontmatter</td><td>keys sumi @0.70 #5d5f60, values sumi 1.00</td></tr>
+  </table>
+  <div class="specimen">
+    <div class="reg-label">discursive — Kamae</div>
+    <h2>構え — deciding before doing</h2>
+    <p>A Kamae document is written before the work starts and read long after it
+       ends. The seed names what the project is and refuses what it is not. The
+       system design turns that refusal into commitments: this stack, this boundary,
+       this test. Nothing downstream reopens them. When a session finds a decision
+       the chain never made, the session stops and the question goes back up. That
+       is the whole discipline — decide where deciding is cheap.</p>
+    <div class="reg-label">procedural — agent task</div>
+    <pre><span class="fm">---
+task:     <b>ho-12.2</b>
+parent:   <b>ho-12</b>
+scope:    <b>parser/frontmatter.py</b>
+verify:   <b>uv run pytest tests/test_frontmatter.py</b>
+coverage: <b>90</b>
+---</span>
+GOAL   Extract frontmatter keys without reading the body.
+FILES  parser/frontmatter.py, tests/test_frontmatter.py
+DONE   All six fixture documents parse; malformed
+       frontmatter raises ParseError with a line number.</pre>
+    <div class="reg-label">emergent — Reflect</div>
+    <p class="emergent">Reflect, ho-12 closed. The parser grew a second mode nobody
+       planned: early vault documents often have no frontmatter at all. We answered
+       with a default header instead of an error. Worth watching — a default that
+       quiet can hide real omissions. Parked for the ho-14 review.</p>
+    <div class="reg-label">term-dense — marked terms at rest</div>
+    <p>Every <span class="term">ho</span> (歩) is one bounded step, sized to one
+       session. The <span class="term">Kamae</span> (構え) chain decides before the
+       step; <span class="term">dandori</span> (段取り) orders the work inside it;
+       <span class="term">Reflect</span> records what the step learned. A step that
+       outgrows its bounds is split, never stretched — ho-7 becomes ho-7.1 and
+       ho-7.2, and the abandoned number stays dead. The rhythm underneath is
+       <span class="term">shu-ha-ri</span>: follow the form, adapt the form, leave
+       the form.</p>
+    <p class="cap">Caption scale — 0.875rem, sumi @0.70. Session record, 2026-07-04.</p>
+  </div>
+</article>
+
+<!-- ================================ D ================================ -->
+<article class="variant vD">
+  <div class="tag">D — Literata + Fragment Mono</div>
+  <p class="commit">Commits to a long-form book face with generous leading and a
+     single-weight typewriter mono; the quietest, monochrome marking.</p>
+  <table class="spec">
+    <tr><td>families</td><td>Literata (400, 400 italic, 600) · Fragment Mono (400 only — the face has no bold)</td></tr>
+    <tr><td>scale</td><td>body 1.0625rem/1.7 · h1 1.75/1.25 · h2 1.375/1.35 · h3 1.125/1.45 (all 600) · mono 0.875rem/1.7 · caption 0.8125rem/1.6</td></tr>
+    <tr><td>emergent</td><td>upright 400, bero-ai #29618e (5.8:1), leading 1.8</td></tr>
+    <tr><td>marked term</td><td>sumi text, 1px dotted underline sumi @0.40 #9b9e9d (2.4:1 — below the 3:1 non-text floor; part of why it is quietest), offset 0.2em</td></tr>
+    <tr><td>frontmatter</td><td>keys sumi @0.70 #5d5f60, values sumi 1.00 (opacity, since no bold exists)</td></tr>
+  </table>
+  <div class="specimen">
+    <div class="reg-label">discursive — Kamae</div>
+    <h2>構え — deciding before doing</h2>
+    <p>A Kamae document is written before the work starts and read long after it
+       ends. The seed names what the project is and refuses what it is not. The
+       system design turns that refusal into commitments: this stack, this boundary,
+       this test. Nothing downstream reopens them. When a session finds a decision
+       the chain never made, the session stops and the question goes back up. That
+       is the whole discipline — decide where deciding is cheap.</p>
+    <div class="reg-label">procedural — agent task</div>
+    <pre><span class="fm">---
+task:     <b>ho-12.2</b>
+parent:   <b>ho-12</b>
+scope:    <b>parser/frontmatter.py</b>
+verify:   <b>uv run pytest tests/test_frontmatter.py</b>
+coverage: <b>90</b>
+---</span>
+GOAL   Extract frontmatter keys without reading the body.
+FILES  parser/frontmatter.py, tests/test_frontmatter.py
+DONE   All six fixture documents parse; malformed
+       frontmatter raises ParseError with a line number.</pre>
+    <div class="reg-label">emergent — Reflect</div>
+    <p class="emergent">Reflect, ho-12 closed. The parser grew a second mode nobody
+       planned: early vault documents often have no frontmatter at all. We answered
+       with a default header instead of an error. Worth watching — a default that
+       quiet can hide real omissions. Parked for the ho-14 review.</p>
+    <div class="reg-label">term-dense — marked terms at rest</div>
+    <p>Every <span class="term">ho</span> (歩) is one bounded step, sized to one
+       session. The <span class="term">Kamae</span> (構え) chain decides before the
+       step; <span class="term">dandori</span> (段取り) orders the work inside it;
+       <span class="term">Reflect</span> records what the step learned. A step that
+       outgrows its bounds is split, never stretched — ho-7 becomes ho-7.1 and
+       ho-7.2, and the abandoned number stays dead. The rhythm underneath is
+       <span class="term">shu-ha-ri</span>: follow the form, adapt the form, leave
+       the form.</p>
+    <p class="cap">Caption scale — 0.8125rem, sumi @0.70. Session record, 2026-07-04.</p>
+  </div>
+</article>
+
+</div><!-- /variants -->
+
+<section class="close">
+  <h2>Recommendation — A</h2>
+  <ol>
+    <li><strong>Body stays sumi; bero stays at the edges.</strong> Long-form reading
+        at 14.2:1, with bero-ai carrying only the emergent register and the term
+        marks. B's all-bero prose makes the ink atmospheric — the type is asked to
+        serve reading, not mood — and drops sustained body contrast from 14.2:1 to
+        5.8:1.</li>
+    <li><strong>The only marking that is quiet, ≥3:1, and not hue-dependent.</strong>
+        A's dotted underline at bero @0.70 measures 3.1:1 as a mark and survives
+        color-blindness because the dot pattern, not the hue, does the marking.
+        C's ink-only term fails color independence; D's sumi @0.40 dots sit at
+        2.4:1, below the non-text floor.</li>
+    <li><strong>One foundry, honest pairing.</strong> Source Serif 4 and Source Code
+        Pro share proportions, so procedural blocks sit inside prose at 0.875rem
+        with no optical fudging; the mono reads as typed record, not IDE chrome.
+        Plex is the same trick with a colder, more corporate voice; JetBrains Mono
+        shouts editor; Fragment Mono's single weight can't articulate frontmatter
+        without leaning entirely on opacity.</li>
+  </ol>
+  <p class="note">Spectral (C) is genuinely sharp and handsome at 1.125rem, but its
+     light strokes sparkle at caption sizes and its stronger character pulls
+     attention the voice constraint says the type must not take.</p>
+
+  <h2>Frozen if accepted</h2>
+  <pre class="frozen">
+FAMILIES (two + CJK fallback, per budget)
+  serif   'Source Serif 4'   weights 400, 400 italic, 600
+  mono    'Source Code Pro'  weights 400, 600
+  CJK     'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif
+          — appended to both stacks; no CJK webfont is downloaded.
+  The piece's face characters (歩 / と) render in this CJK stack.
+
+REGISTERS
+  discursive   serif 400, sumi #1f2123 (14.2:1)
+  procedural   mono 400 at 0.875rem/1.6, sumi; frontmatter keys
+               sumi @0.70 #5d5f60 (5.6:1), values sumi 1.00
+  emergent     serif 400 italic, bero-ai #29618e (5.8:1),
+               2px left rule bero @0.40 #9fb7c8, padding-left 1rem
+
+SCALE (rem / unitless leading)
+  body      1.0625 / 1.65
+  h1        1.75   / 1.25   weight 600
+  h2        1.375  / 1.3    weight 600
+  h3        1.125  / 1.4    weight 600
+  mono      0.875  / 1.6    (blocks; inline code 0.875em)
+  caption   0.8125 / 1.5    sumi @0.70
+
+MARKED TERM (resting look only)
+  text sumi 1.00; text-decoration: underline dotted 1px;
+  text-decoration-color: bero @0.70 #648cab (3.1:1 as a mark);
+  text-underline-offset: 0.2em; no background, no weight change.
+</pre>
+
+  <h2>Parked</h2>
+  <ul>
+    <li>Definition-on-touch behavior of marked terms — hover, tap, and the opened
+        definition (session 7); only the resting look is frozen here.</li>
+    <li>Measure, column widths, margins, and where each register sits on the page
+        (session 5 — documents).</li>
+    <li>Whether the koma's 歩/と glyphs need a subset CJK webfont for cross-platform
+        consistency of the mark (coherence check).</li>
+    <li>Dark-mode inks and any weight compensation on dark ground (dark-mode
+        session).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>A (Source Serif 4 + Source Code Pro)</strong>, accepted as
+  recommended. Reasons: long-form body stays at full sumi contrast with bero reserved
+  for the edges; the dotted marked-term treatment is the only one simultaneously
+  quiet, ≥3:1 as a mark, and not hue-dependent. The CJK fallback stack resolves
+  session 1's deferred mincho-face question. The practitioner asked whether a
+  document's first paragraph should print in bero; decided no — bero is earned by
+  register, never by position (block-to-register assignment is session 5's question).
+  Parked items as listed above. Values landed in <code>design/basis-of-design.md</code> §3.</p>
+</section>
+
+</div>
+</body>
+</html>

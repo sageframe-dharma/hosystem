@@ -33,10 +33,10 @@ never silently.
 | 1 | the piece | landed 2026-07-04 | [§1](#1--the-piece) |
 | 2 | palette | landed 2026-07-04 | [§2](#2--palette) |
 | 3 | type | landed 2026-07-04 | [§3](#3--type) |
-| 4 | the step | open | — |
-| 5 | documents | open | — |
-| 6 | diagrams | open | — |
-| 7 | definition-on-touch | open | — |
+| 4 | the step | landed 2026-07-04 | [§4](#4--the-step) |
+| 5 | documents | landed 2026-07-04 | [§5](#5--documents) |
+| 6 | diagrams | landed 2026-07-04 | [§6](#6--diagrams) |
+| 7 | definition-on-touch | landed 2026-07-04 | [§7](#7--definition-on-touch) |
 | 8 | the trail | open | — |
 | 9 | the flip | open | — |
 | 10 | the threaded split | v2 — not yet open | — |
@@ -144,6 +144,135 @@ decoration color bero @0.70 `#648cab` (3.1:1 as a mark);
 document's first paragraph should print in bero. Decision: no — bero is earned by
 register, never by position. Which blocks of a document belong to which register
 is session 5's question.
+
+## 4 — the step
+
+_Landed 2026-07-04. Winner: variant B (brisk footfall), amended at judgment (B′):
+sequence seats on the line, slower populate. Session record:
+`claude-design/sessions/session-04-variants.html`._
+
+**The step** — the unit all site motion is built from:
+
+- duration **160 ms**; easing **cubic-bezier(0.2, 0, 0, 1)** — accelerate, land;
+  no glide between rests
+- travel: **8 px vertical rise** with opacity 0→1 on the same curve; travel beyond
+  8 px is a cut plus an arrival, never a longer slide
+- arriving glyphs seat on their line: travel ends with bottoms flush on the
+  baseline rule _(amended at judgment)_
+
+**Sequence:** hold between steps **220 ms** → interval **380 ms constant**
+_(amended at judgment from 140/300 — "a little slower populating"; 380 is this
+landing's cut of "a little"; verify at the coherence check)_. Five-node build =
+1680 ms. The beat is constant — steps are equal commitments; acceleration implies
+momentum, and momentum is drift.
+
+**Page transition:** out = cut (0 ms) → **80 ms** hold on bare washi → in = one
+step. 240 ms total.
+
+**Section arrival:** the section arrives as one block, one step.
+
+**Never moves:** body text mid-read; the washi ground; anything already at rest;
+surrounding layout (arrivals reserve their space — no reflow shove); scroll
+position; anything under the pointer.
+
+**Reduced motion:** every step has an instant-swap fallback;
+`prefers-reduced-motion` renders all of the above at 0 ms.
+
+## 5 — documents
+
+_Landed 2026-07-04. Winner: variant A (the ledger) — practitioner's pick over the
+session's D recommendation. Session record:
+`claude-design/sessions/session-05-variants.html`._
+
+**Header (frontmatter as a typed ledger):** boxed grid — box 1px sumi@0.40; rows
+`9rem + 1fr`; row padding 0.5rem 0.875rem; row rules 1px sumi@0.12; keys mono
+sumi@0.70, values mono sumi 1.00, authored order; margin-bottom 2.5rem.
+Frontmatter renders first, visible, nothing hidden.
+
+**Measure:** 42rem body column.
+
+**State marks:** 12 px solid-form koma (§1's sub-24 px inking) 0.5rem before
+status values, inked per §2's state map; adjacent labels full sumi.
+
+**Chain links:** header-level only — `builds-on:` / `supersedes:` values are live
+links; prose mentions are not auto-linked (authored links still render). Link
+affordance: solid 1px underline bero@0.70 — solid = link, dotted = marked term.
+
+**Supersession reveal:** activating a superseded marker opens facing panes —
+1fr / 1fr, column-gap 2rem, inside a bordered extension of the header box; stacks
+below 40rem. Fell pane: 2px gold@0.40 rule, text sumi@0.70. Replaced pane: 2px
+gold rule, text full sumi. Open/close is discrete.
+
+**Register map:** frontmatter + Execute blocks → procedural; headings + prose →
+discursive; Reflect + asides → emergent (§3 treatments). Procedural blocks carry
+a 2px sumi@0.40 left rule mirroring the emergent rule.
+
+**Rhythm:** paragraphs 1.25rem; h2 2.5rem above / 1rem below; blocks 1.5rem.
+
+## 6 — diagrams
+
+_Landed 2026-07-04. Winner: variant A. Session record:
+`claude-design/sessions/session-06-variants.html`._
+
+The koma appears only where work is steppable — the frame/step distinction taught
+by shape alone.
+
+```
+orientation   vertical descent · one SVG source, three scales by reduction
+node          192 × 48 · fill washi #eef1ef · stroke 1.5 · square corners, miter · pitch 92 (gap 44)
+node ink      Kamae 1–4 stroke+text bero #29618e · Kamae 5 sumi #1f2123 · fill always washi
+node text     title mono 600 13 px at (x+12, y+21) · commitment label mono 400 11 px tier@.70 at (x+12, y+37)
+              content: Seed/opinions · System Design/decisions · README/scope ·
+              Ho Overview/sequence · Per-Ho Documents/session
+piece         appears only where work is steppable: ho node marker koma h28 keyline (§1),
+              inset 12 px; agent tasks koma h20 solid sumi (§1 sub-24 inking)
+forward       2.0 px solid tier ink · head filled triangle 8 × 7, miter
+crossing      every thinking→doing arrow, at any scale, prints kachi #040c13 (chain 4→5 and
+              session think→task alike)
+return        1.0 px source-tier ink @.40 (#9fb7c8 / #9b9e9d) · orthogonal, left lanes −40 / −72 px
+              from node edge · head open chevron 5 × 5 @ 1.0 · labels mono 10 tier@.70 rotated −90°
+              content: System Design→Seed "revises" · Per-Ho→README "addenda supersede"
+tier rule     1.0 px sumi@.12 #d5d8d7 full width · captions "thinking"/"doing" mono 11 tier@.70
+              · node 5 straddles the rule (rule crosses at node-top +24; node fill interrupts it)
+decomposition edge 1.25 px sumi, head 6 × 5, elbow from node-5 bottom · think node 64 × 26
+              stroke 1.0 bero, label mono 10 · think→task arrow kachi 1.25 · mini return 0.75 sumi@.40
+scales        full ≥ 480 px wide — everything above
+              header ≥ 160 px wide — nodes 128 × 24 stroke 1.0, titles mono 600 10, arrows 1.5
+              head 6 × 5, returns kept unlabeled, tier rule kept uncaptioned; koma h14 solid;
+              gradient labels, decomposition, all annotations dropped
+              glyph < 160 px — four bars 12 × 3 bero + solid koma h6 sumi, gap 2.5,
+              left-aligned, no arrows (viewBox 14 × 28.5)
+gold          never in the canonical chain — it is structure, not state; live instances
+              (colophon) ink nodes per §2's state map, labels at full sumi
+```
+
+## 7 — definition-on-touch
+
+_Landed 2026-07-04. Winner: variant A (floating card, one at a time). Session
+record: `claude-design/sessions/session-07-variants.html`._
+
+**Card:** width `min(24rem, column − 1rem)`; padding 0.625rem 0.875rem; washi
+ground; border 1px sumi@0.40; radius 0; no shadow; z-index 10 — the page's only
+elevated layer.
+
+**Placement:** 0.5rem below the term's line box, left-aligned to term start,
+clamped 0.5rem from column edges; flips above when short of space. Zero reflow —
+the prose never moves.
+
+**Content:** plain cut serif 400 0.9375rem/1.55 sumi; "full entry →" mono 400
+0.8125rem bero.
+
+**One model, three modes:** hover/focus = transient; tap/Enter = pin;
+Escape / outside-tap / second-tap = dismiss. One card at a time. An open term's
+underline goes dotted → solid, same bero@0.70.
+
+**Terms-you've-met: kept**, quietest form. Met = a pinned reveal was dismissed
+(deliberate touch, not hover-past). Met resting look: underline decoration recedes
+bero@0.70 → sumi@0.40 — recession by opacity, the state map's own grammar. No
+gold: met is reader state, not framework state.
+
+**Timing:** reveal/dismiss instant (0 ms) as designed; whether the card's arrival
+adopts §4's 160 ms step is resolved at the coherence check.
 
 ## Propagation ledger
 

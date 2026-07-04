@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 7 — definition-on-touch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --washi: #eef1ef;
+    --sumi: #1f2123;
+    --bero: #29618e;
+    --gold: #a9832a;
+    --sumi-70: #5d5f60;
+    --sumi-40: #9b9e9d;
+    --sumi-12: #d5d8d7;
+    --bero-70: #648cab;
+    --bero-40: #9fb7c8;
+    --serif: 'Source Serif 4', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+    --mono: 'Source Code Pro', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    margin: 0;
+    background: var(--washi);
+    color: var(--sumi);
+    font-family: var(--serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+  main { max-width: 60rem; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 600; margin: 0 0 0.5rem; }
+  h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 600; margin: 3.5rem 0 0.25rem; }
+  h3 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; margin: 2rem 0 0.5rem; }
+  p { margin: 0.75rem 0; }
+  .caption { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); }
+  .commit { font-family: var(--mono); font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); margin: 0 0 1rem; }
+  .kicker { font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); margin: 0 0 0.25rem; }
+  code, .mono { font-family: var(--mono); font-size: 0.875em; }
+  hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 3rem 0; }
+
+  /* frozen-inputs recap */
+  .frozen { border: 1px solid var(--sumi-12); padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .frozen dt { font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); margin-top: 0.5rem; }
+  .frozen dd { margin: 0.1rem 0 0; font-size: 0.9375rem; }
+  .swatch { display: inline-block; width: 0.75em; height: 0.75em; border: 1px solid var(--sumi-12); vertical-align: baseline; margin-right: 0.25em; }
+
+  /* demo shell */
+  .demo {
+    border: 1px solid var(--sumi-12);
+    padding: 2rem 2rem 1.5rem;
+    margin: 1rem 0 1rem;
+    position: relative;
+  }
+  .demo-prose { max-width: 34rem; }
+  .demo-prose p { margin: 0; }
+  .demo-tools { margin-top: 1.25rem; }
+  .demo-tools a { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); text-decoration: underline dotted 1px; text-underline-offset: 0.2em; }
+
+  /* marked term — frozen resting look (session 3), verbatim */
+  .term {
+    color: var(--sumi);
+    text-decoration: underline dotted 1px;
+    text-decoration-color: var(--bero-70);
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+    outline: none;
+  }
+  .term:focus-visible { outline: 1px solid var(--bero-70); outline-offset: 2px; }
+  /* open state: dotted -> solid, same ink */
+  .term.open { text-decoration-style: solid; }
+  /* met state (keep verdict): decoration recedes bero@0.70 -> sumi@0.40 */
+  .term.met { text-decoration-color: var(--sumi-40); }
+
+  /* definition content, shared across variants */
+  .defcut { font-family: var(--serif); font-size: 0.9375rem; line-height: 1.55; color: var(--sumi); font-weight: 400; }
+  .deflink {
+    display: inline-block;
+    margin-top: 0.375rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--bero);
+    text-decoration: none;
+    font-weight: 400;
+  }
+  .deflink:hover, .deflink:focus-visible { text-decoration: underline solid 1px; text-underline-offset: 0.2em; }
+  .deflabel { font-family: var(--mono); font-size: 0.8125rem; font-weight: 600; color: var(--sumi-70); display: block; margin-bottom: 0.125rem; }
+
+  /* A — floating card */
+  .a-card {
+    position: absolute;
+    display: none;
+    background: var(--washi);
+    border: 1px solid var(--sumi-40);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.625rem 0.875rem;
+    z-index: 10;
+  }
+  .a-card::before { /* hover bridge across the 0.5rem offset gap; invisible, hit-area only */
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: -0.625rem;
+    height: 0.625rem;
+  }
+  .a-card.flip::before { top: auto; bottom: -0.625rem; }
+
+  /* B — inline expansion */
+  .b-def {
+    display: block;
+    margin: 0.375rem 0 0.5rem;
+    padding: 0.25rem 0 0.25rem 1rem;
+    border-left: 2px solid var(--sumi-40);
+  }
+
+  /* C — margin rail */
+  .c-grid { display: grid; grid-template-columns: minmax(0, 34rem) 15rem; gap: 2rem; }
+  .c-rail { position: relative; min-height: 100%; }
+  .c-note {
+    position: absolute;
+    left: 0;
+    width: 15rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  .c-note .defcut { font-size: 0.8125rem; line-height: 1.5; }
+  .demo.demo-c { overflow-x: auto; }
+  .demo-c .c-grid { min-width: 46rem; }
+
+  /* D — paragraph-foot slot */
+  .d-slot {
+    max-width: 34rem;
+    min-height: 4.5rem;
+    margin-top: 1rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid var(--sumi-12);
+  }
+
+  /* numbers blocks */
+  .numbers { font-family: var(--mono); font-size: 0.8125rem; line-height: 1.7; color: var(--sumi); margin: 0.5rem 0 0; padding-left: 1.25rem; }
+  .numbers li { margin: 0.1rem 0; }
+  .numbers .dim { color: var(--sumi-70); }
+
+  .verdict { border: 1px solid var(--sumi-12); padding: 1rem 1.25rem; margin: 1rem 0; }
+  .verdict-frozen { border-left: 3px solid var(--gold); } /* gold = state: these values land (close) if accepted */
+  ul.plain { padding-left: 1.25rem; }
+  ul.plain li { margin: 0.3rem 0; }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">hosystem — design session 7 — 2026-07-04</p>
+  <h1>Definition-on-touch</h1>
+  <p>The touch interaction, exactly: what happens between resting marked term and read
+  definition, and back. Four working demos below — same term-dense paragraph, four
+  mechanisms. Hover, tap, and keyboard (Tab to a term, <span class="mono">Enter</span> pins,
+  <span class="mono">Escape</span> dismisses) all work in every variant.
+  All reveals are <strong>instant</strong>: session 4 (the step) has not landed, so no
+  timing is cut here.</p>
+
+  <div class="frozen">
+    <p class="kicker">frozen inputs (pasted from basis-of-design)</p>
+    <dl>
+      <dt>session 2 — palette</dt>
+      <dd><span class="swatch" style="background:#eef1ef"></span>washi <code>#eef1ef</code> ·
+          <span class="swatch" style="background:#1f2123"></span>sumi <code>#1f2123</code> ·
+          <span class="swatch" style="background:#29618e"></span>bero-ai <code>#29618e</code> ·
+          <span class="swatch" style="background:#a9832a"></span>gold <code>#a9832a</code> (state only).
+          Opacity ladder 1.00 / 0.70 / 0.40 / 0.12. Flat fields; recession is opacity.</dd>
+      <dt>session 3 — type</dt>
+      <dd>Source Serif 4 (400 / 400i / 600) + Source Code Pro (400 / 600), CJK fallback appended.
+          Body 1.0625rem/1.65. Caption 0.8125rem/1.5 sumi @0.70. Mono 0.875rem/1.6.</dd>
+      <dt>session 3 — marked term, resting</dt>
+      <dd>text sumi 1.00; <code>underline dotted 1px</code>, decoration color bero @0.70
+          <code>#648cab</code>; <code>text-underline-offset: 0.2em</code>; no background, no weight change.
+          Rendered verbatim on every term below.</dd>
+    </dl>
+  </div>
+
+  <h3>One interaction model (all four variants)</h3>
+  <ul class="plain" style="font-size:0.9375rem">
+    <li><strong>Hover / focus</strong> — transient reveal. Leaving the term (or blurring) dismisses, unless pinned. The reveal itself is hoverable, so the link is reachable.</li>
+    <li><strong>Tap / click / Enter / Space</strong> — pins the reveal. It now survives pointer-leave and blur.</li>
+    <li><strong>Dismiss</strong> — second tap on the term, <span class="mono">Escape</span> (focus returns to the term), tap/click anywhere outside, or opening another term (in one-at-a-time variants).</li>
+    <li><strong>No navigation</strong> — the reader never moves. “full entry →” is the only way out, and it is a link, not the touch.</li>
+    <li><strong>Met</strong> (decided below, demoed live in every variant): a term counts as <em>met</em> once a <em>pinned</em> reveal is dismissed — a deliberate touch, not a hover-past. Its dotted underline recedes from bero @0.70 to sumi @0.40.</li>
+  </ul>
+
+  <hr>
+
+  <!-- ============================ A ============================ -->
+  <h2>A — floating card, one at a time</h2>
+  <p class="commit">commits to: zero reflow — the prose never moves; one reveal slot on the whole page; the card is the only thing that ever floats.</p>
+  <div class="demo" id="demo-a">
+    <div class="demo-prose"></div>
+    <div class="demo-tools"><a href="#" class="reset">reset met state</a></div>
+  </div>
+  <ul class="numbers">
+    <li>card width min(24rem, column − 1rem) · padding 0.625rem 0.875rem</li>
+    <li>background washi #eef1ef · border 1px solid sumi @0.40 #9b9e9d · radius 0 · shadow none (flat fields)</li>
+    <li>offset 0.5rem below the term’s line box, left-aligned to term start, clamped ≥ 0.5rem from column edges</li>
+    <li>flips above the term when space below &lt; card height + 0.5rem</li>
+    <li>z-index 10 — the only elevated layer; one slot, so cards can never stack or overlap</li>
+    <li>one at a time: any new reveal claims the slot and dismisses the previous one</li>
+    <li class="dim">reveal instant (0 ms) — timing parked on session 4</li>
+  </ul>
+
+  <!-- ============================ B ============================ -->
+  <h2>B — inline expansion, one at a time</h2>
+  <p class="commit">commits to: the paragraph opens to admit the definition — everything stays in the text column and in reading order; the page reflows.</p>
+  <div class="demo" id="demo-b">
+    <div class="demo-prose"></div>
+    <div class="demo-tools"><a href="#" class="reset">reset met state</a></div>
+  </div>
+  <ul class="numbers">
+    <li>definition block: full column width (max 34rem) · inserted directly after the term, breaking the line</li>
+    <li>margin 0.375rem 0 0.5rem · padding 0.25rem 0 0.25rem 1rem · left rule 2px sumi @0.40 (sumi, not bero — this is glossary voice, not the emergent register)</li>
+    <li>z-behavior: none — fully in flow, nothing elevated; vertical reflow equals block height (~3.2–4.5rem)</li>
+    <li>one at a time: opening a second term closes the first (two open blocks would shear the paragraph apart)</li>
+    <li class="dim">reveal instant (0 ms) — timing parked on session 4</li>
+  </ul>
+
+  <!-- ============================ C ============================ -->
+  <h2>C — margin note, allow multiple</h2>
+  <p class="commit">commits to: definitions live beside the prose, never over or inside it — several can sit open at once, like printed marginalia.</p>
+  <div class="demo demo-c" id="demo-c">
+    <div class="c-grid">
+      <div class="demo-prose"></div>
+      <div class="c-rail"></div>
+    </div>
+    <div class="demo-tools"><a href="#" class="reset">reset met state</a></div>
+  </div>
+  <ul class="numbers">
+    <li>rail 15rem wide · 2rem gap from a 34rem text column (page needs ≥ 51rem + padding)</li>
+    <li>note width 15rem · type 0.8125rem/1.5 · term label mono 600 0.8125rem sumi @0.70 above the cut</li>
+    <li>note top aligned to the term’s line box top · collisions stack downward, min gap 0.75rem</li>
+    <li>z-behavior: none — in flow beside the column; no occlusion possible</li>
+    <li>allow multiple: each term holds its own note independently</li>
+    <li class="dim">below ~51rem viewport the rail does not exist — a second mechanism is required on touch-width screens</li>
+    <li class="dim">reveal instant (0 ms) — timing parked on session 4</li>
+  </ul>
+
+  <!-- ============================ D ============================ -->
+  <h2>D — paragraph-foot slot, one at a time</h2>
+  <p class="commit">commits to: absolute quiet — one reserved slot under the paragraph, so nothing ever floats, occludes, or reflows; the eye travels instead.</p>
+  <div class="demo" id="demo-d">
+    <div class="demo-prose"></div>
+    <div class="d-slot"></div>
+    <div class="demo-tools"><a href="#" class="reset">reset met state</a></div>
+  </div>
+  <ul class="numbers">
+    <li>slot: full column width (max 34rem) · reserved min-height 4.5rem (space is pre-paid — zero reflow ever)</li>
+    <li>top rule 1px sumi @0.12 · padding-top 0.625rem · margin-top 1rem above the rule · term label mono 600 0.8125rem sumi @0.70</li>
+    <li>z-behavior: none — in flow, permanently</li>
+    <li>one at a time by construction: one slot per paragraph</li>
+    <li class="dim">cost: every paragraph with marked terms carries 4.5rem of reserved emptiness; term-to-definition distance grows with paragraph length</li>
+    <li class="dim">reveal instant (0 ms) — timing parked on session 4</li>
+  </ul>
+
+  <hr>
+
+  <!-- ============================ recommendation ============================ -->
+  <h2>Recommendation — A</h2>
+  <p><strong>A, the floating card, one at a time.</strong></p>
+  <ul class="plain">
+    <li><strong>The prose never moves.</strong> “The reader stays exactly where they are” is the
+    session’s governing sentence, and A is the only variant that honors it literally in both
+    dimensions: no navigation <em>and</em> no reflow. B shoves the rest of the paragraph down
+    mid-sentence; D moves the reader’s eye to the paragraph foot and back. A puts the plain cut
+    at the point of touch and takes it away without leaving a mark.</li>
+    <li><strong>One geometry, every mode, every width.</strong> The same card works identically
+    for hover, tap, and focus, from phone to desktop. C is the most beautiful variant on a wide
+    screen and simply does not exist below ~51rem — it forces a second mechanism on touch
+    devices, which violates “one coherent model” by itself.</li>
+    <li><strong>One-at-a-time is the quiet setting.</strong> Three marked terms in one sentence
+    can each be touched, but only one card ever exists. The page can never accumulate open
+    interface. Allow-multiple (C) reads as annotation clutter after two touches.</li>
+    <li>The card is the page’s only floating element, ever — a single, bounded exception to
+    flatness, held to a 1px sumi rule with no shadow and no radius, so it reads as a slip of the
+    same paper laid on top, not as software chrome.</li>
+  </ul>
+
+  <h3>Terms-you’ve-met — decide here</h3>
+  <p><strong>KEEP</strong>, in its quietest possible form. Judged against quiet-in-dense-passages:
+  the met state makes dense passages <em>quieter over time</em>, not louder — a met term’s dotted
+  underline recedes from bero @0.70 to sumi @0.40, which is recession by opacity, exactly the
+  grammar the state map already uses for “superseded” and “open.” No gold (met is reader state,
+  not framework state — gold stays untouched), no new marks, no accumulation of emphasis: reading
+  the site literally calms the page down. A term is met only when a pinned reveal is dismissed —
+  a deliberate touch, so hovering across a paragraph marks nothing. The accumulated list is
+  stored client-side with the trail and surfaces wherever the trail renders — that rendering is
+  session 8’s question, not this one. (Try it above: pin a definition, dismiss it, watch the
+  underline recede.)</p>
+
+  <div class="verdict verdict-frozen">
+    <p class="kicker">frozen if accepted</p>
+    <ul class="numbers">
+      <li><strong>mechanism</strong> — floating card anchored to the touched term; one reveal slot page-wide (one at a time)</li>
+      <li><strong>reveal / dismiss</strong> — instant (0 ms); re-cut per session 4’s step grammar when it lands</li>
+      <li><strong>card</strong> — width min(24rem, column − 1rem) · padding 0.625rem 0.875rem · background washi #eef1ef · border 1px solid sumi @0.40 #9b9e9d · border-radius 0 · box-shadow none</li>
+      <li><strong>offset</strong> — 0.5rem below the term’s line box, left-aligned to the term’s start, clamped ≥ 0.5rem from column edges; flips above when space below &lt; card height + 0.5rem</li>
+      <li><strong>z-behavior</strong> — card at z-index 10, the page’s only elevated layer; overlap impossible (single slot)</li>
+      <li><strong>plain cut type</strong> — serif 400 · 0.9375rem/1.55 · sumi 1.00</li>
+      <li><strong>full-entry link</strong> — mono 400 · 0.8125rem · bero #29618e · text “full entry →” · margin-top 0.375rem · underline on hover/focus only</li>
+      <li><strong>open term</strong> — underline dotted → solid, 1px, decoration color unchanged (bero @0.70 #648cab); aria-expanded="true"</li>
+      <li><strong>interaction</strong> — hover/focus: transient reveal (card itself is hoverable) · tap/click/Enter/Space: pin toggle · dismiss: second tap, Escape (focus returns to term), tap/click outside, or any new reveal</li>
+      <li><strong>terms-you’ve-met</strong> — KEEP. Met = a pinned reveal was dismissed. Met resting look: underline dotted 1px, decoration color sumi @0.40 #9b9e9d (recession per opacity ladder); text stays sumi 1.00. Stored client-side with the trail; no gold, ever.</li>
+    </ul>
+  </div>
+
+  <h3>Parked</h3>
+  <ul class="plain" style="font-size:0.9375rem">
+    <li>Reveal/dismiss timing must be re-aligned to session 4’s step grammar once it lands — everything here is instant (0 ms) pending that.</li>
+    <li>The trail’s own rendering, including where the met-terms list surfaces visually — session 8.</li>
+    <li>The glossary entry page itself (the destination of “full entry →”) — session 5 (documents).</li>
+    <li>The card on dark ground — the dark-mode session.</li>
+  </ul>
+
+  <p class="caption">Session 7 · hosystem · variants page. Demos store no data; met state is
+  page-local and resettable per variant. “full entry →” links are inert stubs here (the touch
+  never navigates; the demo doesn’t either).</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- shared content -------------------------------------------------
+  var DEFS = {
+    ho: {
+      label: "ho",
+      cut: "A bounded unit of work sized to finish inside one working session."
+    },
+    kamae: {
+      label: "kamae chain",
+      cut: "The ordered set of founding documents a project writes before building anything."
+    },
+    dandori: {
+      label: "dandori",
+      cut: "A task specification written so completely that an agent can carry it out without asking questions."
+    },
+    bod: {
+      label: "basis of design",
+      cut: "The living document where every frozen design decision is recorded as an explicit value."
+    },
+    trail: {
+      label: "trail",
+      cut: "A record of the pages and terms you have touched, kept only in your browser."
+    }
+  };
+
+  function termSpan(key, text) {
+    return '<span class="term" data-key="' + key + '" tabindex="0" role="button" aria-expanded="false">' + text + '</span>';
+  }
+
+  var PARA =
+    '<p>Every working session opens against a single ' + termSpan('ho', 'ho') +
+    ', scoped before any code exists by the ' + termSpan('kamae', 'kamae chain') +
+    '. Work that decomposes cleanly ships as a ' + termSpan('dandori', 'dandori') +
+    ' an agent can run alone; what the session freezes lands in the ' + termSpan('bod', 'basis of design') +
+    ', and closed work stays closed. None of it reports to a server — the ' + termSpan('trail', 'trail') +
+    ' lives in your browser, and only there.</p>';
+
+  function defHTML(key, withLabel) {
+    var d = DEFS[key];
+    return (withLabel ? '<span class="deflabel">' + d.label + '</span>' : '') +
+      '<span class="defcut">' + d.cut + '</span><br>' +
+      '<a class="deflink" href="#" data-stub="1">full entry →</a>';
+  }
+
+  // ---- generic variant engine ------------------------------------------
+  // mode: 'card' | 'inline' | 'margin' | 'slot'
+  // multiple: margin only
+  function setupVariant(rootId, mode) {
+    var root = document.getElementById(rootId);
+    var prose = root.querySelector('.demo-prose');
+    prose.innerHTML = PARA;
+    var terms = Array.prototype.slice.call(prose.querySelectorAll('.term'));
+    var multiple = (mode === 'margin');
+
+    // per-term state: { revealEl, pinned, wasPinned, hoverTerm, hoverReveal }
+    var state = new Map();
+    terms.forEach(function (t) {
+      state.set(t, { revealEl: null, pinned: false, wasPinned: false, hoverTerm: false, hoverReveal: false });
+    });
+
+    // ---- mode-specific fixtures ----
+    var card = null, rail = null, slot = null;
+    var shared = (mode === 'card' || mode === 'slot'); // one reveal element reused across terms
+    var sharedHover = false;
+    if (mode === 'card') {
+      card = document.createElement('div');
+      card.className = 'a-card';
+      root.appendChild(card);
+    } else if (mode === 'margin') {
+      rail = root.querySelector('.c-rail');
+    } else if (mode === 'slot') {
+      slot = root.querySelector('.d-slot');
+    }
+    if (shared) {
+      var sharedEl = card || slot;
+      sharedEl.addEventListener('pointerenter', function (e) {
+        if (e.pointerType === 'mouse') { sharedHover = true; }
+      });
+      sharedEl.addEventListener('pointerleave', function (e) {
+        if (e.pointerType === 'mouse') {
+          sharedHover = false;
+          var o = openTerms()[0];
+          if (o) { deferMaybeClose(o); }
+        }
+      });
+    }
+
+    function openTerms() {
+      return terms.filter(function (t) { return state.get(t).revealEl !== null; });
+    }
+
+    function stubLinks(el) {
+      Array.prototype.forEach.call(el.querySelectorAll('a[data-stub]'), function (a) {
+        a.addEventListener('click', function (e) { e.preventDefault(); });
+      });
+    }
+
+    function wireRevealHover(el, term) {
+      if (shared) { return; } // card/slot hover is wired once at setup
+      el.addEventListener('pointerenter', function (e) {
+        if (e.pointerType === 'mouse') { state.get(term).hoverReveal = true; }
+      });
+      el.addEventListener('pointerleave', function (e) {
+        if (e.pointerType === 'mouse') { state.get(term).hoverReveal = false; deferMaybeClose(term); }
+      });
+    }
+
+    // ---- open / close ----
+    function open(term, pin) {
+      var s = state.get(term);
+      if (!multiple) {
+        openTerms().forEach(function (o) { if (o !== term) { close(o); } });
+      }
+      if (s.revealEl) { // already open — maybe just pin
+        if (pin) { s.pinned = true; s.wasPinned = true; }
+        return;
+      }
+      var el;
+      if (mode === 'card') {
+        el = card;
+        el.innerHTML = defHTML(term.dataset.key, false);
+        positionCard(term);
+      } else if (mode === 'inline') {
+        el = document.createElement('span');
+        el.className = 'b-def';
+        el.innerHTML = defHTML(term.dataset.key, false);
+        term.insertAdjacentElement('afterend', el);
+      } else if (mode === 'margin') {
+        el = document.createElement('div');
+        el.className = 'c-note';
+        el.innerHTML = defHTML(term.dataset.key, true);
+        rail.appendChild(el);
+      } else { // slot
+        el = slot;
+        el.innerHTML = defHTML(term.dataset.key, true);
+      }
+      stubLinks(el);
+      wireRevealHover(el, term);
+      s.revealEl = el;
+      s.pinned = !!pin;
+      s.wasPinned = !!pin;
+      term.classList.add('open');
+      term.setAttribute('aria-expanded', 'true');
+      if (mode === 'margin') { layoutNotes(); }
+    }
+
+    function close(term) {
+      var s = state.get(term);
+      if (!s.revealEl) { return; }
+      if (mode === 'card') {
+        card.style.display = 'none';
+        card.classList.remove('flip');
+      } else if (mode === 'slot') {
+        slot.innerHTML = '';
+      } else {
+        s.revealEl.remove();
+      }
+      s.revealEl = null;
+      s.hoverReveal = false;
+      if (shared) { sharedHover = false; }
+      s.pinned = false;
+      term.classList.remove('open');
+      term.setAttribute('aria-expanded', 'false');
+      if (s.wasPinned) { term.classList.add('met'); } // met = a pinned reveal was dismissed
+      s.wasPinned = false;
+      if (mode === 'margin') { layoutNotes(); }
+    }
+
+    // deferred close check (one frame) so pointer can cross term -> reveal
+    function deferMaybeClose(term) {
+      requestAnimationFrame(function () {
+        var s = state.get(term);
+        if (!s.revealEl || s.pinned) { return; }
+        var hoveringReveal = shared ? sharedHover : s.hoverReveal;
+        var focusInside = document.activeElement === term ||
+          (s.revealEl && s.revealEl.contains(document.activeElement));
+        if (!s.hoverTerm && !hoveringReveal && !focusInside) {
+          close(term);
+        }
+      });
+    }
+
+    // ---- geometry ----
+    function positionCard(term) {
+      var rootRect = root.getBoundingClientRect();
+      var rect = term.getBoundingClientRect();
+      var rootW = root.clientWidth;
+      var w = Math.min(384, rootW - 16); // min(24rem, column − 1rem)
+      card.style.width = w + 'px';
+      card.style.display = 'block';
+      card.style.visibility = 'hidden';
+      card.style.left = '0px';
+      card.style.top = '0px';
+      var h = card.offsetHeight;
+      var left = Math.max(8, Math.min(rect.left - rootRect.left, rootW - w - 8));
+      var below = rect.bottom + 8 + h <= window.innerHeight;
+      var top;
+      if (below) {
+        top = rect.bottom - rootRect.top + 8;
+        card.classList.remove('flip');
+      } else {
+        top = rect.top - rootRect.top - h - 8;
+        card.classList.add('flip');
+      }
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+      card.style.visibility = 'visible';
+    }
+
+    function layoutNotes() {
+      var grid = root.querySelector('.c-grid');
+      var gridRect = grid.getBoundingClientRect();
+      var open = openTerms().map(function (t) {
+        return { t: t, el: state.get(t).revealEl, want: t.getBoundingClientRect().top - gridRect.top };
+      }).sort(function (a, b) { return a.want - b.want; });
+      var floor = 0;
+      open.forEach(function (n) {
+        var top = Math.max(n.want, floor);
+        n.el.style.top = top + 'px';
+        floor = top + n.el.offsetHeight + 12; // min gap 0.75rem
+      });
+    }
+
+    // ---- term wiring ----
+    terms.forEach(function (term) {
+      var s = state.get(term);
+
+      term.addEventListener('pointerenter', function (e) {
+        if (e.pointerType !== 'mouse') { return; }
+        s.hoverTerm = true;
+        if (!s.revealEl) { open(term, false); }
+      });
+      term.addEventListener('pointerleave', function (e) {
+        if (e.pointerType !== 'mouse') { return; }
+        s.hoverTerm = false;
+        deferMaybeClose(term);
+      });
+      term.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (s.pinned) { close(term); }
+        else { open(term, true); }
+      });
+      term.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (s.pinned) { close(term); } else { open(term, true); }
+        } else if (e.key === 'Escape') {
+          if (s.revealEl) { close(term); term.focus(); }
+        }
+      });
+      term.addEventListener('focus', function () {
+        if (!s.revealEl) { open(term, false); }
+      });
+      term.addEventListener('blur', function () {
+        deferMaybeClose(term);
+      });
+    });
+
+    // dismiss reveals on outside tap/click — "outside" means outside every term
+    // and every open reveal of this variant (so allow-multiple isn't defeated
+    // by touching a second term; open() handles one-at-a-time replacement)
+    document.addEventListener('pointerdown', function (e) {
+      var inside = terms.some(function (t) { return t.contains(e.target); }) ||
+        openTerms().some(function (t) {
+          var el = state.get(t).revealEl;
+          return el && el.contains(e.target);
+        });
+      if (inside) { return; }
+      openTerms().forEach(function (t) { close(t); });
+    });
+
+    // reposition on resize
+    window.addEventListener('resize', function () {
+      if (mode === 'card') {
+        var o = openTerms()[0];
+        if (o) { positionCard(o); }
+      } else if (mode === 'margin') {
+        layoutNotes();
+      }
+    });
+
+    // reset met state
+    var reset = root.querySelector('.reset');
+    if (reset) {
+      reset.addEventListener('click', function (e) {
+        e.preventDefault();
+        terms.forEach(function (t) { close(t); t.classList.remove('met'); });
+      });
+    }
+  }
+
+  setupVariant('demo-a', 'card');
+  setupVariant('demo-b', 'inline');
+  setupVariant('demo-c', 'margin');
+  setupVariant('demo-d', 'slot');
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>A (floating card, one at a time)</strong>, accepted as
+  recommended: no navigation and no reflow, one geometry across hover/tap/focus at
+  every viewport width. Terms-you've-met: <strong>kept</strong>, quietest form — met
+  fires only on a deliberate pin-and-dismiss, and a met term's underline recedes
+  bero@0.70 → sumi@0.40. Reveals land instant (0&nbsp;ms); whether the card's arrival
+  adopts §4's 160&nbsp;ms step is resolved at the coherence check. Values landed in
+  <code>design/basis-of-design.md</code> §7.</p>
+</section>
+
+</body>
+</html>

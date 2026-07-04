@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 4 — the step</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ================= frozen palette (session 2) ================= */
+  :root {
+    --washi: #eef1ef;
+    --sumi: #1f2123;
+    --bero: #29618e;
+    --gold: #a9832a;
+    --sumi-70: rgba(31, 33, 35, 0.70);
+    --sumi-40: rgba(31, 33, 35, 0.40);
+    --sumi-12: rgba(31, 33, 35, 0.12);
+    --bero-40: rgba(41, 97, 142, 0.40);
+  }
+
+  /* ================= frozen type (session 3) ================= */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--washi);
+    color: var(--sumi);
+    font-family: 'Source Serif 4', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    font-weight: 400;
+    padding: 3rem 1.5rem 5rem;
+  }
+  main { max-width: 60rem; margin: 0 auto; }
+  h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 600; }
+  h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 600; margin-top: 3.5rem; }
+  h3 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
+  p  { margin-top: 0.75rem; max-width: 44rem; }
+  code, .mono {
+    font-family: 'Source Code Pro', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+    font-size: 0.875rem; line-height: 1.6;
+  }
+  .caption { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); }
+  .commit-line {
+    margin-top: 0.35rem;
+    font-style: italic;
+    color: var(--sumi-70);
+  }
+
+  /* ================= page furniture ================= */
+  .rm-note {
+    display: none;
+    margin-top: 1rem; padding: 0.5rem 0.75rem;
+    border-left: 2px solid var(--bero-40);
+    font-family: 'Source Code Pro', monospace; font-size: 0.8125rem;
+    color: var(--bero);
+  }
+  body.reduced .rm-note { display: block; }
+
+  .frozen-recap {
+    margin-top: 1.5rem; padding: 1rem 1.25rem;
+    border: 1px solid var(--sumi-12);
+    font-family: 'Source Code Pro', monospace; font-size: 0.8125rem; line-height: 1.7;
+    color: var(--sumi-70);
+  }
+  .frozen-recap b { color: var(--sumi); font-weight: 600; }
+
+  .cases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  @media (max-width: 56rem) { .cases { grid-template-columns: 1fr; } }
+
+  .demo {
+    border: 1px solid var(--sumi-12);
+    background: var(--washi);
+    display: flex; flex-direction: column;
+  }
+  .demo-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--sumi-12);
+  }
+  .demo-head .label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8125rem; font-weight: 600; color: var(--sumi);
+  }
+  button.replay {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8125rem; font-weight: 400;
+    color: var(--sumi); background: var(--washi);
+    border: 1px solid var(--sumi-40);
+    padding: 0.15rem 0.6rem;
+    cursor: pointer;
+  }
+  button.replay:hover { border-color: var(--sumi); }
+  button.replay:active { background: var(--sumi-12); }
+
+  .stage {
+    position: relative;
+    height: 11rem;
+    overflow: hidden;
+    padding: 1rem 1.1rem;
+  }
+  .numbers {
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--sumi-12);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.75rem; line-height: 1.6;
+    color: var(--sumi-70);
+    min-height: 3.4rem;
+  }
+
+  /* ---- page-transition stage: two absolutely-positioned pages ---- */
+  .page {
+    position: absolute; inset: 0;
+    padding: 1rem 1.1rem;
+    background: var(--washi);
+  }
+  .page h4 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
+  .page p  { font-size: 0.9rem; margin-top: 0.4rem; max-width: none; }
+  .page .crumb {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.75rem; color: var(--sumi-70); margin-bottom: 0.6rem;
+  }
+  /* a page that is not landed is absent — cut out, never faded out */
+  .page:not(.landed) { visibility: hidden; }
+
+  /* ---- section-arrival stage ---- */
+  .atrest { font-size: 0.9rem; max-width: none; }
+  .arriving-section { margin-top: 0.9rem; }
+  .arriving-section h5 { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
+  .arriving-section p { font-size: 0.9rem; margin-top: 0.25rem; max-width: none; }
+
+  /* ---- sequence stage: five koma pieces (session 1 solid form, <24px) ---- */
+  .seq {
+    display: flex; align-items: flex-end; gap: 1rem;
+    height: 100%; padding-bottom: 1.4rem; position: relative;
+  }
+  .seq .baseline {
+    position: absolute; left: 0; right: 0; bottom: 1.35rem;
+    height: 1px; background: var(--sumi-12);
+  }
+  .seq .node { display: block; }
+
+  /* ================= THE STEP — variant mechanics =================
+     Base state: not yet arrived. `.landed`: at rest.
+     The transition lives on `.landed` only, so removing it (replay
+     reset) is always an instant swap — nothing ever animates out.  */
+
+  .step { opacity: 0; }
+  .step.landed { opacity: 1; transform: none; }
+
+  /* variant A — the cut. 0ms. presence is binary. */
+  .v-a .step.landed { transition: none; }
+
+  /* variant B — brisk footfall. 160ms rise-and-land, 8px. */
+  .v-b .step { transform: translateY(8px); }
+  .v-b .step.landed {
+    transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1),
+                transform 160ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* B′ — practitioner's amendment at judgment: same footfall, seated on the line,
+     slower populate (interval 300 → 380ms). */
+  .v-bp .step { transform: translateY(8px); }
+  .v-bp .step.landed {
+    transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1),
+                transform 160ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .seq.seated .baseline { bottom: calc(1.4rem - 1px); }
+
+  /* variant C — deliberate placement. 280ms, 12px. */
+  .v-c .step { transform: translateY(12px); }
+  .v-c .step.landed {
+    transition: opacity 280ms cubic-bezier(0.45, 0, 0.12, 1),
+                transform 280ms cubic-bezier(0.45, 0, 0.12, 1);
+  }
+
+  /* variant D — bokashi edge. 220ms opacity only, no travel. */
+  .v-d .step.landed {
+    transition: opacity 220ms cubic-bezier(0.3, 0, 0.55, 1);
+  }
+
+  /* reset helper: strips all transitions for one frame */
+  .no-anim .step, .no-anim .step.landed { transition: none !important; }
+
+  /* reduced motion: every step is an instant swap */
+  @media (prefers-reduced-motion: reduce) {
+    .step.landed { transition: none !important; }
+  }
+
+  /* ================= closing blocks ================= */
+  .reco { margin-top: 3.5rem; border-top: 1px solid var(--sumi-40); padding-top: 1.5rem; }
+  pre.frozen {
+    margin-top: 1rem; padding: 1rem 1.25rem;
+    border: 1px solid var(--sumi-12);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.875rem; line-height: 1.6;
+    color: var(--sumi);
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+  pre.frozen .k { color: var(--sumi-70); }
+  ul.parked { margin: 0.75rem 0 0 1.25rem; max-width: 44rem; }
+  ul.parked li { margin-top: 0.35rem; }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>Session 4 — the step</h1>
+  <p>What one step of motion <em>is</em> — the unit all site motion is built from.
+  Each variant answers with the same three cases: a page transition, a section
+  arriving in-page, and a five-node sequence building piece by piece. Every number
+  printed under a demo is the number driving it.</p>
+  <p class="caption">In every variant the outgoing page is <strong>cut</strong>, never faded — release
+  is not a step; only arrival commits. Replay resets are instant swaps. Sequence
+  nodes are session&nbsp;1's solid form (&lt;24px, no keyline, no character).</p>
+
+  <div class="rm-note">prefers-reduced-motion: reduce detected — every step below
+  renders as an instant swap; sequences complete in one frame. This is the frozen
+  fallback, not a degraded page.</div>
+
+  <div class="frozen-recap">
+    <b>frozen inputs</b> — palette (session 2): washi #eef1ef · sumi #1f2123 ·
+    bero-ai #29618e · gold #a9832a (state only) · opacity ladder 1.00/0.70/0.40/0.12
+    &nbsp;·&nbsp; type (session 3): 'Source Serif 4' 400/400i/600 ·
+    'Source Code Pro' 400/600 · body 1.0625/1.65 · mono 0.875/1.6 ·
+    caption 0.8125/1.5 @0.70
+  </div>
+
+  <!-- ================================================================ -->
+  <section class="v-a" id="variant-a">
+    <h2>A — the cut</h2>
+    <p class="commit-line">Commits to the print pulled, not placed: arrival is instant and binary; rhythm is the only motion.</p>
+    <div class="cases">
+      <div class="demo" data-variant="a" data-case="page">
+        <div class="demo-head"><span class="label">page transition</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="page page-one step landed">
+            <div class="crumb">hosystem / framework</div>
+            <h4>The framework</h4>
+            <p>Work moves in bounded steps. A step opens, runs, and closes.</p>
+          </div>
+          <div class="page page-two step">
+            <div class="crumb">hosystem / records</div>
+            <h4>The record</h4>
+            <p>Each step lands and is written. Closed steps stay closed.</p>
+          </div>
+        </div>
+        <div class="numbers">out: cut 0ms → hold 120ms on washi → in: cut 0ms<br>total 120ms</div>
+      </div>
+      <div class="demo" data-variant="a" data-case="section">
+        <div class="demo-head"><span class="label">section arrival</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <p class="atrest">A ho is a bounded unit of work. It opens, it runs, it closes.</p>
+          <div class="arriving-section step landed">
+            <h5>The record</h5>
+            <p>What was decided, and when, stays written. Nothing reopens.</p>
+          </div>
+        </div>
+        <div class="numbers">one cut, 0ms · the block appears whole · space pre-reserved, no reflow</div>
+      </div>
+      <div class="demo" data-variant="a" data-case="sequence">
+        <div class="demo-head"><span class="label">five-node sequence</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="seq">
+            <div class="baseline"></div>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+          </div>
+        </div>
+        <div class="numbers">step 0ms · hold 260ms · interval 260ms constant<br>total 1040ms</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="v-b" id="variant-b">
+    <h2>B — the brisk footfall</h2>
+    <p class="commit-line">Commits to the footfall: one short rise-and-land per arrival — direction, deceleration, rest — on a constant beat.</p>
+    <div class="cases">
+      <div class="demo" data-variant="b" data-case="page">
+        <div class="demo-head"><span class="label">page transition</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="page page-one step landed">
+            <div class="crumb">hosystem / framework</div>
+            <h4>The framework</h4>
+            <p>Work moves in bounded steps. A step opens, runs, and closes.</p>
+          </div>
+          <div class="page page-two step">
+            <div class="crumb">hosystem / records</div>
+            <h4>The record</h4>
+            <p>Each step lands and is written. Closed steps stay closed.</p>
+          </div>
+        </div>
+        <div class="numbers">out: cut 0ms → hold 80ms → in: step 160ms cubic-bezier(.2,0,0,1) · rise 8px<br>total 240ms</div>
+      </div>
+      <div class="demo" data-variant="b" data-case="section">
+        <div class="demo-head"><span class="label">section arrival</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <p class="atrest">A ho is a bounded unit of work. It opens, it runs, it closes.</p>
+          <div class="arriving-section step landed">
+            <h5>The record</h5>
+            <p>What was decided, and when, stays written. Nothing reopens.</p>
+          </div>
+        </div>
+        <div class="numbers">one step, 160ms cubic-bezier(.2,0,0,1) · rise 8px · block moves as one piece · text above never moves</div>
+      </div>
+      <div class="demo" data-variant="b" data-case="sequence">
+        <div class="demo-head"><span class="label">five-node sequence</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="seq">
+            <div class="baseline"></div>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+          </div>
+        </div>
+        <div class="numbers">step 160ms · hold 140ms · interval 300ms constant<br>total 1360ms</div>
+      </div>
+    </div>
+
+    <div class="v-bp">
+      <div class="demo" data-variant="bp" data-case="sequence">
+        <div class="demo-head"><span class="label">B′ — amended at judgment: seated on the line · slower populate</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="seq seated">
+            <div class="baseline"></div>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+          </div>
+        </div>
+        <div class="numbers">step 160ms · hold 220ms · interval 380ms constant<br>total 1680ms · koma bottoms rest on the line</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="v-c" id="variant-c">
+    <h2>C — deliberate placement</h2>
+    <p class="commit-line">Commits to weight: each piece is seen being set down; the sequence is slow enough to count aloud.</p>
+    <div class="cases">
+      <div class="demo" data-variant="c" data-case="page">
+        <div class="demo-head"><span class="label">page transition</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="page page-one step landed">
+            <div class="crumb">hosystem / framework</div>
+            <h4>The framework</h4>
+            <p>Work moves in bounded steps. A step opens, runs, and closes.</p>
+          </div>
+          <div class="page page-two step">
+            <div class="crumb">hosystem / records</div>
+            <h4>The record</h4>
+            <p>Each step lands and is written. Closed steps stay closed.</p>
+          </div>
+        </div>
+        <div class="numbers">out: cut 0ms → hold 120ms → in: step 280ms cubic-bezier(.45,0,.12,1) · rise 12px<br>total 400ms</div>
+      </div>
+      <div class="demo" data-variant="c" data-case="section">
+        <div class="demo-head"><span class="label">section arrival</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <p class="atrest">A ho is a bounded unit of work. It opens, it runs, it closes.</p>
+          <div class="arriving-section step landed">
+            <h5>The record</h5>
+            <p>What was decided, and when, stays written. Nothing reopens.</p>
+          </div>
+        </div>
+        <div class="numbers">one step, 280ms cubic-bezier(.45,0,.12,1) · rise 12px · block moves as one piece</div>
+      </div>
+      <div class="demo" data-variant="c" data-case="sequence">
+        <div class="demo-head"><span class="label">five-node sequence</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="seq">
+            <div class="baseline"></div>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+          </div>
+        </div>
+        <div class="numbers">step 280ms · hold 240ms · interval 520ms constant<br>total 2360ms</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="v-d" id="variant-d">
+    <h2>D — the bokashi edge, gathering pace</h2>
+    <p class="commit-line">Commits to the wiped edge: arrival is a gradated opacity edge with no travel, and the sequence quickens as it builds — the drift-risk test.</p>
+    <div class="cases">
+      <div class="demo" data-variant="d" data-case="page">
+        <div class="demo-head"><span class="label">page transition</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="page page-one step landed">
+            <div class="crumb">hosystem / framework</div>
+            <h4>The framework</h4>
+            <p>Work moves in bounded steps. A step opens, runs, and closes.</p>
+          </div>
+          <div class="page page-two step">
+            <div class="crumb">hosystem / records</div>
+            <h4>The record</h4>
+            <p>Each step lands and is written. Closed steps stay closed.</p>
+          </div>
+        </div>
+        <div class="numbers">out: cut 0ms → hold 80ms → in: fade 220ms cubic-bezier(.3,0,.55,1) · no travel<br>total 300ms</div>
+      </div>
+      <div class="demo" data-variant="d" data-case="section">
+        <div class="demo-head"><span class="label">section arrival</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <p class="atrest">A ho is a bounded unit of work. It opens, it runs, it closes.</p>
+          <div class="arriving-section step landed">
+            <h5>The record</h5>
+            <p>What was decided, and when, stays written. Nothing reopens.</p>
+          </div>
+        </div>
+        <div class="numbers">one fade, 220ms cubic-bezier(.3,0,.55,1) · no travel · opacity as gradated edge</div>
+      </div>
+      <div class="demo" data-variant="d" data-case="sequence">
+        <div class="demo-head"><span class="label">five-node sequence</span><button class="replay">replay</button></div>
+        <div class="stage">
+          <div class="seq">
+            <div class="baseline"></div>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+            <svg class="node step landed" viewBox="0 0 74 100" width="15" height="20" aria-hidden="true"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+          </div>
+        </div>
+        <div class="numbers">step 220ms · intervals 380 → 330 → 280 → 230ms (accelerating)<br>total 1440ms</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <section class="reco">
+    <h2>Recommendation — B, the brisk footfall</h2>
+    <p><strong>1. Only the footfall reads as a step.</strong> A step is a bounded
+    move with direction and a landing. B's 8px rise decelerating into rest is
+    exactly that — the eye reads <em>arrived</em>, not <em>appeared</em> or
+    <em>faded in</em>. A (the cut) is honest but mute: at page scale it reads as a
+    glitch, and in a sequence the nodes pop rather than land — presence without
+    commitment. D fails its own test: at 220ms with no travel, opacity alone reads
+    as drift — a position may not wander, and it turns out a surface materializing
+    in place wanders too. The bokashi edge belongs to edges (session 2 already
+    holds it there), not to arrivals.</p>
+    <p><strong>2. The constant beat is the framework's honest rhythm.</strong>
+    Steps are equal commitments; a sequence that accelerates (D) implies momentum,
+    and momentum is drift. B's 300ms constant interval makes a five-node build
+    countable — five equal footfalls, 1.36s total — brisk enough that the reader
+    never waits (C's 2.36s does make you wait, and its 280ms step starts to feel
+    like being shown motion rather than shown work), slow enough that each landing
+    registers.</p>
+    <p>Secondary: B's page transition (cut out, 80ms washi hold, one 160ms step in)
+    keeps the release instant — leaving is not a step; only arrival commits — and
+    the washi hold is the blank sheet between impressions.</p>
+
+    <h3 style="margin-top:2rem">Frozen if accepted:</h3>
+    <pre class="frozen"><span class="k"># the step — the unit of all site motion</span>
+step duration        160ms
+step easing          cubic-bezier(0.2, 0, 0, 1)
+                     <span class="k">accelerate → decelerate → land; no overshoot.
+                     inside a step only — never between rests.</span>
+step travel          8px (0.5rem) vertical rise, translateY(8px → 0)
+step opacity         0 → 1, same duration, same curve
+hold between steps   140ms
+sequence interval    300ms (= step + hold), constant — never accelerates
+                     <span class="k">five-node build = 1360ms total</span>
+
+<span class="k"># the three cases</span>
+page transition      out: cut, 0ms (release is not a step)
+                     hold: 80ms on bare washi
+                     in: one step, 160ms — total 240ms
+section arrival      one step; the block moves as a single piece
+sequence             one step per node, 300ms constant interval
+
+<span class="k"># reduced motion</span>
+prefers-reduced-motion: reduce → every step is an instant swap (0ms);
+sequences render complete in one frame; holds collapse to 0.
+
+<span class="k"># never moves</span>
+- body text mid-read (a section may arrive once, as one block; after
+  that its text is ground)
+- the washi ground
+- anything already at rest — an arrived element never re-travels
+- surrounding layout: arrivals occupy reserved space; no reflow shove
+- scroll position (no scroll-jacking, ever)
+- anything under the pointer: nothing moves beneath a hover
+- easing between rests: no element ever glides from one rest to another;
+  travel &gt; 8px is a cut plus an arrival, not a longer slide</pre>
+
+    <h3 style="margin-top:2rem">Parked</h3>
+    <ul class="parked">
+      <li><strong>The flip (session 9):</strong> whether the piece's promotion turn shares the 160ms step or gets its own duration.</li>
+      <li><strong>The trail (session 8):</strong> how a completed sequence persists — recession of earlier nodes (sumi 1.00 → 0.40) and whether an opacity state-change counts as a step.</li>
+      <li><strong>Diagrams (session 6):</strong> what the five nodes connect with, and whether connectors arrive with their node or after it.</li>
+      <li><strong>Dark mode (own session):</strong> the page-transition hold color on a dark ground.</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (REDUCED) document.body.classList.add('reduced');
+
+  /* Every number here is the number shown on the page. */
+  var TIMING = {
+    a: { pageHold: 120, seqStarts: [0, 260, 520, 780, 1040] },   /* interval 260 constant */
+    b: { pageHold: 80,  seqStarts: [0, 300, 600, 900, 1200] },   /* interval 300 constant */
+    bp: { pageHold: 80, seqStarts: [0, 380, 760, 1140, 1520] },  /* B-prime amended: interval 380 constant */
+    c: { pageHold: 120, seqStarts: [0, 520, 1040, 1560, 2080] }, /* interval 520 constant */
+    d: { pageHold: 80,  seqStarts: [0, 380, 710, 990, 1220] }    /* gaps 380/330/280/230 */
+  };
+  var RESET_BEAT = 500; /* pause after reset so the replay is legible; not part of the step */
+
+  function clearTimers(demo) {
+    (demo._timers || []).forEach(clearTimeout);
+    demo._timers = [];
+  }
+  function later(demo, fn, ms) {
+    demo._timers.push(setTimeout(fn, REDUCED ? 0 : ms));
+  }
+
+  /* instant reset: strip transitions for one frame, unland, force reflow */
+  function resetSteps(demo, els) {
+    demo.classList.add('no-anim');
+    els.forEach(function (el) { el.classList.remove('landed'); });
+    void demo.offsetWidth; /* reflow */
+    demo.classList.remove('no-anim');
+  }
+
+  function replay(demo) {
+    var variant = demo.dataset.variant;
+    var kase = demo.dataset.case;
+    var t = TIMING[variant];
+    clearTimers(demo);
+
+    if (kase === 'page') {
+      var p1 = demo.querySelector('.page-one');
+      var p2 = demo.querySelector('.page-two');
+      /* reset: back to page one, instantly */
+      demo.classList.add('no-anim');
+      p2.classList.remove('landed');
+      p1.classList.add('landed');
+      void demo.offsetWidth;
+      demo.classList.remove('no-anim');
+      later(demo, function () {
+        p1.classList.remove('landed');           /* out: cut, 0ms */
+        later(demo, function () {
+          p2.classList.add('landed');            /* in: one step */
+        }, t.pageHold);                          /* hold on bare washi */
+      }, RESET_BEAT);
+
+    } else if (kase === 'section') {
+      var sec = demo.querySelector('.arriving-section');
+      resetSteps(demo, [sec]);
+      later(demo, function () { sec.classList.add('landed'); }, RESET_BEAT);
+
+    } else if (kase === 'sequence') {
+      var nodes = Array.prototype.slice.call(demo.querySelectorAll('.node'));
+      resetSteps(demo, nodes);
+      later(demo, function () {
+        nodes.forEach(function (node, i) {
+          later(demo, function () { node.classList.add('landed'); }, t.seqStarts[i]);
+        });
+      }, RESET_BEAT);
+    }
+  }
+
+  document.querySelectorAll('.demo').forEach(function (demo) {
+    demo._timers = [];
+    demo.querySelector('.replay').addEventListener('click', function () {
+      replay(demo);
+    });
+  });
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>B (brisk footfall), amended at judgment to B′</strong>: sequence
+  glyphs seat on the baseline (bottoms flush on the line) and populate slower — hold
+  140 → 220ms, interval 300 → 380ms constant. 380ms is this landing's cut of the
+  practitioner's "a little slower"; verify at the coherence check. All other B values
+  land unchanged. The B′ demo above shows the amended values moving. Values landed in
+  <code>design/basis-of-design.md</code> §4.</p>
+</section>
+
+</body>
+</html>

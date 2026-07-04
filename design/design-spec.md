@@ -2,14 +2,14 @@
 created: 2026-07-03
 status: draft
 type: design-spec
-project: hosystem.sageframe.net
+project: hosystem
 builds-on:
   - "sageframe-no-kaji/ho-system: private/audit/fable-2026-07-01/deliverable-2-web-presence-vision.md"
   - "sageframe-no-kaji/ho-system: private/audit/fable-2026-07-01/deliverable-1-docification/framework-structure-design-work.md (2.11)"
   - "sageframe-no-kaji/ho-system: framework/glossary.md"
 ---
 
-# hosystem.sageframe.net — Design Spec
+# hosystem — Design Spec
 
 The public site of the Ho System. Not a brochure about the practice — a walk through
 its real artifacts. The visitor learns the system the way the system works: in bounded

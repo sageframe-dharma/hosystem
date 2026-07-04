@@ -2,7 +2,7 @@
 created: 2026-07-03
 status: living
 type: basis-of-design
-project: hosystem.sageframe.net
+project: hosystem
 ---
 
 # Basis of Design

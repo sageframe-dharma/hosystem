@@ -1,6 +1,6 @@
-# hosystem.sageframe.net
+# hosystem
 
-The public site of the Ho System. Not a brochure about the practice — a walk through
+The public site of the Ho System, served at `hosystem.sageframe.net`. Not a brochure about the practice — a walk through
 its real artifacts.
 
 **Status: founding.** Design work runs first; the build follows.

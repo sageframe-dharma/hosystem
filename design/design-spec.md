@@ -165,6 +165,43 @@ The Walk renders sharibako (public repo, full current-convention chain). Kanyō 
 origin story, added in v2. The colophon renders this repo's own record, beginning with
 this spec.
 
+### 5.1 Where the material comes from
+
+The site authors almost no content. It renders the practitioner's existing corpus —
+the framework documents in which every part of the system was defined and named. The
+site's job is to make that work walkable, not to restate it. Ingested at build time
+from `sageframe-no-kaji/ho-system` and `sageframe-no-kaji/sharibako`:
+
+| Site section | Source material |
+|---|---|
+| Front page | The problem and claim, already written in the framework README |
+| The Practice | `framework/the-ho-system.md` · `framework/ho-foundations-evidence.md` · the operating discipline, in readable form · the Writing list (§5.2) |
+| The Walk | sharibako — the full chain: Kamae documents, hos, agent tasks, Reflect records, addenda |
+| The Framework | `framework/structure/*` — the named parts (the Kamae chain, ho shapes, the numbering system, forward-only, the two registers, dandori, the artifact-type registry) · `framework/templates/*`, downloadable |
+| The Skills | `skills/*` — one page per skill, per the vision's anatomy |
+| Practicing | `guides/*` |
+| Engagements | The one section with substantially new prose · the external-contribution doctrine |
+| Definition-on-touch | `framework/glossary.md` — every term the practitioner defined and named, one touch away under every page |
+| Colophon | This repo's own record |
+
+The naming work is carried twice: structurally (The Framework renders the documents
+that define each part) and ambiently (the glossary system puts the practitioner's
+definitions under every term of art, everywhere on the site). Nothing is paraphrased
+away; where the site compresses per constraint #0, the full document is the link.
+
+### 5.2 The practitioner's writing
+
+The essays stay on Substack; the site links out (vision §13). A curated Writing list
+lives on The Practice page. Confirmed members:
+
+- [I Built a Computer Vision System for Harvard's Falcon Cameras](https://sageframe.substack.com/p/ho-process-methodology) — the origin essay
+- [Walking Without Google Maps](https://sageframe.substack.com/p/walking-without-google-maps) — problem definition before solution; the design-thinking ground
+- [Three Hours](https://sageframe.substack.com/p/three-hours) — shu-ha-ri arrived; the encoded-environment observation
+- *The Spec Is Not the Hard Part* — joins on publication
+
+The list is practitioner-curated and extensible; candidates from the wider essay
+corpus are added by the practitioner, not inferred.
+
 ---
 
 ## 6. The design questions

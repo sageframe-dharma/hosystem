@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coherence check — hosystem</title>
+
+<!-- Frozen fonts only: Source Serif 4 (400, 400i, 600) + Source Code Pro (400, 600) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<!-- Favicon: §1 solid form, front face, 16px, sumi fill -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 100'%3E%3Cpath d='M37 0 L66 22 L74 100 L0 100 L8 22 Z' fill='%231f2123'/%3E%3C/svg%3E">
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   §2 PALETTE — three inks + paper. Flat fields only.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --washi:#eef1ef;
+  --sumi:#1f2123;   --sumi-rgb:31,33,35;
+  --bero:#29618e;   --bero-rgb:41,97,142;
+  --gold:#a9832a;   --gold-rgb:169,131,42;
+  --kachi:#040c13;      /* sumi × bero */
+  --matsuba:#1b3117;    /* bero × gold */
+
+  /* opacity ladder: 1.00 / 0.70 / 0.40 / 0.12 */
+  --sumi-70:rgba(var(--sumi-rgb),.70);
+  --sumi-40:rgba(var(--sumi-rgb),.40);
+  --sumi-12:rgba(var(--sumi-rgb),.12);
+  --bero-70:rgba(var(--bero-rgb),.70);
+  --bero-40:rgba(var(--bero-rgb),.40);
+  --gold-40:rgba(var(--gold-rgb),.40);
+
+  /* §3 CJK fallback — appended to both stacks; no CJK webfont downloaded */
+  --cjk:'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+  --serif:'Source Serif 4',var(--cjk);
+  --mono:'Source Code Pro',var(--cjk);
+
+  --step-ease:cubic-bezier(0.2,0,0,1);
+  --measure:42rem;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   §3 TYPE — three registers, one scale
+   ───────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+/* §4 / §7 / §9 — prefers-reduced-motion renders every step at 0 ms */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-delay:0ms !important;
+    transition-duration:.001ms !important;}
+}
+html{background:var(--washi)}
+body{
+  margin:0; background:var(--washi); color:var(--sumi);
+  font-family:var(--serif); font-weight:400;
+  font-size:1.0625rem; line-height:1.65;      /* body */
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.wrap{max-width:var(--measure); margin:0 auto; padding:0 1.25rem}
+
+h1{font-family:var(--serif); font-weight:600; font-size:1.75rem;  line-height:1.25; margin:0}
+h2{font-family:var(--serif); font-weight:600; font-size:1.375rem; line-height:1.3;
+   margin:2.5rem 0 1rem}                        /* §5 rhythm */
+h3{font-family:var(--serif); font-weight:600; font-size:1.125rem; line-height:1.4; margin:1.5rem 0 .5rem}
+p{margin:0 0 1.25rem}                           /* §5 rhythm */
+.caption{font-size:.8125rem; line-height:1.5; color:var(--sumi-70)}
+
+/* registers */
+.discursive{}                                   /* serif 400 sumi — the default body */
+.procedural{
+  font-family:var(--mono); font-weight:400; font-size:.875rem; line-height:1.6;
+  color:var(--sumi); white-space:pre-wrap;
+  border-left:2px solid var(--sumi-40); padding-left:1rem;   /* §5 procedural left rule */
+  margin:1.5rem 0;
+}
+.emergent{
+  font-family:var(--serif); font-style:italic; font-weight:400;
+  color:var(--bero);
+  border-left:2px solid var(--bero-40); padding-left:1rem;   /* §3 emergent rule */
+  margin:1.5rem 0;
+}
+code, .mono{font-family:var(--mono); font-size:.875em}
+
+/* §3 marked term — resting look only (touch = §7) */
+.term{
+  color:var(--sumi);
+  text-decoration:underline dotted 1px;
+  text-decoration-color:var(--bero-70);
+  text-underline-offset:.2em;
+  cursor:help; background:none; font-weight:inherit;
+}
+.term.open{text-decoration-style:solid}         /* §7: open term dotted→solid */
+.term.met{text-decoration-color:var(--sumi-40)} /* §7: met recedes bero→sumi@.40 */
+
+/* §5 chain link — solid = link, dotted = marked term */
+.chain-link{
+  color:var(--sumi); text-decoration:underline solid 1px;
+  text-decoration-color:var(--bero-70); text-underline-offset:.2em; cursor:pointer;
+}
+
+/* section frame — the page reads as one site, sections arrive as blocks (§4) */
+section.block{margin:3.5rem 0; opacity:1}
+.rule{border:0; border-top:1px solid var(--sumi-12); margin:0}     /* tier/field rule */
+.koma-face{font-family:var(--cjk)}              /* piece faces render in CJK stack */
+
+/* small utility labels for demo scaffolding — clearly not framework chrome */
+.scaffold{
+  font-family:var(--mono); font-size:.75rem; color:var(--sumi-70);
+  border:1px dashed var(--sumi-40); padding:.35rem .6rem; display:inline-block;
+  border-radius:0; background:none;
+}
+button.demo{
+  font-family:var(--mono); font-size:.8125rem; color:var(--sumi);
+  background:var(--washi); border:1px solid var(--sumi-40); border-radius:0;
+  padding:.4rem .8rem; cursor:pointer;
+}
+button.demo:hover{border-color:var(--sumi)}
+button.demo:focus-visible{outline:2px solid var(--bero); outline-offset:2px}
+
+/* ─────────────────────────────────────────────────────────────
+   §1 THE PIECE
+   ───────────────────────────────────────────────────────────── */
+.masthead{display:flex; align-items:flex-end; gap:1.25rem; margin:2.5rem 0 1rem}
+.masthead svg{display:block}
+.masthead .titles h1{font-size:2.25rem}
+.masthead .titles .sub{color:var(--sumi-70); font-size:1rem}
+.piece-note{color:var(--sumi-70); font-size:.8125rem; margin-top:.25rem}
+
+/* nav */
+.topnav{
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+  border-top:1px solid var(--sumi-12); border-bottom:1px solid var(--sumi-12);
+  padding:.6rem 0; margin-top:1.5rem;
+}
+.topnav a{
+  font-family:var(--mono); font-size:.8125rem; color:var(--sumi-70);
+  text-decoration:none;
+}
+.topnav a:hover{color:var(--sumi)}
+.topnav .corner{margin-left:auto; display:flex; align-items:center}
+
+/* ─────────────────────────────────────────────────────────────
+   §5 THE LEDGER
+   ───────────────────────────────────────────────────────────── */
+.ledger{
+  border:1px solid var(--sumi-40);
+  margin-bottom:2.5rem;
+  font-family:var(--mono); font-size:.875rem; line-height:1.6;
+}
+.ledger .row{
+  display:grid; grid-template-columns:9rem 1fr;
+  padding:.5rem .875rem;
+  border-bottom:1px solid var(--sumi-12);
+}
+.ledger .row:last-child{border-bottom:0}
+.ledger .k{color:var(--sumi-70)}
+.ledger .v{color:var(--sumi)}
+.ledger .v.link .chain-link{font-family:var(--mono)}
+.status-val{display:inline-flex; align-items:center}
+.status-val .koma{margin-right:.5rem}          /* 12px koma, 0.5rem before value */
+
+/* §5 supersession reveal */
+.supersede{
+  border:1px solid var(--sumi-40); border-top:0;
+  margin-top:-2.5rem; margin-bottom:2.5rem;
+  padding:1rem .875rem; display:none;
+}
+.supersede.open{display:block}
+.supersede .panes{display:grid; grid-template-columns:1fr 1fr; column-gap:2rem}
+@media (max-width:40rem){ .supersede .panes{grid-template-columns:1fr; row-gap:1.25rem} }
+.pane{font-family:var(--serif); font-size:1rem; line-height:1.55}
+.pane h4{font-family:var(--mono); font-size:.75rem; margin:0 0 .5rem; color:var(--sumi-70); font-weight:400}
+.pane.fell{border-left:2px solid var(--gold-40); padding-left:1rem; color:var(--sumi-70)}
+.pane.replaced{border-left:2px solid var(--gold); padding-left:1rem; color:var(--sumi)}
+
+/* ─────────────────────────────────────────────────────────────
+   §7 DEFINITION CARD
+   ───────────────────────────────────────────────────────────── */
+#defcard{
+  position:absolute; z-index:10; display:none;
+  width:min(24rem, var(--card-col, 40rem) - 1rem);
+  padding:.625rem .875rem;
+  background:var(--washi); border:1px solid var(--sumi-40); border-radius:0;
+  box-shadow:none;
+}
+#defcard .def{font-family:var(--serif); font-weight:400; font-size:.9375rem; line-height:1.55; color:var(--sumi)}
+#defcard .more{font-family:var(--mono); font-weight:400; font-size:.8125rem; color:var(--bero); margin-top:.4rem}
+
+/* ─────────────────────────────────────────────────────────────
+   §4 THE STEP — arrival demo
+   ───────────────────────────────────────────────────────────── */
+.stepstage{
+  border:1px solid var(--sumi-12); padding:1.25rem; margin:1rem 0;
+  min-height:170px;
+}
+.seq{display:flex; flex-direction:column; gap:.5rem}
+.seq .node{
+  font-family:var(--mono); font-size:.875rem; color:var(--sumi);
+  border-bottom:1px solid var(--sumi-12); padding-bottom:.25rem;
+  display:flex; align-items:baseline; gap:.5rem;
+  opacity:0;                                   /* seated on the baseline rule */
+}
+.seq .node.in{animation:stepin 160ms var(--step-ease) forwards}
+.seq .node .g{font-family:var(--cjk); color:var(--bero)}
+@keyframes stepin{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+
+/* page transition mock */
+.pagestage{border:1px solid var(--sumi-12); padding:1.25rem; margin:1rem 0; min-height:120px}
+.pageslot .content{opacity:1}
+.pageslot .content.in{animation:stepin 160ms var(--step-ease) forwards}
+
+/* ─────────────────────────────────────────────────────────────
+   §6 DIAGRAM
+   ───────────────────────────────────────────────────────────── */
+.diagrams{display:flex; gap:2.5rem; flex-wrap:wrap; align-items:flex-start}
+.diagrams svg text{font-family:var(--mono)}
+.dcol h3{margin-top:0}
+
+/* ─────────────────────────────────────────────────────────────
+   §9 THE FLIP
+   ───────────────────────────────────────────────────────────── */
+.records{display:flex; flex-direction:column; gap:.75rem; margin:1rem 0}
+.rec{display:flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.875rem}
+.rec .label{color:var(--sumi)}                 /* labels full sumi throughout */
+.rec .state{color:var(--sumi-70); font-size:.75rem}
+.flipbox{position:relative; width:16px; height:22px}   /* holds two stacked koma */
+.flipbox svg{position:absolute; left:0; bottom:0; transform-origin:50% 50%}
+
+.compare{display:flex; gap:2.5rem; flex-wrap:wrap; align-items:flex-end; margin:1rem 0}
+.compare .cell{text-align:center}
+.compare .big{position:relative; width:60px; height:81px; margin:0 auto}
+.compare .big svg{position:absolute; left:0; bottom:0; transform-origin:50% 50%}
+.bokashi-edge{
+  position:absolute; left:0; right:0; top:50%; height:10px; transform:translateY(-50%);
+  background:linear-gradient(var(--washi), rgba(var(--sumi-rgb),0), var(--washi));
+  pointer-events:none; display:none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   §8 THE TRAIL
+   ───────────────────────────────────────────────────────────── */
+.trail{
+  margin-top:4rem; border-top:1px solid var(--sumi-12);
+  padding:12px 0 8px;
+}
+.trail .cap{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px}
+.trail .cap .you{color:var(--sumi-70)}
+.trail .cap .n{color:var(--sumi-40)}
+.trail svg text{font-family:var(--mono)}
+.narrowtrail{max-width:420px; border:1px dashed var(--sumi-40); padding:.75rem; margin-top:.75rem}
+
+/* deferred / frictions */
+.deferred .item{border-top:1px solid var(--sumi-12); padding:1.25rem 0}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem}
+@media (max-width:40rem){ .two{grid-template-columns:1fr} }
+.two .h{font-family:var(--mono); font-size:.75rem; color:var(--sumi-70); margin-bottom:.5rem}
+.rec-note{font-family:var(--mono); font-size:.8125rem; color:var(--bero); margin-top:.75rem}
+
+.inklegend{display:flex; gap:1.25rem; flex-wrap:wrap; margin:1rem 0}
+.ink{font-family:var(--mono); font-size:.75rem; color:var(--sumi-70)}
+.chip{width:100%; height:28px; border:1px solid var(--sumi-12); margin-bottom:.25rem}
+.ladder{display:flex; gap:0; margin:.5rem 0 0}
+.ladder span{width:40px; height:24px; display:block}
+.overlap{position:relative; width:120px; height:36px; margin-top:.25rem}
+.overlap .a,.overlap .b{position:absolute; width:80px; height:36px}
+
+.colophon{margin-top:3.5rem; border-top:1px solid var(--sumi-12); padding-top:1.25rem}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<!-- ══ MASTHEAD — §1 the piece, keyline form ══ -->
+<header>
+  <div class="masthead">
+    <span data-koma="keyline front 120" aria-hidden="true"></span>
+    <div class="titles">
+      <h1>歩 &nbsp;Ho System</h1>
+      <div class="sub">the method, its practice, and the record of its making</div>
+      <div class="piece-note">One geometry, two inkings: keyline ≥ 24 px (above), solid &lt; 24 px
+        (the state marks, trail nodes, and nav glyph on this page). Promoted face
+        <span style="font-family:var(--cjk); color:var(--gold)">と</span> in gold is state, never emphasis.</div>
+    </div>
+  </div>
+
+  <!-- nav — the six doors (tie to §8 trail); nav-corner glyph = §6 glyph scale -->
+  <nav class="topnav" aria-label="primary">
+    <a href="#framework">Framework</a>
+    <a href="#practice">Practice</a>
+    <a href="#skills">Skills</a>
+    <a href="#writing">Writing</a>
+    <a href="#walk">Walk</a>
+    <a href="#colophon">Colophon</a>
+    <span class="corner" title="Kamae chain — nav glyph" data-diagram="glyph"></span>
+  </nav>
+</header>
+
+<!-- ══ INTRO — §3 registers + §7 marked terms ══ -->
+<section class="block" id="framework">
+  <p class="discursive">The <span class="term" data-term="ho">Ho System</span> is a discipline for
+  building things with an agent in the room. Work is cut into <span class="term" data-term="ho">hos</span> —
+  bounded sessions, each answering one question and then closing. A closed ho stays closed; when what
+  the project knows changes, a new ho responds. This page is a <em>coherence check</em>: every frozen
+  element of the site, assembled once, doing its real job — before any build code exists.</p>
+
+  <div class="emergent">Read this the way the site will read: the paper is warm, the ink is economical,
+  and the marks that move are the marks that mean something. Nothing here is decorative. Where a thing
+  is gold, a piece has closed.</div>
+
+  <p class="discursive">The five documents of the <span class="term" data-term="kamae">Kamae</span> chain
+  descend from opinion to session. The <span class="term" data-term="koma">koma</span> — the walking
+  piece — appears only where work is steppable. Its promotion is the site's one real animation, and it
+  fires only on real news: a record you are seeing close for the first time.</p>
+</section>
+
+<!-- ══ §4 THE STEP ══ -->
+<section class="block">
+  <h2>The step</h2>
+  <p class="discursive">All site motion is one unit: a 160 ms committed step — 8 px rise, opacity 0→1,
+  <code>cubic-bezier(.2,0,0,1)</code>, arriving glyphs seated on the line. A five-node sequence
+  populates on the constant 380 ms beat (build = 1680 ms). The beat is constant on purpose: equal
+  commitments, no momentum, no drift.</p>
+
+  <div class="stepstage">
+    <div class="seq" id="seq">
+      <div class="node"><span class="g">歩</span> Seed — the project's opinions</div>
+      <div class="node"><span class="g">歩</span> System Design — the decisions</div>
+      <div class="node"><span class="g">歩</span> README — the scope</div>
+      <div class="node"><span class="g">歩</span> Ho Overview — the sequence</div>
+      <div class="node"><span class="g">歩</span> Per-Ho Documents — the session</div>
+    </div>
+  </div>
+  <p><button class="demo" id="seq-replay">▷ populate (380 ms beat)</button>
+     &nbsp;<button class="demo" id="page-replay">▷ page transition (cut → 80 ms → step)</button></p>
+
+  <div class="pagestage">
+    <div class="pageslot" id="pageslot">
+      <div class="content">
+        <strong>Page A.</strong> The section you are reading. A page transition is out=cut (0 ms) →
+        80 ms hold on bare washi → in=one step. 240 ms total. Body text mid-read never moves.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ §5 SAMPLE HO DOCUMENT ══ -->
+<section class="block" id="practice">
+  <h2>A ho document</h2>
+  <p class="caption">Sample Ho System material — plausible, not a real record. Frontmatter renders
+  first and nothing is hidden.</p>
+
+  <!-- ledger header -->
+  <div class="ledger" role="table" aria-label="ho frontmatter">
+    <div class="row"><span class="k">created</span><span class="v">2026-07-04</span></div>
+    <div class="row"><span class="k">type</span><span class="v">ho</span></div>
+    <div class="row"><span class="k">ho</span><span class="v">04</span></div>
+    <div class="row"><span class="k">status</span><span class="v">
+        <span class="status-val"><span data-koma="solid closed 12"></span>closed</span></span></div>
+    <div class="row"><span class="k">builds-on</span><span class="v link">
+        <span class="chain-link" tabindex="0">ho-03</span></span></div>
+    <div class="row"><span class="k">supersedes</span><span class="v link">
+        <span class="chain-link" id="supersede-trigger" tabindex="0" role="button"
+              aria-expanded="false" aria-controls="supersede-panes">ho-02.1</span></span></div>
+    <div class="row"><span class="k">register</span><span class="v">shu</span></div>
+  </div>
+
+  <!-- supersession reveal -->
+  <div class="supersede" id="supersede-panes">
+    <div class="panes">
+      <div class="pane fell">
+        <h4>ho-02.1 · fell</h4>
+        The palette carried four inks — a second blue for links. Links and the thinking register both
+        printed blue, and the eye could not tell a door from a discursive aside.
+      </div>
+      <div class="pane replaced">
+        <h4>ho-04 · replaced</h4>
+        Three inks, total. Links earn a <em>solid</em> underline; the marked term keeps the dotted one.
+        Same bero, different stroke — affordance by line, not by hue.
+      </div>
+    </div>
+  </div>
+
+  <h3>What this ho does</h3>
+  <p class="discursive">This session freezes how a <span class="term" data-term="koma">koma</span> state
+  mark seats in the ledger and how a <span class="term" data-term="supersession">supersession</span>
+  opens. The header carries the only links that auto-render; prose mentions stay plain unless the
+  author linked them.</p>
+
+  <!-- procedural / Execute -->
+  <div class="procedural">Execute:
+  1. render frontmatter as a typed ledger (9rem key column, mono, keys @0.70)
+  2. seat a 12 px solid koma 0.5 rem before the status value, inked per the state map
+  3. wire builds-on / supersedes as the header's only live links
+  4. activating a superseded marker opens facing panes inside the header box</div>
+
+  <p class="discursive">The doing tier speaks in mono; that block above is procedural, and its left rule
+  is sumi, not bero. Bero is earned by register — the aside below, not the instruction above.</p>
+
+  <!-- emergent / Reflect -->
+  <div class="emergent">Reflect: the ledger tempted us toward a second accent for keys — a quieter grey
+  that wasn't in the ink budget. We held to opacity instead. A key at sumi@0.70 is the same ink as its
+  value, only receded. The restraint is the point: recession is the state map's own grammar.</div>
+
+  <p class="discursive">A closed ho like this one carries a gold koma. Closure is permanent; a
+  <span class="term" data-term="supersession">superseded</span> record recedes to gold@0.40 rather than
+  vanishing. <span class="term" data-term="forward-only">Forward-only</span>: the record of what was
+  believed stays legible.</p>
+</section>
+
+<!-- ══ §6 DIAGRAM ══ -->
+<section class="block" id="skills">
+  <h2>The Kamae chain</h2>
+  <p class="discursive">One vertical descent, three scales by reduction. The koma appears only where
+  work is steppable — the frame/step distinction taught by shape alone. Gold never appears in the
+  canonical chain: here the piece is structure, not state.</p>
+
+  <div class="diagrams">
+    <div class="dcol">
+      <h3>full — ≥ 480 px</h3>
+      <!-- full-scale chain -->
+      <svg width="500" height="520" viewBox="0 0 500 520" role="img"
+           aria-label="Kamae chain: Seed, System Design, README, Ho Overview, Per-Ho Documents, with a decomposition into think and task nodes">
+        <!-- tier rule: sumi@.12, node 5 straddles it (crosses at node-top+24 = y402) -->
+        <line x1="0" y1="402" x2="500" y2="402" stroke="#d5d8d7" stroke-width="1"/>
+        <text x="4" y="396" font-size="11" fill="rgba(31,33,35,.7)">thinking</text>
+        <text x="4" y="417" font-size="11" fill="rgba(31,33,35,.7)">doing</text>
+
+        <!-- forward arrows (behind nodes) -->
+        <!-- N1->N2 bero -->
+        <line x1="206" y1="58" x2="206" y2="99" stroke="#29618e" stroke-width="2"/>
+        <polygon points="206,102 202,95 210,95" fill="#29618e"/>
+        <!-- N2->N3 bero -->
+        <line x1="206" y1="150" x2="206" y2="191" stroke="#29618e" stroke-width="2"/>
+        <polygon points="206,194 202,187 210,187" fill="#29618e"/>
+        <!-- N3->N4 bero -->
+        <line x1="206" y1="242" x2="206" y2="283" stroke="#29618e" stroke-width="2"/>
+        <polygon points="206,286 202,279 210,279" fill="#29618e"/>
+        <!-- N4->N5 crossing thinking->doing = kachi -->
+        <line x1="206" y1="334" x2="206" y2="375" stroke="#040c13" stroke-width="2"/>
+        <polygon points="206,378 202,371 210,371" fill="#040c13"/>
+
+        <!-- return N2->N1 "revises" bero@.40, lane x70 -->
+        <path d="M110 126 H70 V34 H110" fill="none" stroke="#9fb7c8" stroke-width="1"/>
+        <polyline points="104,30 110,34 104,38" fill="none" stroke="#9fb7c8" stroke-width="1"/>
+        <text x="66" y="80" font-size="10" fill="rgba(31,33,35,.7)"
+              transform="rotate(-90 66 80)">revises</text>
+        <!-- return N5->N3 "addenda supersede" sumi@.40, lane x38 -->
+        <path d="M110 402 H38 V218 H110" fill="none" stroke="#9b9e9d" stroke-width="1"/>
+        <polyline points="104,214 110,218 104,222" fill="none" stroke="#9b9e9d" stroke-width="1"/>
+        <text x="34" y="320" font-size="10" fill="rgba(31,33,35,.7)"
+              transform="rotate(-90 34 320)">addenda supersede</text>
+
+        <!-- nodes 192x48, fill washi, stroke 1.5, miter, square corners -->
+        <!-- N1 Seed (bero) -->
+        <rect x="110" y="10" width="192" height="48" fill="#eef1ef" stroke="#29618e" stroke-width="1.5"/>
+        <text x="122" y="31" font-size="13" font-weight="600" fill="#29618e">Seed</text>
+        <text x="122" y="47" font-size="11" fill="rgba(41,97,142,.7)">opinions</text>
+        <!-- N2 System Design (bero) -->
+        <rect x="110" y="102" width="192" height="48" fill="#eef1ef" stroke="#29618e" stroke-width="1.5"/>
+        <text x="122" y="123" font-size="13" font-weight="600" fill="#29618e">System Design</text>
+        <text x="122" y="139" font-size="11" fill="rgba(41,97,142,.7)">decisions</text>
+        <!-- N3 README (bero) -->
+        <rect x="110" y="194" width="192" height="48" fill="#eef1ef" stroke="#29618e" stroke-width="1.5"/>
+        <text x="122" y="215" font-size="13" font-weight="600" fill="#29618e">README</text>
+        <text x="122" y="231" font-size="11" fill="rgba(41,97,142,.7)">scope</text>
+        <!-- N4 Ho Overview (bero) -->
+        <rect x="110" y="286" width="192" height="48" fill="#eef1ef" stroke="#29618e" stroke-width="1.5"/>
+        <text x="122" y="307" font-size="13" font-weight="600" fill="#29618e">Ho Overview</text>
+        <text x="122" y="323" font-size="11" fill="rgba(41,97,142,.7)">sequence</text>
+        <!-- N5 Per-Ho Documents (sumi) — fill interrupts the tier rule -->
+        <rect x="110" y="378" width="192" height="48" fill="#eef1ef" stroke="#1f2123" stroke-width="1.5"/>
+        <text x="122" y="399" font-size="13" font-weight="600" fill="#1f2123">Per-Ho Documents</text>
+        <text x="122" y="415" font-size="11" fill="rgba(31,33,35,.7)">session</text>
+        <!-- ho node marker: koma h28 keyline, front face sumi (gold never here), inset 12px -->
+        <g transform="translate(269.3,390)">
+          <svg width="20.7" height="28" viewBox="0 0 74 100">
+            <path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#eef1ef" stroke="#1f2123" stroke-width="4" stroke-linejoin="miter"/>
+            <text x="37" y="61" font-size="42" text-anchor="middle" dominant-baseline="central"
+                  fill="#1f2123" class="koma-face">歩</text>
+          </svg>
+        </g>
+
+        <!-- decomposition (shu): elbow from N5 bottom -->
+        <path d="M206 426 V446 H250" fill="none" stroke="#1f2123" stroke-width="1.25"/>
+        <polygon points="250,446 244,443 244,449" fill="#1f2123"/>
+        <rect x="250" y="433" width="64" height="26" fill="#eef1ef" stroke="#29618e" stroke-width="1"/>
+        <text x="258" y="450" font-size="10" fill="#29618e">Think</text>
+        <!-- think->task arrow kachi 1.25 -->
+        <line x1="314" y1="446" x2="342" y2="446" stroke="#040c13" stroke-width="1.25"/>
+        <polygon points="345,446 339,443 339,449" fill="#040c13"/>
+        <!-- agent task: koma h20 solid sumi -->
+        <g transform="translate(348,436)">
+          <svg width="14.8" height="20" viewBox="0 0 74 100">
+            <path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/>
+          </svg>
+        </g>
+        <!-- mini return 0.75 sumi@.40 -->
+        <path d="M348 456 H320 V462" fill="none" stroke="rgba(31,33,35,.4)" stroke-width="0.75"/>
+        <text x="250" y="480" font-size="10" fill="rgba(31,33,35,.7)">decomposition · think → task</text>
+      </svg>
+    </div>
+
+    <div class="dcol">
+      <h3>header — ≥ 160 px</h3>
+      <!-- header-scale: nodes 128x24 stroke 1.0, titles mono 600 10, arrows 1.5 head 6x5,
+           returns unlabeled, tier rule uncaptioned, koma h14 solid; annotations dropped -->
+      <svg width="200" height="330" viewBox="0 0 200 330" role="img" aria-label="Kamae chain, header scale">
+        <line x1="0" y1="266" x2="200" y2="266" stroke="#d5d8d7" stroke-width="1"/>
+        <!-- forwards -->
+        <line x1="94" y1="34" x2="94" y2="59" stroke="#29618e" stroke-width="1.5"/>
+        <polygon points="94,62 91,56 97,56" fill="#29618e"/>
+        <line x1="94" y1="86" x2="94" y2="111" stroke="#29618e" stroke-width="1.5"/>
+        <polygon points="94,114 91,108 97,108" fill="#29618e"/>
+        <line x1="94" y1="138" x2="94" y2="163" stroke="#29618e" stroke-width="1.5"/>
+        <polygon points="94,166 91,160 97,160" fill="#29618e"/>
+        <line x1="94" y1="190" x2="94" y2="215" stroke="#040c13" stroke-width="1.5"/>
+        <polygon points="94,218 91,212 97,212" fill="#040c13"/>
+        <!-- unlabeled returns -->
+        <path d="M30 74 H14 V22 H30" fill="none" stroke="#9fb7c8" stroke-width="1"/>
+        <path d="M30 242 H6 V126 H30" fill="none" stroke="#9b9e9d" stroke-width="1"/>
+        <!-- nodes 128x24 -->
+        <rect x="30" y="10" width="128" height="24" fill="#eef1ef" stroke="#29618e" stroke-width="1"/>
+        <text x="38" y="26" font-size="10" font-weight="600" fill="#29618e">Seed</text>
+        <rect x="30" y="62" width="128" height="24" fill="#eef1ef" stroke="#29618e" stroke-width="1"/>
+        <text x="38" y="78" font-size="10" font-weight="600" fill="#29618e">System Design</text>
+        <rect x="30" y="114" width="128" height="24" fill="#eef1ef" stroke="#29618e" stroke-width="1"/>
+        <text x="38" y="130" font-size="10" font-weight="600" fill="#29618e">README</text>
+        <rect x="30" y="166" width="128" height="24" fill="#eef1ef" stroke="#29618e" stroke-width="1"/>
+        <text x="38" y="182" font-size="10" font-weight="600" fill="#29618e">Ho Overview</text>
+        <rect x="30" y="218" width="128" height="24" fill="#eef1ef" stroke="#1f2123" stroke-width="1"/>
+        <text x="38" y="234" font-size="10" font-weight="600" fill="#1f2123">Per-Ho Documents</text>
+        <!-- koma h14 solid on N5 -->
+        <g transform="translate(140,222)">
+          <svg width="10.4" height="14" viewBox="0 0 74 100"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>
+        </g>
+      </svg>
+    </div>
+
+    <div class="dcol">
+      <h3>nav glyph — &lt; 160 px</h3>
+      <p class="caption">Four bars (thinking) + solid koma (doing). Also the nav-corner mark, top right.</p>
+      <span data-diagram="glyph-large"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ §9 THE FLIP ══ -->
+<section class="block" id="walk">
+  <h2>The flip</h2>
+  <p class="discursive">A koma promotes end-over-end — the real move — rendered flat as a vertical
+  squash: <span class="term" data-term="washi">washi</span> shows, no perspective, no shadow. It fires
+  on the <strong>news rule</strong> only: a firing-list mark, fully in view, whose record advanced to
+  closed since your last visit. Superseded never flips — it renders pre-flipped at gold@0.40.</p>
+
+  <div class="scaffold" style="margin-bottom:.75rem">demo scaffolding — witness log is simulated in-page;
+  the real site keeps it in <span class="mono">localStorage['hosystem-witnessed']</span></div>
+
+  <div class="records" id="records">
+    <div class="rec" data-fire="true" data-recid="ho-11">
+      <span class="flipbox" data-flip="12"></span>
+      <span class="label">ho-11 — the threaded split</span>
+      <span class="state">just closed · flips on encounter</span>
+    </div>
+    <div class="rec" data-fire="false" data-recid="ho-07">
+      <span class="flipbox" data-flip="12" data-promoted="1"></span>
+      <span class="label">ho-07 — the trail</span>
+      <span class="state">already witnessed · rests promoted</span>
+    </div>
+    <div class="rec" data-superseded="true" data-recid="ho-02.1">
+      <span class="flipbox" data-flip="12" data-superseded="1"></span>
+      <span class="label">ho-02.1 — palette v1</span>
+      <span class="state">superseded · pre-flipped gold@0.40 · never fires</span>
+    </div>
+  </div>
+  <p><button class="demo" id="flip-replay">▷ replay demo (reset witness log, re-encounter ho-11)</button></p>
+</section>
+
+<!-- ══ §2 PALETTE — inking note ══ -->
+<section class="block">
+  <h2>How this page is inked</h2>
+  <p class="discursive">Three inks and paper. Flat fields; <span class="term" data-term="bokashi">bokashi</span>
+  is the only gradient. Gold is state, never emphasis. Overlaps multiply into named third colors where
+  they genuinely meet.</p>
+  <div class="inklegend">
+    <div class="ink" style="width:120px"><div class="chip" style="background:var(--washi)"></div>washi · ground</div>
+    <div class="ink" style="width:120px"><div class="chip" style="background:var(--sumi)"></div>sumi · doing</div>
+    <div class="ink" style="width:120px"><div class="chip" style="background:var(--bero)"></div>bero-ai · thinking</div>
+    <div class="ink" style="width:120px"><div class="chip" style="background:var(--gold)"></div>gold · state only</div>
+  </div>
+  <div class="ink">opacity ladder — 1.00 / 0.70 / 0.40 / 0.12
+    <div class="ladder">
+      <span style="background:var(--sumi)"></span>
+      <span style="background:var(--sumi-70)"></span>
+      <span style="background:var(--sumi-40)"></span>
+      <span style="background:var(--sumi-12)"></span>
+    </div>
+  </div>
+  <div class="inklegend" style="margin-top:1rem">
+    <div class="ink">kachi = sumi × bero (the thinking→doing crossing, above)
+      <div class="overlap">
+        <div class="a" style="background:rgba(var(--sumi-rgb),.9); mix-blend-mode:multiply"></div>
+        <div class="b" style="left:40px; background:rgba(var(--bero-rgb),.9); mix-blend-mode:multiply"></div>
+      </div>
+    </div>
+    <div class="ink">matsuba = bero × gold (reserved — only where an emergent field meets a gold mark)
+      <div class="overlap">
+        <div class="a" style="background:rgba(var(--bero-rgb),.9); mix-blend-mode:multiply"></div>
+        <div class="b" style="left:40px; background:rgba(var(--gold-rgb),.9); mix-blend-mode:multiply"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DEFERRED ══ -->
+<section class="block deferred" id="writing">
+  <h2>Deferred to this check</h2>
+  <p class="caption">The landings parked these five questions for judgment here. Rendered side by side
+  where possible. No frozen value is changed.</p>
+
+  <div class="item">
+    <h3>1 · Does the 380 ms populate beat feel right?</h3>
+    <p class="discursive">The sequence in “The step” above is the real test. Replay it and watch a
+    five-node build land in 1680 ms.</p>
+    <p><button class="demo" id="beat-380">▷ 380 ms (frozen)</button>
+       &nbsp;<button class="demo" id="beat-300">▷ 300 ms (the pre-amendment beat, for contrast)</button></p>
+    <div class="stepstage"><div class="seq" id="seq2">
+      <div class="node"><span class="g">歩</span> node one</div>
+      <div class="node"><span class="g">歩</span> node two</div>
+      <div class="node"><span class="g">歩</span> node three</div>
+      <div class="node"><span class="g">歩</span> node four</div>
+      <div class="node"><span class="g">歩</span> node five</div>
+    </div></div>
+    <p class="rec-note">Read: 380 ms holds. It reads as deliberate footfall, not lag — each node is a
+    separate commitment. 300 ms starts to feel like a fill animation. Recommend keeping 380 ms.</p>
+  </div>
+
+  <div class="item">
+    <h3>2 · Should §7's card arrive as a step (160 ms) or stay instant?</h3>
+    <div class="two">
+      <div><div class="h">instant (0 ms) — as designed</div>
+        <p class="discursive">Hover <span class="term" data-term="ho" data-cardmode="instant">this term</span>.
+        The card is simply present.</p></div>
+      <div><div class="h">step (160 ms) — §4's arrival</div>
+        <p class="discursive">Hover <span class="term" data-term="koma" data-cardmode="step">this term</span>.
+        The card rises 8 px and seats.</p></div>
+    </div>
+    <p class="rec-note">Read: the card answers a question the reader asked (a hover); an arrival step
+    reads as the page speaking unprompted, and adds 160 ms before the definition is legible. Recommend
+    instant. The step is the site's grammar for <em>the site's</em> moves, not the reader's.</p>
+  </div>
+
+  <div class="item">
+    <h3>3 · Does the flat squash read thin — want the sanctioned bokashi edge?</h3>
+    <div class="compare">
+      <div class="cell"><div class="big" data-bigflip="flat"></div>
+        <div class="h">flat (frozen) — no edge</div></div>
+      <div class="cell"><div class="big" data-bigflip="bokashi"></div>
+        <div class="h">bokashi edge at collapse line</div></div>
+    </div>
+    <p><button class="demo" id="bigflip-replay">▷ flip both</button></p>
+    <p class="rec-note">Read: at 60 px the flat squash is clean and legible; the collapse line is over in
+    one committed move and the eye doesn't dwell there. The bokashi edge softens the fold but starts to
+    read as a page-turn effect — decorative, adjacent to the imagery ban. Recommend staying flat. Bokashi
+    stays reserved for the ground.</p>
+  </div>
+
+  <div class="item">
+    <h3>4 · Trail door labels below ~480 px column width</h3>
+    <p class="discursive">The frozen door row spaces six doors evenly with 10 px mono labels centered
+    6 px below. Below ~480 px those labels collide. The frozen spec does not decide the narrow case —
+    it is parked here.</p>
+    <div class="narrowtrail">
+      <div class="cap"><span class="you">your walk (≈420 px column)</span><span class="n">5 steps</span></div>
+      <div id="narrow-trail-svg"></div>
+    </div>
+    <p class="rec-note">Read: at 420 px the six labels overlap. Legible options, in order of least
+    departure from the frozen row: (a) rotate labels −45°; (b) show only the current + entered-this-walk
+    door labels, others on expansion; (c) abbreviate to first letters with full names on hover. Recommend
+    (b) — it matches the door-ink hierarchy already frozen (this-walk 1.00, past .70, never .40) and adds
+    no new grammar. Flagged for a v2 ho, not resolved here.</p>
+  </div>
+
+  <div class="item">
+    <h3>5 · Do the koma faces need a subset CJK webfont?</h3>
+    <p class="discursive">The faces below render in the frozen system stack
+    (<span class="mono">Hiragino Mincho ProN / Yu Mincho / Noto Serif JP / serif</span>) — no webfont
+    downloaded:</p>
+    <div style="display:flex; gap:1.5rem; align-items:flex-end; margin:1rem 0">
+      <span data-koma="keyline front 72"></span>
+      <span data-koma="keyline promoted 72"></span>
+      <span style="font-family:var(--cjk); font-size:64px; line-height:1">歩 と</span>
+    </div>
+    <p class="rec-note">Risk: the glyph you see is whichever mincho the visitor's OS ships. macOS renders
+    Hiragino; Windows without Yu Mincho or Noto falls to a heavier gothic or a tofu box; Linux depends on
+    installed CJK fonts. 歩 and と will shift weight, width, and stroke contrast across platforms — the
+    koma's silhouette is fixed (it's the keyline), but the <em>face</em> is not cross-platform stable.
+    Recommend: subset a single mincho (歩 + と, two glyphs, &lt; 3 KB woff2) and prepend it to the CJK
+    stack — buys consistency at the cost of one small download, and only for the piece. Decision deferred;
+    naming the risk here as asked.</p>
+  </div>
+</section>
+
+<!-- ══ §7 met-terms note (so recession is visible after a pin+dismiss above) ══ -->
+<section class="block">
+  <h2>Terms you've met</h2>
+  <p class="discursive">Pin a term (tap / Enter), then dismiss it (Escape / tap away). Its underline
+  recedes from bero@0.70 to sumi@0.40 — the same terms above go quiet once met. Met is reader state, so
+  no gold. Try it on
+  <span class="term" data-term="kamae">Kamae</span>,
+  <span class="term" data-term="supersession">supersession</span>, or
+  <span class="term" data-term="bokashi">bokashi</span>.</p>
+</section>
+
+<!-- ══ §8 THE TRAIL (live footer strip) ══ -->
+<div class="trail" id="colophon-trail">
+  <div class="cap"><span class="you">your walk</span><span class="n" id="trail-steps">5 steps</span></div>
+  <div id="trail-svg"></div>
+</div>
+
+<!-- ══ FRICTIONS ══ -->
+<section class="block" id="colophon">
+  <h2>Frictions found</h2>
+  <p class="discursive">Genuine tensions surfaced while assembling — reported, not resolved, and no
+  frozen value touched.</p>
+  <ol>
+    <li class="discursive"><strong>§5 supersession box vs. §7 card z-order.</strong> The supersession
+    reveal (§5) is an in-flow bordered extension of the header; the definition card (§7) is the page's
+    only elevated layer (z-index 10). If a marked term sits inside an open supersession pane, the card
+    correctly floats above — but the pane's gold rules and the card's washi ground are then adjacent at
+    two different depths. Nothing breaks and no value conflicts; it's just the one place two "surfaces"
+    stack. Worth a glance in the spike.</li>
+    <li class="discursive"><strong>Koma face baseline vs. keyline centering.</strong> §1 centers the
+    face at (0.370H, 0.610H) with <span class="mono">dominant-baseline: central</span>; the actual
+    optical center of 歩 vs と differs slightly between mincho fonts (deferred item 5), so on some
+    platforms と sits a hair high inside the keyline. Same metrics are honored as frozen; the visible
+    drift is a font-metrics fact, not a spec conflict — it rides along with the CJK-subset decision.</li>
+    <li class="discursive"><strong>Trail door count vs. nav.</strong> §8 freezes exactly six doors
+    (Framework · Practice · Skills · Writing · Walk · Colophon) as placeholders "names bind at build."
+    The nav and the trail both hard-code six; if the real content map yields five or seven doors, the
+    even-spacing geometry and the "first/last inset 8 px" rule still hold, but the placeholder count is
+    load-bearing in two places. Noting it so the build binds names in one source, not two.</li>
+  </ol>
+  <p class="discursive">No two frozen <em>values</em> contradict. The three above are seams to watch,
+  not conflicts to fix.</p>
+</section>
+
+<div class="colophon">
+  <p class="caption">Coherence check · hand-built · not build code · assembles the Basis of Design §1–§9
+  as of 2026-07-04. Judge, then land.</p>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- floating definition card (§7) -->
+<div id="defcard" role="dialog" aria-label="definition">
+  <div class="def" id="defcard-def"></div>
+  <div class="more" id="defcard-more">full entry →</div>
+</div>
+
+<script>
+"use strict";
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KOMA_PATH = 'M37 0 L66 22 L74 100 L0 100 L8 22 Z';
+
+/* literal ink values — CSS var() does NOT resolve inside SVG presentation
+   attributes, so SVG-generated markup uses these directly (§2). */
+const INK = {
+  washi:'#eef1ef', sumi:'#1f2123', bero:'#29618e', gold:'#a9832a', kachi:'#040c13',
+  sumi70:'rgba(31,33,35,.7)', sumi40:'rgba(31,33,35,.4)', sumi12:'#d5d8d7',
+  bero70:'rgba(41,97,142,.7)', bero40:'#9fb7c8', sumi40ret:'#9b9e9d',
+  gold40:'rgba(169,131,42,.4)'
+};
+
+/* ── §1 koma generator ───────────────────────────────────────── */
+function komaMarkup(h, mode, face){
+  const w = (0.74*h).toFixed(2);
+  if(mode === 'keyline'){
+    const ch = face==='promoted' ? 'と' : '歩';
+    const col = face==='promoted' ? INK.gold : INK.sumi;
+    const sw = 4; // 0.040H in 100-unit space
+    return `<svg width="${w}" height="${h}" viewBox="0 0 74 100" role="img" aria-label="koma">`
+      + `<path d="${KOMA_PATH}" fill="${INK.washi}" stroke="${INK.sumi}" stroke-width="${sw}" stroke-linejoin="miter"/>`
+      + `<text x="37" y="61" font-size="42" text-anchor="middle" dominant-baseline="central" `
+      + `fill="${col}" class="koma-face">${ch}</text></svg>`;
+  } else {
+    const fill = face==='promoted' ? INK.gold
+               : face==='closed'    ? INK.gold
+               : face==='superseded'? INK.gold40
+               : INK.sumi;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 74 100" role="img" aria-label="koma">`
+      + `<path d="${KOMA_PATH}" fill="${fill}"/></svg>`;
+  }
+}
+document.querySelectorAll('[data-koma]').forEach(el=>{
+  const [mode,face,h] = el.getAttribute('data-koma').split(' ');
+  el.innerHTML = komaMarkup(parseFloat(h), mode, face);
+});
+
+/* nav-corner glyph + large glyph (§6 <160px: four bars 12x3 bero + solid koma h6 sumi, gap 2.5, viewBox 14x28.5) */
+function glyphMarkup(scale){
+  const s = scale;
+  return `<svg width="${14*s}" height="${28.5*s}" viewBox="0 0 14 28.5" role="img" aria-label="Kamae chain glyph">`
+    + `<rect x="0" y="0"    width="12" height="3" fill="${INK.bero}"/>`
+    + `<rect x="0" y="5.5"  width="12" height="3" fill="${INK.bero}"/>`
+    + `<rect x="0" y="11"   width="12" height="3" fill="${INK.bero}"/>`
+    + `<rect x="0" y="16.5" width="12" height="3" fill="${INK.bero}"/>`
+    + `<g transform="translate(0,22)"><svg width="4.44" height="6" viewBox="0 0 74 100">`
+    + `<path d="${KOMA_PATH}" fill="${INK.sumi}"/></svg></g></svg>`;
+}
+document.querySelectorAll('[data-diagram="glyph"]').forEach(e=> e.innerHTML = glyphMarkup(1));
+document.querySelectorAll('[data-diagram="glyph-large"]').forEach(e=> e.innerHTML = glyphMarkup(3));
+
+/* ── §4 the step: sequence populate on the beat ──────────────── */
+function runSequence(seqEl, interval){
+  const nodes = [...seqEl.querySelectorAll('.node')];
+  nodes.forEach(n=>{ n.classList.remove('in'); n.style.opacity='0'; });
+  if(RM){ nodes.forEach(n=>{ n.style.opacity='1'; }); return; }
+  nodes.forEach((n,i)=> setTimeout(()=> n.classList.add('in'), i*interval));
+}
+document.getElementById('seq-replay').onclick = ()=> runSequence(document.getElementById('seq'),380);
+document.getElementById('beat-380').onclick   = ()=> runSequence(document.getElementById('seq2'),380);
+document.getElementById('beat-300').onclick   = ()=> runSequence(document.getElementById('seq2'),300);
+// arrive once on load
+window.addEventListener('load', ()=> runSequence(document.getElementById('seq'),380));
+
+/* page transition mock: cut (0) -> 80ms bare washi -> in step (160) = 240ms */
+const pages = [
+  '<strong>Page A.</strong> The section you are reading. A page transition is out=cut (0 ms) → 80 ms hold on bare washi → in=one step. 240 ms total. Body text mid-read never moves.',
+  '<strong>Page B.</strong> Arrived as one step — 8 px rise, seated on the line. Surrounding layout did not shove; the slot reserved its space. Reduced-motion swaps this instantly.'
+];
+let pageI = 0;
+document.getElementById('page-replay').onclick = ()=>{
+  const slot = document.getElementById('pageslot');
+  const cur = slot.querySelector('.content');
+  pageI = 1 - pageI;
+  if(RM){ cur.innerHTML = pages[pageI]; return; }
+  cur.style.opacity = '0';                          // out = cut
+  setTimeout(()=>{                                   // 80ms hold on bare washi
+    cur.innerHTML = pages[pageI];
+    cur.classList.remove('in'); void cur.offsetWidth; cur.classList.add('in'); // in = one step
+  }, 80);
+};
+
+/* ── §5 supersession reveal ──────────────────────────────────── */
+(function(){
+  const trig = document.getElementById('supersede-trigger');
+  const panes = document.getElementById('supersede-panes');
+  function toggle(){
+    const open = panes.classList.toggle('open');
+    trig.setAttribute('aria-expanded', open ? 'true':'false');
+  }
+  trig.addEventListener('click', toggle);
+  trig.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+})();
+
+/* ── §7 definition-on-touch ──────────────────────────────────── */
+const DEFS = {
+  ho:{t:'ho (歩)', d:'A bounded unit of work — one session answering one question, then closed. Closed hos stay closed; a new ho responds to what changed.'},
+  kamae:{t:'Kamae', d:'The five-document chain a project descends: Seed → System Design → README → Ho Overview → Per-Ho Documents. Opinion narrowing to session.'},
+  koma:{t:'koma (駒)', d:'The walking piece — the site\'s mark. One geometry, two inkings by size. It promotes end-over-end when a record closes.'},
+  supersession:{t:'supersession', d:'A later record replaces an earlier one. The earlier is not deleted — it recedes to gold@0.40 and stays legible. Forward-only.'},
+  'forward-only':{t:'forward-only', d:'The rule that records never rewrite the past. Corrections arrive as new records that name what changed.'},
+  bokashi:{t:'bokashi (ぼかし)', d:'A graded wash — the only gradient the palette permits. Everything else is a flat field.'},
+  washi:{t:'washi (和紙)', d:'The paper ground, #eef1ef. Warm, not white. It never moves and it always shows through the keyline.'},
+  sumi:{t:'sumi (墨)', d:'The primary ink, #1f2123 — text, structure, and the doing tier.'}
+};
+(function(){
+  const card = document.getElementById('defcard');
+  const defEl = document.getElementById('defcard-def');
+  const moreEl = document.getElementById('defcard-more');
+  let current = null, pinned = false;
+  const met = new Set();
+
+  function positionCard(term){
+    const r = term.getBoundingClientRect();
+    const wrap = document.querySelector('.wrap').getBoundingClientRect();
+    card.style.setProperty('--card-col', wrap.width + 'px');
+    card.style.display = 'block';
+    const cardW = card.offsetWidth, cardH = card.offsetHeight;
+    let left = r.left + window.scrollX;
+    const minL = wrap.left + window.scrollX + 8;               // clamp 0.5rem from column edges
+    const maxL = wrap.right + window.scrollX - cardW - 8;
+    left = Math.max(minL, Math.min(left, maxL));
+    let top = r.bottom + window.scrollY + 8;                   // 0.5rem below line box
+    if(r.bottom + cardH + 24 > window.innerHeight){            // flip above when short of space
+      top = r.top + window.scrollY - cardH - 8;
+    }
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+  }
+  function show(term, mode){
+    if(current && current!==term) current.classList.remove('open');
+    current = term;
+    const key = term.getAttribute('data-term');
+    const d = DEFS[key]; if(!d) return;
+    defEl.innerHTML = '<strong>'+d.t+'.</strong> '+d.d;
+    const arrive = term.getAttribute('data-cardmode')==='step';
+    card.style.display='block';
+    positionCard(term);
+    term.classList.add('open');
+    if(arrive && !RM){                                         // deferred #2: card as a §4 step
+      card.style.opacity='0'; card.style.transform='translateY(8px)';
+      requestAnimationFrame(()=>{
+        card.style.transition='opacity 160ms cubic-bezier(.2,0,0,1), transform 160ms cubic-bezier(.2,0,0,1)';
+        card.style.opacity='1'; card.style.transform='translateY(0)';
+      });
+    } else {
+      card.style.transition='none'; card.style.opacity='1'; card.style.transform='none';
+    }
+  }
+  function hide(force){
+    if(pinned && !force) return;
+    card.style.display='none'; card.style.transition='none';
+    if(current){
+      if(pinned){ current.classList.add('met'); met.add(current.getAttribute('data-term')); }
+      current.classList.remove('open'); current=null;
+    }
+    pinned=false;
+  }
+  document.querySelectorAll('.term').forEach(term=>{
+    term.addEventListener('mouseenter', ()=>{ if(!pinned) show(term); });      // transient
+    term.addEventListener('mouseleave', ()=>{ if(!pinned) hide(); });
+    term.addEventListener('focus', ()=>{ if(!pinned) show(term); });
+    term.addEventListener('blur', ()=>{ if(!pinned) hide(); });
+    term.setAttribute('tabindex','0');
+    term.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(pinned && current===term){ hide(true); return; }      // second-tap dismiss
+      pinned=false; show(term); pinned=true;                    // pin
+    });
+    term.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ e.preventDefault(); pinned=false; show(term); pinned=true; }
+      if(e.key==='Escape'){ hide(true); }
+    });
+  });
+  document.addEventListener('click', ()=> hide(true));          // outside-tap dismiss
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') hide(true); });
+  card.addEventListener('click', e=> e.stopPropagation());
+})();
+
+/* ── cubic-bezier(.2,0,0,1) evaluator (for the flip) ─────────── */
+function bezierY(t){
+  // x1=.2,y1=0,x2=0,y2=1 ; solve s from X(s)=t, return Y(s)
+  const X = s => 0.6*(1-s)*(1-s)*s + s*s*s;        // 3(1-s)^2 s*0.2 + s^3
+  const Y = s => 3*s*s - 2*s*s*s;                  // 3s^2(1-s) + s^3
+  let lo=0, hi=1, s=t;
+  for(let i=0;i<24;i++){ s=(lo+hi)/2; (X(s)<t)?lo=s:hi=s; }
+  return Y(s);
+}
+
+/* ── §9 the flip ─────────────────────────────────────────────── */
+function buildFlipbox(box, h, opts){
+  opts = opts||{};
+  box.innerHTML='';
+  if(opts.superseded){
+    box.innerHTML = komaMarkup(h,'solid','superseded');       // pre-flipped gold@0.40, never fires
+    return {static:true};
+  }
+  // two stacked koma svgs; CSS positions .flipbox/.big svg absolute, origin 50% 50%
+  box.insertAdjacentHTML('beforeend', komaMarkup(h,'solid','front'));  // sumi 歩
+  box.insertAdjacentHTML('beforeend', komaMarkup(h,'solid','closed')); // gold と
+  const svgs = box.querySelectorAll('svg');
+  const front = svgs[0], promoted = svgs[1];
+  if(opts.promoted){ front.style.display='none'; promoted.style.transform='scaleY(1)'; }
+  else { promoted.style.transform='scaleY(0)'; front.style.transform='scaleY(1)'; }
+  return {front, promoted};
+}
+function flip(refs, dur, onSwap){
+  if(refs.static) return;
+  const {front, promoted} = refs;
+  if(RM){ front.style.display='none'; promoted.style.transform='scaleY(1)'; if(onSwap)onSwap(); return; }
+  const start = performance.now(); let swapped=false;
+  function frame(now){
+    let t = (now-start)/dur; if(t>1) t=1;
+    const y = bezierY(t);                                     // eased progress; crosses 0.5 at ~32ms
+    const f = Math.max(0, 1-2*y), p = Math.max(0, 2*y-1);
+    front.style.transform = 'scaleY('+f+')';
+    promoted.style.transform = 'scaleY('+p+')';
+    if(!swapped && y>=0.5){ swapped=true; front.style.display='none'; if(onSwap)onSwap(); } // face swap ~32ms
+    if(t<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* records + simulated witness log */
+let witnessLog = { 'ho-07':'closed' };   // ho-07 already witnessed; ho-11 not yet
+const recRefs = {};
+function setupRecords(){
+  document.querySelectorAll('#records .rec').forEach(rec=>{
+    const box = rec.querySelector('.flipbox');
+    const id = rec.getAttribute('data-recid');
+    const superseded = rec.getAttribute('data-superseded')==='true';
+    const alreadyPromoted = witnessLog[id]==='closed';
+    recRefs[id] = buildFlipbox(box, 12, {superseded, promoted:alreadyPromoted});
+  });
+}
+setupRecords();
+// news rule: fire ho-11 when fully in view AND advanced-to-closed since last visit
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && e.intersectionRatio>=1.0){
+      const rec = e.target; const id = rec.getAttribute('data-recid');
+      if(rec.getAttribute('data-fire')==='true' && witnessLog[id]!=='closed'){
+        flip(recRefs[id], 160, ()=>{ witnessLog[id]='closed'; });   // once-only
+      }
+    }
+  });
+},{threshold:1.0});
+document.querySelectorAll('#records .rec[data-fire="true"]').forEach(r=> io.observe(r));
+
+document.getElementById('flip-replay').onclick = ()=>{
+  delete witnessLog['ho-11'];                    // reset witness log (demo scaffolding)
+  setupRecords();
+  const rec = document.querySelector('#records .rec[data-recid="ho-11"]');
+  flip(recRefs['ho-11'], 160, ()=>{ witnessLog['ho-11']='closed'; });
+};
+
+/* deferred #3: big flips, flat vs bokashi edge */
+const bigRefs = {};
+document.querySelectorAll('[data-bigflip]').forEach(box=>{
+  const kind = box.getAttribute('data-bigflip');
+  bigRefs[kind] = buildFlipbox(box, 81, {});
+  if(kind==='bokashi'){
+    const edge = document.createElement('div');
+    edge.className='bokashi-edge'; edge.style.display='block';
+    box.appendChild(edge);
+  }
+});
+document.getElementById('bigflip-replay').onclick = ()=>{
+  ['flat','bokashi'].forEach(k=>{
+    bigRefs[k] = buildFlipbox(document.querySelector('[data-bigflip="'+k+'"]'), 81, {});
+    if(k==='bokashi'){
+      const box = document.querySelector('[data-bigflip="bokashi"]');
+      const edge = document.createElement('div'); edge.className='bokashi-edge'; edge.style.display='block';
+      box.appendChild(edge);
+    }
+    flip(bigRefs[k], 160);
+  });
+};
+
+/* ── §8 the trail ────────────────────────────────────────────── */
+const DOORS = ['Framework','Practice','Skills','Writing','Walk','Colophon'];
+// door state: 0 never, 0.70 past walk, 1.00 this walk
+const DOOR_STATE = {Framework:1, Practice:1, Skills:1, Writing:1, Walk:0, Colophon:0.7};
+// simulated this-walk (ordered), with met terms per step
+const WALK = [
+  {door:0, met:['ho','kamae']},
+  {door:1, met:['koma']},
+  {door:2, met:[]},
+  {door:1, met:['supersession','forward-only','bokashi','washi','sumi']}, // >4 -> +n
+  {door:3, met:['ho']}
+];
+function renderTrail(mountId, colW){
+  const mount = document.getElementById(mountId);
+  const inset = 8;
+  const usable = colW - inset*2;
+  const cx = i => inset + (usable*(i/(DOORS.length-1)));
+  const labelY = 22, bandTop = labelY + 14, pitch = 12; // n<=5
+  const height = bandTop + (WALK.length-1)*pitch + 20;
+  let svg = `<svg width="${colW}" height="${height}" viewBox="0 0 ${colW} ${height}" role="img" aria-label="trail: planned doors above, walk beneath">`;
+  // plan line through door centers
+  svg += `<line x1="${cx(0)}" y1="10" x2="${cx(DOORS.length-1)}" y2="10" stroke="${INK.sumi12}" stroke-width="1"/>`;
+  // doors
+  DOORS.forEach((d,i)=>{
+    const op = DOOR_STATE[d]===0 ? 0.4 : DOOR_STATE[d];
+    svg += `<rect x="${cx(i)-5}" y="5" width="10" height="10" fill="${INK.washi}" stroke="${INK.sumi}" stroke-width="1" opacity="${op}"/>`;
+    svg += `<text x="${cx(i)}" y="${labelY}" font-size="10" text-anchor="middle" fill="${INK.sumi}" opacity="${op}">${d}</text>`;
+  });
+  // thread edges + nodes
+  for(let k=0;k<WALK.length;k++){
+    const x = cx(WALK[k].door), y = bandTop + k*pitch;
+    if(k>0){
+      const px = cx(WALK[k-1].door), py = bandTop + (k-1)*pitch;
+      svg += `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="${INK.sumi}" stroke-width="1.25"/>`;
+      // filled triangle head at arrival
+      const ang = Math.atan2(y-py, x-px);
+      const hx = x, hy = y;
+      const a1x = hx - 5*Math.cos(ang-0.4), a1y = hy - 5*Math.sin(ang-0.4);
+      const a2x = hx - 5*Math.cos(ang+0.4), a2y = hy - 5*Math.sin(ang+0.4);
+      svg += `<polygon points="${hx},${hy} ${a1x},${a1y} ${a2x},${a2y}" fill="${INK.sumi}"/>`;
+    }
+    svg += `<rect x="${x-3}" y="${y-3}" width="6" height="6" fill="${INK.sumi}"/>`;
+    // met dots: 2.5px sumi@.40, 4px right, pitch 4, max 4 then +n
+    const met = WALK[k].met; const shown = Math.min(met.length,4);
+    for(let m=0;m<shown;m++){
+      svg += `<circle cx="${x+4+3+m*4}" cy="${y}" r="1.25" fill="${INK.sumi40}"/>`;
+    }
+    if(met.length>4){
+      svg += `<text x="${x+4+3+4*4}" y="${y+3}" font-size="9" fill="${INK.sumi40}">+${met.length-4}</text>`;
+    }
+  }
+  svg += `</svg>`;
+  mount.innerHTML = svg;
+}
+renderTrail('trail-svg', Math.min(document.querySelector('.wrap').clientWidth-40, 42*16));
+renderTrail('narrow-trail-svg', 388);   // deferred #4: ~420px column -> labels collide
+document.getElementById('trail-steps').textContent = WALK.length + ' steps';
+window.addEventListener('resize', ()=> renderTrail('trail-svg', Math.min(document.querySelector('.wrap').clientWidth-40, 42*16)));
+</script>
+
+<!-- ================= amendment demo + judgment record, appended 2026-07-04 ================= -->
+<section style="max-width:42rem; margin:4rem auto 0; padding:1.5rem; border:1px solid rgba(31,33,35,.4); font-family:'Source Serif 4', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;">
+  <h2 style="font-size:1.375rem; line-height:1.3; font-weight:600;">Amendment demo — the flip, re-cut</h2>
+  <p style="margin-top:.75rem;">At 160 ms the turn was illegible — "I don't get to see the back." Amended: 240 ms
+  total, symmetric halves — the front collapses over 0–120 ms
+  (cubic-bezier(0.4, 0, 1, 1)), the promoted face lands over 120–240 ms
+  (cubic-bezier(0, 0, 0.2, 1)); face swap at the temporal midpoint, adjacent tints
+  cut at 120 ms. Still flat, still one committed move, still inside one 380 ms beat.</p>
+  <div style="display:flex; gap:3rem; margin-top:1.25rem; align-items:flex-start;">
+    <figure style="text-align:center; font-family:'Source Code Pro', monospace; font-size:.8125rem;">
+      <div class="amflip" data-dur="160" style="position:relative; width:53px; height:72px; margin:0 auto;"></div>
+      <figcaption style="margin-top:.5rem; color:rgba(31,33,35,.7);">160 ms — superseded</figcaption>
+    </figure>
+    <figure style="text-align:center; font-family:'Source Code Pro', monospace; font-size:.8125rem;">
+      <div class="amflip" data-dur="240" style="position:relative; width:53px; height:72px; margin:0 auto;"></div>
+      <figcaption style="margin-top:.5rem; color:rgba(31,33,35,.7);">240 ms — amended</figcaption>
+    </figure>
+    <button id="amreplay" style="font-family:'Source Code Pro', monospace; font-size:.8125rem; padding:.35rem .8rem; background:#eef1ef; color:#1f2123; border:1px solid rgba(31,33,35,.4); cursor:pointer;">replay both</button>
+  </div>
+
+  <h2 style="font-size:1.375rem; line-height:1.3; font-weight:600; margin-top:2.5rem;">Judgment record — 2026-07-04</h2>
+  <ol style="margin:.75rem 0 0 1.25rem; line-height:1.65;">
+    <li><strong>380 ms beat</strong> — confirmed.</li>
+    <li><strong>§7 card arrival</strong> — the step (160 ms), overriding the instant recommendation; dismissal stays instant.</li>
+    <li><strong>The flip</strong> — flat confirmed; timing amended as demoed above (the back must be seen).</li>
+    <li><strong>Trail, narrow column</strong> — rejected as shown: too tight to the door squares, edge lines cross the met dots, captions collide. Gets its own ho at the spike.</li>
+    <li><strong>CJK subset webfont</strong> — yes: two-glyph mincho subset (歩, と) prepended to the CJK stack, piece faces only; produced at the spike.</li>
+  </ol>
+  <p style="margin-top:.75rem;">Also ruled: em dashes are Chicago style — true em dash, closed, never spaced.
+  All resolutions landed in <code style="font-family:'Source Code Pro', monospace; font-size:.875em;">design/basis-of-design.md</code>; revisions named in its propagation ledger.</p>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var KOMA = 'M37 0 L66 22 L74 100 L0 100 L8 22 Z';
+  function face(ch, ink) {
+    return '<svg viewBox="-3 -3 80 106" style="position:absolute; inset:0; width:100%; height:100%;">' +
+      '<path d="' + KOMA + '" fill="#eef1ef" stroke="#1f2123" stroke-width="4" stroke-linejoin="miter"/>' +
+      '<text x="37" y="61" font-size="42" fill="' + ink + '" text-anchor="middle" dominant-baseline="central" ' +
+      'font-family="\'Hiragino Mincho ProN\', \'Yu Mincho\', \'Noto Serif JP\', serif">' + ch + '</text></svg>';
+  }
+  var flips = Array.prototype.slice.call(document.querySelectorAll('.amflip'));
+  flips.forEach(function (el) {
+    el.innerHTML = '<div class="amfront" style="position:absolute; inset:0;">' + face('歩', '#1f2123') + '</div>' +
+                   '<div class="amback" style="position:absolute; inset:0; transform:scaleY(0);">' + face('と', '#a9832a') + '</div>';
+  });
+  function run(el) {
+    var dur = +el.dataset.dur, half = dur / 2;
+    var front = el.querySelector('.amfront'), back = el.querySelector('.amback');
+    front.style.transition = 'none'; back.style.transition = 'none';
+    front.style.transform = 'scaleY(1)'; back.style.transform = 'scaleY(0)';
+    void el.offsetWidth;
+    if (REDUCED) { front.style.transform = 'scaleY(0)'; back.style.transform = 'scaleY(1)'; return; }
+    front.style.transition = 'transform ' + half + 'ms cubic-bezier(0.4, 0, 1, 1)';
+    front.style.transform = 'scaleY(0)';
+    setTimeout(function () {
+      back.style.transition = 'transform ' + half + 'ms cubic-bezier(0, 0, 0.2, 1)';
+      back.style.transform = 'scaleY(1)';
+    }, half);
+  }
+  function runAll() { flips.forEach(run); }
+  document.getElementById('amreplay').addEventListener('click', runAll);
+  setTimeout(runAll, 800);
+})();
+</script>
+</body>
+</html>

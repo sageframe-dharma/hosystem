@@ -140,6 +140,15 @@ decoration color bero @0.70 `#648cab` (3.1:1 as a mark);
 `text-underline-offset: 0.2em`; no background, no weight change.
 (The touch interaction is session 7's question.)
 
+**Micro-typography (added at the coherence check, 2026-07-04):** em dashes are
+Chicago style — the true em dash (—), set closed (word—word), never spaced,
+never a hyphen standing in.
+
+**Piece-face webfont (resolved at the coherence check, 2026-07-04):** a
+two-glyph mincho subset (歩, と — Noto Serif JP, woff2, ~3 KB) is prepended to
+the CJK stack for the piece's faces only, so the koma's face does not shift
+with each OS's fallback. Asset produced at the spike.
+
 **Register-by-position ruled out (2026-07-04):** the practitioner asked whether a
 document's first paragraph should print in bero. Decision: no — bero is earned by
 register, never by position. Which blocks of a document belong to which register
@@ -161,8 +170,8 @@ sequence seats on the line, slower populate. Session record:
   baseline rule _(amended at judgment)_
 
 **Sequence:** hold between steps **220 ms** → interval **380 ms constant**
-_(amended at judgment from 140/300 — "a little slower populating"; 380 is this
-landing's cut of "a little"; verify at the coherence check)_. Five-node build =
+_(amended at judgment from 140/300 — "a little slower populating"; verified at
+the coherence check 2026-07-04)_. Five-node build =
 1680 ms. The beat is constant — steps are equal commitments; acceleration implies
 momentum, and momentum is drift.
 
@@ -271,8 +280,9 @@ underline goes dotted → solid, same bero@0.70.
 bero@0.70 → sumi@0.40 — recession by opacity, the state map's own grammar. No
 gold: met is reader state, not framework state.
 
-**Timing:** reveal/dismiss instant (0 ms) as designed; whether the card's arrival
-adopts §4's 160 ms step is resolved at the coherence check.
+**Timing (resolved at the coherence check, 2026-07-04):** the card arrives as
+one §4 step — 160 ms, cubic-bezier(0.2, 0, 0, 1), 8 px rise. Dismissal is
+instant (0 ms). Reduced motion: instant both ways.
 
 ## 8 — the trail
 
@@ -316,6 +326,13 @@ door names     Framework · Practice · Skills · Writing · Walk · Colophon ar
                here; names bind at build
 ```
 
+**Narrow column (rejected at the coherence check, 2026-07-04):** the ~420 px
+rendering is too tight — the thread sits too close to the door squares, edge
+lines cross the met dots, captions collide. The narrow treatment gets its own ho
+at the spike; the candidate direction stands (labels only for current +
+entered-this-walk doors), with band-top clearance and met-dot offset as the
+named problems.
+
 ## 9 — the flip
 
 _Landed 2026-07-04. Winner: variant D (the news). Session record:
@@ -331,12 +348,13 @@ the flip — geometry
   faces       per §1: keyline ≥24 px swaps 歩 sumi → と gold on the same metrics;
               solid <24 px swaps sumi fill → gold fill
 
-the flip — timing (one step, §4's family)
-  duration    160 ms total, one committed move — no wobble, bounce, or spin
-  easing      cubic-bezier(0.2, 0, 0, 1) across the whole flip
-  swap        zero-crossing (face swap) at 32 ms clock time; promoted face settles
-              over the remaining 128 ms
-  adjacent    state tints around the mark (node stroke, rules) cut at 32 ms — a cut,
+the flip — timing (amended at the coherence check 2026-07-04; see ledger)
+  duration    240 ms total, one committed move — no wobble, bounce, or spin
+  easing      symmetric halves: front collapses 0–120 ms cubic-bezier(0.4, 0, 1, 1);
+              promoted face lands 120–240 ms cubic-bezier(0, 0, 0.2, 1)
+  swap        zero-crossing (face swap) at 120 ms — the temporal midpoint;
+              the turn is legible as a turn
+  adjacent    state tints around the mark (node stroke, rules) cut at 120 ms — a cut,
               never a fade; labels print full sumi throughout
   queue       co-triggered flips fire in encounter order on the 380 ms beat; marks in
               view at page arrival start one interval after the page's in-step ends
@@ -363,4 +381,7 @@ firing list (final)
 
 ## Propagation ledger
 
-_(empty — no frozen value has been revised)_
+| date | section | change | reason |
+|---|---|---|---|
+| 2026-07-04 | §9 the flip | duration 160 → 240 ms; easing one whole-flip curve → symmetric halves (collapse cubic-bezier(0.4, 0, 1, 1) over 0–120 ms, land cubic-bezier(0, 0, 0.2, 1) over 120–240 ms); face swap 32 → 120 ms; adjacent tints cut at 120 ms | Practitioner at the coherence check: at 160 ms the turn was illegible — "I don't get to see the back." The flip is the site's one kinetic signature and must read as a physical turn. Amended values seen moving in the coherence page's amendment demo. |
+| 2026-07-04 | §7 timing | card arrival instant (0 ms) → one §4 step (160 ms); dismissal stays instant | Deferred question resolved by the practitioner at the coherence check, overriding the builder's instant recommendation; both behaviors were shown side by side. |

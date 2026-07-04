@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 9 — the flip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ================= frozen palette (session 2) ================= */
+  :root {
+    --washi: #eef1ef;
+    --sumi: #1f2123;
+    --bero: #29618e;
+    --gold: #a9832a;
+    --sumi-70: rgba(31, 33, 35, 0.70);
+    --sumi-40: rgba(31, 33, 35, 0.40);
+    --sumi-12: rgba(31, 33, 35, 0.12);
+    --gold-40: rgba(169, 131, 42, 0.40);
+    --bero-40: rgba(41, 97, 142, 0.40);
+    --mono: 'Source Code Pro', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', monospace;
+  }
+
+  /* ================= frozen type (session 3) ================= */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--washi);
+    color: var(--sumi);
+    font-family: 'Source Serif 4', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    font-weight: 400;
+    padding: 3rem 1.5rem 5rem;
+  }
+  main { max-width: 62rem; margin: 0 auto; }
+  h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 600; }
+  h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 600; margin-top: 3.5rem; }
+  h3 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
+  p  { margin-top: 0.75rem; max-width: 44rem; }
+  code, .mono { font-family: var(--mono); font-size: 0.875rem; line-height: 1.6; }
+  ul { max-width: 44rem; margin-top: 0.75rem; padding-left: 1.25rem; }
+  li { margin-top: 0.35rem; }
+  .caption { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); }
+  .commit-line { margin-top: 0.35rem; font-style: italic; color: var(--sumi-70); max-width: 46rem; }
+
+  /* ================= page furniture ================= */
+  .rm-note {
+    display: none;
+    margin-top: 1rem; padding: 0.5rem 0.75rem;
+    border-left: 2px solid var(--bero-40);
+    font-family: var(--mono); font-size: 0.8125rem;
+    color: var(--bero);
+  }
+  body.reduced .rm-note { display: block; }
+
+  .frozen-recap, .freeze-block {
+    margin-top: 1.5rem; padding: 1rem 1.25rem;
+    border: 1px solid var(--sumi-12);
+    font-family: var(--mono); font-size: 0.8125rem; line-height: 1.7;
+    color: var(--sumi-70);
+    white-space: pre-wrap;
+  }
+  .frozen-recap b, .freeze-block b { color: var(--sumi); font-weight: 600; }
+  .freeze-block { border-color: var(--gold-40); }
+
+  .demo {
+    margin-top: 1.25rem;
+    border: 1px solid var(--sumi-12);
+    background: var(--washi);
+  }
+  .demo-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--sumi-12);
+  }
+  .demo-head .label { font-family: var(--mono); font-size: 0.8125rem; font-weight: 600; }
+  .btns { display: flex; gap: 0.5rem; }
+  button.replay {
+    font-family: var(--mono); font-size: 0.8125rem; font-weight: 400;
+    color: var(--sumi); background: var(--washi);
+    border: 1px solid var(--sumi-40);
+    padding: 0.15rem 0.6rem;
+    cursor: pointer;
+  }
+  button.replay:hover { border-color: var(--sumi); }
+  button.replay:active { background: var(--sumi-12); }
+
+  .stage9 {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr 1.15fr;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 56rem) { .stage9 { grid-template-columns: 1fr; } }
+  .plabel {
+    font-family: var(--mono); font-size: 0.6875rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--sumi-40); margin-bottom: 0.6rem;
+  }
+  .dnote {
+    padding: 0 1.25rem 0.9rem;
+    font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70);
+    min-height: 1.2rem;
+  }
+  .numbers {
+    padding: 0.6rem 0.75rem;
+    border-top: 1px solid var(--sumi-12);
+    font-family: var(--mono);
+    font-size: 0.75rem; line-height: 1.7;
+    color: var(--sumi-70);
+    white-space: pre-wrap;
+  }
+  .numbers b { color: var(--sumi); font-weight: 600; }
+
+  /* ================= mock components ================= */
+  /* §5 ledger */
+  .ledger { border: 1px solid var(--sumi-40); font-family: var(--mono); font-size: 0.8125rem; max-width: 20rem; }
+  .lrow { display: grid; grid-template-columns: 4.5rem 1fr; padding: 0.5rem 0.875rem; }
+  .lrow + .lrow { border-top: 1px solid var(--sumi-12); }
+  .lkey { color: var(--sumi-70); }
+  .lval { color: var(--sumi); display: flex; align-items: center; gap: 0.5rem; }
+
+  /* §6 arc-tree nodes (pitch compressed for the demo) */
+  .nodes { display: flex; flex-direction: column; gap: 14px; }
+  .node {
+    width: 192px; height: 48px;
+    background: var(--washi);
+    border: 1.5px solid var(--sumi);
+    display: flex; align-items: center; gap: 10px;
+    padding-left: 12px;
+  }
+  .node .ntext { display: flex; flex-direction: column; line-height: 1.25; }
+  .node .t { font-family: var(--mono); font-weight: 600; font-size: 13px; color: var(--sumi); }
+  .node .s { font-family: var(--mono); font-size: 11px; color: var(--sumi-70); }
+  .node.n-pre    { border-color: var(--sumi); }
+  .node.n-closed { border-color: var(--gold); }
+  .node.n-sup    { border-color: var(--gold-40); }
+  .node.n-open   { border-color: var(--sumi-40); }
+
+  /* colophon entry (layout is a mock — colophon page design is not this session's question) */
+  .colo {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 0.25rem; max-width: 24rem;
+    border-top: 1px solid var(--sumi-12); border-bottom: 1px solid var(--sumi-12);
+  }
+  .colo .cid { font-family: var(--mono); font-weight: 600; font-size: 0.8125rem; }
+  .colo .ct  { font-size: 0.9375rem; }
+  .colo .cd  { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); margin-left: auto; white-space: nowrap; }
+
+  /* ================= the flip ================= */
+  .flip { display: inline-block; position: relative; vertical-align: middle; flex: none; }
+  .flip .card { display: block; position: relative; width: 100%; height: 100%; }
+  .flip .face { position: absolute; inset: 0; display: block; }
+  .flip .face svg { display: block; }
+
+  /* 2D squash — rotation about the horizontal axis rendered flat */
+  @keyframes sq-out { 0% { transform: scaleY(1); } 50% { transform: scaleY(0); } 100% { transform: scaleY(0); } }
+  @keyframes sq-in  { 0% { transform: scaleY(0); } 50% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
+  .geo-squash .face { transform-origin: 50% 50%; }
+  .geo-squash.at-front .back  { transform: scaleY(0); }
+  .geo-squash.at-back  .front { transform: scaleY(0); }
+  .geo-squash.flipping .front { animation: sq-out 160ms cubic-bezier(0.2, 0, 0, 1) forwards; }
+  .geo-squash.flipping .back  { animation: sq-in  160ms cubic-bezier(0.2, 0, 0, 1) forwards; }
+
+  /* implied depth — perspective rotateX (variant B only) */
+  @keyframes rot-180 { to { transform: rotateX(180deg); } }
+  .geo-depth .card { transform-style: preserve-3d; }
+  .geo-depth .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .geo-depth .back { transform: rotateX(180deg); }
+  .geo-depth.at-back .card { transform: rotateX(180deg); }
+  .geo-depth.flipping .card { animation: rot-180 160ms cubic-bezier(0.2, 0, 0, 1) forwards; }
+
+  body.reduced .flip .face, body.reduced .flip .card { animation: none !important; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Session 9 — the flip</h1>
+<p class="caption mono">hosystem · one question: where promotion fires, and how the flip moves.</p>
+
+<p>The name is the shōgi pawn. It promotes by physically flipping over to reveal と in
+gold. On the site the flip is the state change — the one moment the restraint breaks
+into something kinetic, because a real state changed. Gold is state only: the flip
+never fires as hover, scroll effect, or emphasis.</p>
+
+<div class="rm-note">prefers-reduced-motion detected — every demo renders its instant-swap
+fallback (0 ms), as frozen in §4. This page is behaving correctly, not failing.</div>
+
+<div class="frozen-recap"><b>Frozen inputs used verbatim.</b>
+§1 the piece — path M37 0 L66 22 L74 100 L0 100 L8 22 Z (100-unit height); keyline ≥24 px:
+stroke 0.040H sumi, fill washi, face char 0.420H at (0.370H, 0.610H), front 歩 sumi /
+promoted と gold; solid &lt;24 px: sumi fill front / gold fill promoted, no character.
+§2 palette — washi #eef1ef · sumi #1f2123 · bero #29618e · gold #a9832a; state map:
+open sumi@0.40 · current sumi@1.00 · closed gold@1.00 · superseded gold@0.40.
+§4 the step — 160 ms · cubic-bezier(0.2, 0, 0, 1) · 8 px rise; sequence interval 380 ms
+constant; page transition cut → 80 ms hold → one step; reduced motion: instant swap.</div>
+
+<h2>Decisions carried into every variant</h2>
+<ul>
+  <li><b>Axis correction.</b> A koma promotes by tipping end-over-end toward the opponent —
+  rotation about the <em>horizontal</em> axis. Spinning about the vertical axis is what a
+  captured piece does when it changes sides. So the 2D flip is a <em>vertical</em>
+  squash (scaleY through zero), not the horizontal scale the prompt sketched. The
+  pentagon is left-right symmetric, so only the vertical squash encodes the real move.</li>
+  <li><b>Superseded never flips.</b> Supersession is recession — gold@1.00 → gold@0.40,
+  opacity not promotion (§2: "recession is opacity"). The flip means one thing:
+  promotion. A superseded record arrives already-flipped, receded. Every demo shows this.</li>
+  <li><b>One committed move.</b> 160 ms total, §4's easing across the whole flip. On
+  cubic-bezier(0.2, 0, 0, 1), progress 0.5 lands at exactly 32 ms of clock time — the
+  collapse commits in 32 ms, the promoted face settles over the remaining 128 ms.
+  Accelerate, land. Adjacent state tints (node stroke) cut at the 32 ms zero-crossing —
+  a cut, not a fade. No wobble, no bounce, no spin.</li>
+  <li><b>Queue on the beat.</b> Co-triggered flips fire in encounter order on §4's 380 ms
+  interval. Marks already in view at page arrival start one interval after the page's
+  in-step ends.</li>
+  <li><b>Demo staging.</b> Production triggers are IntersectionObserver on scroll; the
+  replay buttons stage the encounter. Where a flip is pending, the mark rests on its
+  front face (歩, full sumi — current ink) until it fires. Value text ("closed") always
+  prints full sumi throughout — labels never lie, only the mark moves.</li>
+</ul>
+
+<!-- ================================================================ -->
+<h2>Variant A — the ritual</h2>
+<p class="commit-line">Commits to: the flip as re-enactment — every closed record flips
+once per session, on first full view; next session it flips again.</p>
+<div class="demo" id="vA">
+  <div class="demo-head">
+    <span class="label">A · 2D squash · first view · once per session</span>
+    <div class="btns"><button class="replay" id="btnA">replay — first encounter</button></div>
+  </div>
+  <div class="stage9" id="stageA"></div>
+  <div class="dnote" id="noteA"></div>
+  <div class="numbers"><b>duration</b> 160 ms · <b>easing</b> cubic-bezier(0.2, 0, 0, 1) · zero-crossing at 32 ms
+<b>geometry</b> scaleY 1→0→1 (horizontal axis, rendered flat) · origin 50% 50% · no perspective
+<b>trigger</b> mark fully in view (IntersectionObserver threshold 1.0) · <b>store</b> sessionStorage `hosystem-flips`
+<b>once-only</b> once per record per session — re-fires every visit · <b>queue</b> 380 ms beat</div>
+</div>
+
+<!-- ================================================================ -->
+<h2>Variant B — the object</h2>
+<p class="commit-line">Commits to: the flip as a witnessed object — implied depth, a real
+piece turning over, seen exactly once per reader, ever.</p>
+<div class="demo" id="vB">
+  <div class="demo-head">
+    <span class="label">B · implied depth (rotateX) · first view · once ever</span>
+    <div class="btns"><button class="replay" id="btnB">replay — as a fresh reader</button></div>
+  </div>
+  <div class="stage9" id="stageB"></div>
+  <div class="dnote" id="noteB"></div>
+  <div class="numbers"><b>duration</b> 160 ms · <b>easing</b> cubic-bezier(0.2, 0, 0, 1) · 90° swap at 32 ms
+<b>geometry</b> rotateX 0→180°, top edge tips away (the koma falls forward) · perspective 8 × rendered height (224 px at h28, 96 px at h12)
+<b>trigger</b> mark fully in view (threshold 1.0) · <b>store</b> localStorage `hosystem-flips` per record id
+<b>once-only</b> once per reader, ever — later visits render already-promoted · <b>queue</b> 380 ms beat</div>
+</div>
+
+<!-- ================================================================ -->
+<h2>Variant C — no event</h2>
+<p class="commit-line">Commits to: no motion at all — promotion is a fact of the record,
+never a performance; the two faces are the whole flip.</p>
+<div class="demo" id="vC">
+  <div class="demo-head">
+    <span class="label">C · no motion · always already-promoted</span>
+    <div class="btns"><button class="replay" id="btnC">re-render — page transition</button></div>
+  </div>
+  <div class="stage9" id="stageC"></div>
+  <div class="dnote" id="noteC">the button runs §4's page transition (cut → 80 ms bare washi → arrive). Nothing flips — there is no event to stage.</div>
+  <div class="numbers"><b>duration</b> 0 — there is no event · <b>geometry</b> none: two printings of one block
+<b>trigger</b> none — state renders already-flipped, always · <b>store</b> none
+<b>once-only</b> n/a · <b>reduced motion</b> identical — this variant IS the fallback, promoted to the design</div>
+</div>
+
+<!-- ================================================================ -->
+<h2>Variant D — the news</h2>
+<p class="commit-line">Commits to: the flip fires only where the state actually changed
+since the reader last looked — a real transition, witnessed once; everything else is
+already-promoted, as in C.</p>
+<div class="demo" id="vD">
+  <div class="demo-head">
+    <span class="label">D · 2D squash · news rule · once per actual promotion</span>
+    <div class="btns">
+      <button class="replay" id="btnD1">first visit</button>
+      <button class="replay" id="btnD2">return — ho-11 closed while you were away</button>
+    </div>
+  </div>
+  <div class="stage9" id="stageD"></div>
+  <div class="dnote" id="noteD">press "first visit", then "return". ho-09 closed long ago — it never flips. Only the news moves.</div>
+  <div class="numbers"><b>duration</b> 160 ms · <b>easing</b> cubic-bezier(0.2, 0, 0, 1) · zero-crossing at 32 ms · scaleY squash, as A
+<b>trigger</b> mark fully in view (threshold 1.0) AND its record's state advanced to closed since the reader's last visit
+<b>witness log</b> localStorage `hosystem-witnessed` {record-id: state} · first visit seeds the log silently — nothing flips
+<b>once-only</b> once per actual promotion, ever (the log records the witnessing) · no storage → renders as C · <b>queue</b> 380 ms beat</div>
+</div>
+
+<!-- ================================================================ -->
+<h2>Recommendation — D, with A's geometry</h2>
+<p><b>D.</b> The 2D squash, firing under the news rule.</p>
+<ul>
+  <li><b>The governing test, taken literally.</b> The flip breaks the site's restraint
+  "precisely because a real state changed." Only D makes that sentence true. A and B
+  re-stage a month-old closure for every new session or reader — theater about a change
+  that didn't happen on the reader's watch. C never breaks restraint at all and forfeits
+  the site's namesake move. D fires the flip exactly when the framework actually moved:
+  a ho closed between your visits. First visit — you weren't there for any of it — is
+  rendered honestly: everything already promoted, nothing staged. C is D's degenerate
+  case, so D contains C's restraint.</li>
+  <li><b>It scales with the corpus.</b> A mature arc holds a dozen closed hos. Under A or
+  B, every history page greets a first view with a flip storm — twelve promotions
+  re-enacted in sequence, 4.5 seconds of gold motion. Under D the flip stays rare, so it
+  stays meaningful. And the colophon — the site's own live record — keeps closing hos as
+  the site is built, so returning readers genuinely meet it.</li>
+  <li><b>Grammar consistency with §7.</b> Session 7 froze that reader state never earns
+  gold ("met is reader state, not framework state"). B keys a gold event to pure reader
+  state — you hadn't seen it yet. D keys it to a framework transition; the witness log
+  only decides whether that transition is news.</li>
+  <li><b>Squash over depth.</b> Print logic: flat fields, no object floating off the
+  paper. The perspective flip introduces foreshortening — a 3D vocabulary the site has
+  nowhere else and would use exactly once. The vertical squash is the woodblock rendering
+  of the koma's true move: end-over-end, toward the opponent.</li>
+</ul>
+
+<div class="freeze-block"><b>Frozen if accepted:</b>
+
+<b>the flip — geometry</b>
+  axis        horizontal (end-over-end, the koma's real promotion move; a side-spin
+              is capture, not promotion) — rendered flat as a 2D vertical squash
+  keyframes   front face scaleY 1→0 over offsets 0→0.5 · promoted face scaleY 0→1
+              over offsets 0.5→1 · transform-origin 50% 50%
+  flatness    no perspective, no bokashi edge, no shadow — two printings of one block
+  faces       per §1: keyline ≥24 px swaps 歩 sumi → と gold on the same metrics;
+              solid &lt;24 px swaps sumi fill → gold fill
+
+<b>the flip — timing (one step, §4's family)</b>
+  duration    160 ms total, one committed move — no wobble, bounce, or spin
+  easing      cubic-bezier(0.2, 0, 0, 1) across the whole flip
+  swap        zero-crossing (face swap) at 32 ms clock time; promoted face settles
+              over the remaining 128 ms
+  adjacent    state tints around the mark (node stroke, rules) cut at 32 ms — a cut,
+              never a fade; labels print full sumi throughout
+  queue       co-triggered flips fire in encounter order on the 380 ms beat; marks in
+              view at page arrival start one interval after the page's in-step ends
+
+<b>trigger — the news rule</b>
+  fires when  a firing-list mark is fully in view (IntersectionObserver threshold 1.0)
+              AND its record's state advanced to closed since the reader's last visit
+  witness log localStorage `hosystem-witnessed` — {record-id: state}; first visit
+              seeds the log silently (nothing flips); no storage available → renders
+              already-promoted (variant C behavior)
+  once-only   a witnessed promotion is written to the log when it fires and never
+              re-fires
+  reduced     prefers-reduced-motion: instant swap to the promoted face, silent,
+              still writes the log
+
+<b>firing list (final)</b>
+  1  ho document status marker — §5's 12 px solid koma — when status → closed
+  2  live arc-tree ho nodes — §6 live instances, h28 keyline koma — when closed
+  3  colophon entries, at their marks, when their ho closes
+  never fires superseded (recession, not promotion — renders pre-flipped at gold@0.40);
+              the canonical chain diagram (§6: gold never appears there); the favicon
+              (§1: front face, frozen); anything on hover, scroll, or emphasis</div>
+
+<h2>Parked</h2>
+<ul class="caption">
+  <li>Bokashi at the collapse line (permitted by the standing constraints, unused here) — the sanctioned option if the flat squash reads thin at the coherence check.</li>
+  <li>Any textual "closed since your last visit" affordance beside the flip — session 10 / v2 territory.</li>
+  <li>The flip on dark ground — the dark-mode session.</li>
+  <li>Whether the trail (session 8) surfaces fresh promotions — session 8's question.</li>
+  <li>Colophon entry layout (mocked here as a row) — belongs to the colophon's own build, not this session.</li>
+</ul>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (REDUCED) document.body.classList.add('reduced');
+
+  /* ---------- frozen values ---------- */
+  var SUMI = '#1f2123', GOLD = '#a9832a', WASHI = '#eef1ef';
+  var SUMI40 = 'rgba(31,33,35,0.40)', GOLD40 = 'rgba(169,131,42,0.40)';
+  var KOMA = 'M37 0 L66 22 L74 100 L0 100 L8 22 Z';
+  var MINCHO = "'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif";
+  var DUR = 160, SWAP = 32, BEAT = 380;
+
+  /* ---------- koma SVG (frozen §1) ---------- */
+  function svgKeyline(h, ch, charInk, strokeInk) {
+    var w = (74 / 100 * h).toFixed(1);
+    return '<svg viewBox="0 0 74 100" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+      '<path d="' + KOMA + '" fill="' + WASHI + '" stroke="' + strokeInk + '" stroke-width="4" stroke-linejoin="miter"/>' +
+      '<text x="37" y="61" font-size="42" text-anchor="middle" dominant-baseline="central" ' +
+      'font-family="' + MINCHO + '" fill="' + charInk + '">' + ch + '</text></svg>';
+  }
+  function svgSolid(h, fill) {
+    var w = (74 / 100 * h).toFixed(1);
+    return '<svg viewBox="0 0 74 100" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+      '<path d="' + KOMA + '" fill="' + fill + '"/></svg>';
+  }
+
+  /* face inks */
+  function faceFrontCurrent(h) { return svgKeyline(h, '歩', SUMI, SUMI); }        // 歩 current
+  function faceFrontOpen(h)    { return svgKeyline(h, '歩', SUMI40, SUMI40); }    // 歩 open
+  function faceBackClosed(h)   { return svgKeyline(h, 'と', GOLD, SUMI); }        // と closed
+  function faceBackSup(h)      { return svgKeyline(h, 'と', GOLD40, SUMI40); }    // と superseded
+
+  /* ---------- flip assembly ---------- */
+  function makeFlip(o) { // {h, geo:'squash'|'depth', state:'front'|'back', front, back}
+    var w = (74 / 100 * o.h);
+    var el = document.createElement('span');
+    el.className = 'flip geo-' + (o.geo === 'depth' ? 'depth' : 'squash') +
+                   (o.state === 'back' ? ' at-back' : ' at-front');
+    el.style.width = w.toFixed(1) + 'px';
+    el.style.height = o.h + 'px';
+    if (o.geo === 'depth') el.style.perspective = (8 * o.h) + 'px';
+    el.innerHTML = '<span class="card">' +
+      '<span class="face front">' + o.front + '</span>' +
+      '<span class="face back">' + o.back + '</span></span>';
+    return el;
+  }
+  function fireFlip(el, onSwap) {
+    if (REDUCED) { // §4 frozen fallback: instant swap, silent
+      el.classList.remove('at-front', 'flipping');
+      el.classList.add('at-back');
+      if (onSwap) onSwap();
+      return;
+    }
+    el.classList.remove('at-front', 'at-back', 'flipping');
+    void el.offsetWidth; // restartable
+    el.classList.add('flipping');
+    if (onSwap) setTimeout(onSwap, SWAP); // zero-crossing: 32 ms
+    setTimeout(function () {
+      el.classList.remove('flipping');
+      el.classList.add('at-back');
+    }, DUR + 20);
+  }
+  function setFront(el) { el.classList.remove('flipping', 'at-back'); el.classList.add('at-front'); }
+  function setBack(el)  { el.classList.remove('flipping', 'at-front'); el.classList.add('at-back'); }
+
+  /* ---------- mock components ---------- */
+  function panel(labelText, child) {
+    var p = document.createElement('div');
+    var l = document.createElement('div');
+    l.className = 'plabel'; l.textContent = labelText;
+    p.appendChild(l); p.appendChild(child);
+    return p;
+  }
+  function makeLedger(geo) { // §5 ledger, ho-11's own document header
+    var flip = makeFlip({ h: 12, geo: geo, state: 'back',
+                          front: svgSolid(12, SUMI), back: svgSolid(12, GOLD) });
+    var box = document.createElement('div');
+    box.className = 'ledger';
+    box.innerHTML =
+      '<div class="lrow"><span class="lkey">ho</span><span class="lval">ho-11 · the flip</span></div>' +
+      '<div class="lrow"><span class="lkey">status</span><span class="lval sv"></span></div>' +
+      '<div class="lrow"><span class="lkey">closed</span><span class="lval">2026-07-01</span></div>';
+    var sv = box.querySelector('.sv');
+    sv.appendChild(flip);
+    var t = document.createElement('span'); t.textContent = 'closed';
+    sv.appendChild(t);
+    return { el: box, flip: flip };
+  }
+  function makeNode(title, sub, stateCls, mark) { // §6 live-instance node
+    var d = document.createElement('div');
+    d.className = 'node ' + stateCls;
+    d.appendChild(mark);
+    var t = document.createElement('span');
+    t.className = 'ntext';
+    t.innerHTML = '<span class="t">' + title + '</span><span class="s">' + sub + '</span>';
+    d.appendChild(t);
+    return d;
+  }
+  function makeColo(geo, id, title, date) {
+    var flip = makeFlip({ h: 28, geo: geo, state: 'back',
+                          front: faceFrontCurrent(28), back: faceBackClosed(28) });
+    var d = document.createElement('div');
+    d.className = 'colo';
+    d.appendChild(flip);
+    d.innerHTML += '<span class="cid">' + id + '</span><span class="ct">' + title + '</span>' +
+                   '<span class="cd">' + date + '</span>';
+    return { el: d, flip: d.querySelector('.flip') };
+  }
+  function staticMark(h, geo, front, back, state) {
+    return makeFlip({ h: h, geo: geo, state: state, front: front, back: back });
+  }
+
+  /* ---------- variant A / B: encounter stage ---------- */
+  function buildEncounter(stageId, geo) {
+    var stage = document.getElementById(stageId);
+    var ledger = makeLedger(geo);
+
+    var nodeFlip = makeFlip({ h: 28, geo: geo, state: 'back',
+                              front: faceFrontCurrent(28), back: faceBackClosed(28) });
+    var nClosed = makeNode('ho-11 · the flip', 'closed 07-01', 'n-closed', nodeFlip);
+    var nSup = makeNode('ho-10 · the trail', 'superseded — never flips', 'n-sup',
+                        staticMark(28, geo, faceFrontCurrent(28), faceBackSup(28), 'back'));
+    var nOpen = makeNode('ho-12 · dark ground', 'open — front face', 'n-open',
+                         staticMark(28, geo, faceFrontOpen(28), faceBackClosed(28), 'front'));
+    var nodes = document.createElement('div');
+    nodes.className = 'nodes';
+    nodes.appendChild(nClosed); nodes.appendChild(nSup); nodes.appendChild(nOpen);
+
+    var colo = makeColo(geo, 'ho-11', 'The flip lands', 'closed 2026-07-01');
+
+    stage.appendChild(panel('document header — status marker · 12 px solid', ledger.el));
+    stage.appendChild(panel('arc tree — live instances · h28 keyline', nodes));
+    stage.appendChild(panel('colophon entry', colo.el));
+
+    return {
+      replay: function (note) {
+        note.textContent = 'staging: marks rest on the front face (current sumi), then flip on encounter — 0 / 380 / 760 ms.';
+        setFront(ledger.flip); setFront(nodeFlip); setFront(colo.flip);
+        nClosed.className = 'node n-pre';
+        var fire = function () {
+          var q = [
+            function () { fireFlip(ledger.flip); },
+            function () { fireFlip(nodeFlip, function () { nClosed.className = 'node n-closed'; }); },
+            function () { fireFlip(colo.flip); }
+          ];
+          if (REDUCED) { q.forEach(function (f) { f(); }); return; }
+          q.forEach(function (f, i) { setTimeout(f, i * BEAT); });
+        };
+        setTimeout(fire, REDUCED ? 0 : 450);
+      }
+    };
+  }
+
+  var vA = buildEncounter('stageA', 'squash');
+  document.getElementById('btnA').addEventListener('click', function () {
+    vA.replay(document.getElementById('noteA'));
+  });
+
+  var vB = buildEncounter('stageB', 'depth');
+  document.getElementById('btnB').addEventListener('click', function () {
+    vB.replay(document.getElementById('noteB'));
+  });
+
+  /* ---------- variant C: no event ---------- */
+  (function () {
+    var stage = document.getElementById('stageC');
+    var ledger = makeLedger('squash');
+    var nodes = document.createElement('div');
+    nodes.className = 'nodes';
+    nodes.appendChild(makeNode('ho-11 · the flip', 'closed 07-01', 'n-closed',
+                               staticMark(28, 'squash', faceFrontCurrent(28), faceBackClosed(28), 'back')));
+    nodes.appendChild(makeNode('ho-10 · the trail', 'superseded', 'n-sup',
+                               staticMark(28, 'squash', faceFrontCurrent(28), faceBackSup(28), 'back')));
+    nodes.appendChild(makeNode('ho-12 · dark ground', 'open — front face', 'n-open',
+                               staticMark(28, 'squash', faceFrontOpen(28), faceBackClosed(28), 'front')));
+    var colo = makeColo('squash', 'ho-11', 'The flip lands', 'closed 2026-07-01');
+    stage.appendChild(panel('document header — status marker · 12 px solid', ledger.el));
+    stage.appendChild(panel('arc tree — live instances · h28 keyline', nodes));
+    stage.appendChild(panel('colophon entry', colo.el));
+
+    document.getElementById('btnC').addEventListener('click', function () {
+      if (REDUCED) return; // 0 ms everywhere: nothing to show
+      stage.style.visibility = 'hidden';               // out = cut
+      setTimeout(function () {                         // 80 ms bare washi
+        stage.style.visibility = 'visible';            // in — already promoted
+      }, 80);
+    });
+  })();
+
+  /* ---------- variant D: the news rule ---------- */
+  (function () {
+    var stage = document.getElementById('stageD');
+    var note = document.getElementById('noteD');
+    var ledger = makeLedger('squash');
+
+    var newFlip = makeFlip({ h: 28, geo: 'squash', state: 'back',
+                             front: faceFrontCurrent(28), back: faceBackClosed(28) });
+    var nNew = makeNode('ho-11 · the flip', 'closed 07-01 · the news', 'n-closed', newFlip);
+    var nOld = makeNode('ho-09 · the piece', 'closed 06-02 · old news', 'n-closed',
+                        staticMark(28, 'squash', faceFrontCurrent(28), faceBackClosed(28), 'back'));
+    var nSup = makeNode('ho-10 · the trail', 'superseded — never flips', 'n-sup',
+                        staticMark(28, 'squash', faceFrontCurrent(28), faceBackSup(28), 'back'));
+    var nodes = document.createElement('div');
+    nodes.className = 'nodes';
+    nodes.appendChild(nOld); nodes.appendChild(nSup); nodes.appendChild(nNew);
+
+    var colo = makeColo('squash', 'ho-11', 'The flip lands', 'closed 2026-07-01');
+
+    stage.appendChild(panel('document header — status marker · 12 px solid', ledger.el));
+    stage.appendChild(panel('arc tree — live instances · h28 keyline', nodes));
+    stage.appendChild(panel('colophon entry', colo.el));
+
+    document.getElementById('btnD1').addEventListener('click', function () {
+      setBack(ledger.flip); setBack(newFlip); setBack(colo.flip);
+      nNew.className = 'node n-closed';
+      note.textContent = 'first visit — witness log seeded silently; everything renders already-promoted; nothing flips.';
+    });
+    document.getElementById('btnD2').addEventListener('click', function () {
+      note.textContent = 'return visit — ho-11 advanced to closed since your log; its marks flip on encounter (0 / 380 / 760 ms). ho-09 and ho-10 hold still.';
+      setFront(ledger.flip); setFront(newFlip); setFront(colo.flip);
+      nNew.className = 'node n-pre';
+      var fire = function () {
+        var q = [
+          function () { fireFlip(ledger.flip); },
+          function () { fireFlip(newFlip, function () { nNew.className = 'node n-closed'; }); },
+          function () { fireFlip(colo.flip); }
+        ];
+        if (REDUCED) { q.forEach(function (f) { f(); }); return; }
+        q.forEach(function (f, i) { setTimeout(f, i * BEAT); });
+      };
+      setTimeout(fire, REDUCED ? 0 : 450);
+    });
+  })();
+
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>D (the news)</strong>, accepted as recommended. The flip fires
+  only when a record's state actually advanced to closed since the reader's last
+  visit — the governing test taken literally; it stays rare and therefore meaningful.
+  Geometry: flat 2D vertical squash (print logic — nothing floats off the paper),
+  axis corrected to end-over-end (a side-spin is capture, not promotion). Superseded
+  never flips: recession, not promotion. Values landed in
+  <code>design/basis-of-design.md</code> §9.</p>
+</section>
+
+</body>
+</html>

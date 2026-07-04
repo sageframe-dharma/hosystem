@@ -37,8 +37,8 @@ never silently.
 | 5 | documents | landed 2026-07-04 | [§5](#5--documents) |
 | 6 | diagrams | landed 2026-07-04 | [§6](#6--diagrams) |
 | 7 | definition-on-touch | landed 2026-07-04 | [§7](#7--definition-on-touch) |
-| 8 | the trail | open | — |
-| 9 | the flip | open | — |
+| 8 | the trail | landed 2026-07-04 | [§8](#8--the-trail) |
+| 9 | the flip | landed 2026-07-04 | [§9](#9--the-flip) |
 | 10 | the threaded split | v2 — not yet open | — |
 
 ## 1 — the piece
@@ -273,6 +273,93 @@ gold: met is reader state, not framework state.
 
 **Timing:** reveal/dismiss instant (0 ms) as designed; whether the card's arrival
 adopts §4's 160 ms step is resolved at the coherence check.
+
+## 8 — the trail
+
+_Landed 2026-07-04. Winner: variant D (plan above, walk beneath). Session record:
+`claude-design/sessions/session-08-variants.html`._
+
+```
+trail          the visitor's walk renders as a footer strip on every page: planned nav
+               order above, actual walk threaded beneath
+placement      in-column (42 rem measure), above the colophon rule · margin-top 4 rem ·
+               top rule 1 px sumi@.12 · padding 12 px 0 8 px · no fixed elements
+caption        "your walk" mono 11 px sumi@.70 left · "n steps" mono 11 px sumi@.40 right
+door row       six nav doors, nav order, left→right · node 10 × 10 px, stroke 1, fill
+               washi, square corners miter · centers evenly spaced, first/last inset
+               8 px from column edges · plan line 1 px sumi@.12 through centers, behind
+               nodes · labels mono 10 px centered 6 px below, opacity = node's
+door ink       never entered sumi@.40 · entered a past walk sumi@.70 · entered this
+               walk sumi 1.00 · fill always washi · no gold ever on the trail
+thread         band top = labels + 14 px · step k = 6 × 6 px filled sumi 1.00 at its
+               door's column, y = band top + (k−1)·pitch · pitch 12 px (n ≤ 5), else
+               48/(n−1) px, floor 6 · > 9 steps: last 9 render, "⋯ +k" mono 10
+               sumi@.40 at band top-right · resting strip height ≤ 128 px
+edges          1.25 px sumi, filled triangle head 5 × 4 miter, every segment · all
+               steps equal ink; revisits append new nodes, never return arrows
+met terms      2.5 px dots sumi@.40, 4 px right of the step node, pitch 4 px, max 4
+               then "+n" mono 9 sumi@.40 (met = pinned reveal dismissed, §7)
+expansion      hover/focus/tap a step node → door label mono 10 sumi@.70, met names
+               appended @.40, inside the strip, instant, zero reflow · tap pins ·
+               Escape / outside-tap dismisses · one at a time
+arrival        new step arrives after the 240 ms page transition as one §4 step
+               (160 ms, cubic-bezier(.2,0,0,1), 8 px rise, seat) · nothing at rest
+               moves · prefers-reduced-motion: instant swap
+persistence    localStorage ho.trail.doors = set of door ids ever entered (across
+               visits) · sessionStorage ho.trail.walk = ordered [{door, met[]}], this
+               walk only, cap 64 steps with elided count kept · door ids and met-term
+               ids only — no timestamps, no URLs, nothing leaves the browser
+returning      fresh thread; previously entered doors greet at sumi@.70
+empty state    renders from step 1 (six doors, one node) · never hidden, never nags
+door names     Framework · Practice · Skills · Writing · Walk · Colophon are
+               placeholders from the spec's content map — geometry and rules freeze
+               here; names bind at build
+```
+
+## 9 — the flip
+
+_Landed 2026-07-04. Winner: variant D (the news). Session record:
+`claude-design/sessions/session-09-variants.html`._
+
+```
+the flip — geometry
+  axis        horizontal (end-over-end, the koma's real promotion move; a side-spin
+              is capture, not promotion) — rendered flat as a 2D vertical squash
+  keyframes   front face scaleY 1→0 over offsets 0→0.5 · promoted face scaleY 0→1
+              over offsets 0.5→1 · transform-origin 50% 50%
+  flatness    no perspective, no bokashi edge, no shadow — two printings of one block
+  faces       per §1: keyline ≥24 px swaps 歩 sumi → と gold on the same metrics;
+              solid <24 px swaps sumi fill → gold fill
+
+the flip — timing (one step, §4's family)
+  duration    160 ms total, one committed move — no wobble, bounce, or spin
+  easing      cubic-bezier(0.2, 0, 0, 1) across the whole flip
+  swap        zero-crossing (face swap) at 32 ms clock time; promoted face settles
+              over the remaining 128 ms
+  adjacent    state tints around the mark (node stroke, rules) cut at 32 ms — a cut,
+              never a fade; labels print full sumi throughout
+  queue       co-triggered flips fire in encounter order on the 380 ms beat; marks in
+              view at page arrival start one interval after the page's in-step ends
+
+trigger — the news rule
+  fires when  a firing-list mark is fully in view (IntersectionObserver threshold 1.0)
+              AND its record's state advanced to closed since the reader's last visit
+  witness log localStorage `hosystem-witnessed` — {record-id: state}; first visit
+              seeds the log silently (nothing flips); no storage available → renders
+              already-promoted
+  once-only   a witnessed promotion is written to the log when it fires and never
+              re-fires
+  reduced     prefers-reduced-motion: instant swap to the promoted face, silent,
+              still writes the log
+
+firing list (final)
+  1  ho document status marker — §5's 12 px solid koma — when status → closed
+  2  live arc-tree ho nodes — §6 live instances, h28 keyline koma — when closed
+  3  colophon entries, at their marks, when their ho closes
+  never fires superseded (recession, not promotion — renders pre-flipped at gold@0.40);
+              the canonical chain diagram (§6: gold never appears there); the favicon
+              (§1: front face, frozen); anything on hover, scroll, or emphasis
+```
 
 ## Propagation ledger
 

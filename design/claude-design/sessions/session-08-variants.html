@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — design session 8 — the trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --washi:#eef1ef; --sumi:#1f2123; --bero:#29618e; --gold:#a9832a;
+    --s70:#5d5f60; --s40:#9b9e9d; --s12:#d5d8d7;
+    --b70:#648cab; --b40:#9fb7c8;
+    --serif:'Source Serif 4','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+    --mono:'Source Code Pro','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',monospace;
+  }
+  html{background:var(--washi);}
+  body{
+    font-family:var(--serif); font-size:1.0625rem; line-height:1.65; color:var(--sumi);
+    margin:0 auto; padding:3rem 1.5rem 6rem; max-width:46rem;
+  }
+  h1{font-size:1.75rem; line-height:1.25; font-weight:600; margin:0 0 .5rem;}
+  h2{font-size:1.375rem; line-height:1.3; font-weight:600; margin:2.5rem 0 1rem;}
+  h3{font-size:1.125rem; line-height:1.4; font-weight:600; margin:1.5rem 0 .5rem;}
+  p{margin:1.25rem 0;}
+  .cap{font-size:.8125rem; line-height:1.5; color:var(--s70);}
+  .commit{font-style:italic; margin:.25rem 0 1rem;}
+  pre.spec{
+    font-family:var(--mono); font-size:.8125rem; line-height:1.55; color:var(--sumi);
+    border-left:2px solid var(--s40); padding-left:1rem; margin:1.5rem 0;
+    white-space:pre-wrap; overflow-x:auto;
+  }
+  pre.spec b{font-weight:600;}
+  .mockpage{
+    border:1px solid var(--s12); background:var(--washi);
+    padding:1.25rem 1.5rem 0; margin:1rem 0; position:relative;
+  }
+  .fauxline{height:8px; background:var(--s12); margin:11px 0; border-radius:0;}
+  .fauxline.short{width:62%;}
+  .fauxhead{height:12px; width:38%; background:var(--s40); margin:0 0 18px;}
+  .controls{margin:.75rem 0 0; display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;}
+  button.ctl{
+    font-family:var(--mono); font-size:.75rem; color:var(--sumi);
+    background:var(--washi); border:1px solid var(--s40); border-radius:0;
+    padding:3px 12px; cursor:pointer;
+  }
+  button.ctl:hover{border-color:var(--sumi);}
+  button.ctl.on{border-color:var(--sumi); background:var(--s12);}
+  .ctlnote{font-family:var(--mono); font-size:.6875rem; color:var(--s40);}
+  /* the strip (B and D live in the mock page footer) */
+  .strip{border-top:1px solid var(--s12); margin-top:2rem; padding:12px 0 8px;}
+  .striphead{display:flex; justify-content:space-between; font-family:var(--mono);
+    font-size:11px; margin-bottom:10px;}
+  .striphead .l{color:var(--s70);} .striphead .r{color:var(--s40);}
+  svg{display:block;}
+  text.m10{font-family:var(--mono); font-size:10px;}
+  text.m9{font-family:var(--mono); font-size:9px;}
+  text.m11{font-family:var(--mono); font-size:11px;}
+  text.m12b{font-family:var(--mono); font-size:12px; font-weight:600;}
+  /* variant A corner mark */
+  .vpA{height:380px; overflow:hidden;}
+  .cornermark{position:absolute; left:16px; bottom:16px; cursor:pointer; line-height:0;}
+  .cornerpanel{
+    position:absolute; left:16px; bottom:16px; background:var(--washi);
+    border:1px solid var(--s40); padding:10px 12px 12px; width:264px; z-index:10;
+  }
+  .cornerpanel .ph{font-family:var(--mono); font-size:11px; color:var(--s70); margin-bottom:8px;}
+  .arrivable{will-change:transform,opacity;}
+  /* variant C glyph link */
+  .walklink{font-family:var(--mono); font-size:11px; color:var(--bero);
+    text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:var(--b70);
+    text-underline-offset:.2em; cursor:pointer;}
+  .cfoot{display:flex; align-items:center; gap:8px; border-top:1px solid var(--s12);
+    margin-top:2rem; padding:10px 0 14px;}
+  .cpair{display:grid; grid-template-columns:1fr 1.15fr; gap:1rem;}
+  @media (max-width:640px){ .cpair{grid-template-columns:1fr;} }
+  .cpage{border:1px solid var(--s12); padding:1rem 1.25rem;}
+  .cpage h4{font-family:var(--mono); font-size:.8125rem; font-weight:600; margin:0 0 .75rem; color:var(--s70);}
+  ul.parked{margin:1rem 0; padding-left:1.25rem;}
+  ul.parked li{margin:.35rem 0;}
+  hr{border:0; border-top:1px solid var(--s12); margin:3rem 0;}
+  .frozen{border:1px solid var(--s40); padding:1rem 1.25rem; margin:1.5rem 0;}
+  .frozen pre.spec{border-left:none; padding-left:0; margin:0;}
+  em.term{font-style:normal;}
+  @media (prefers-reduced-motion: reduce){
+    .arrivable{transition:none !important; transform:none !important; opacity:1 !important;}
+  }
+</style>
+</head>
+<body>
+
+<h1>Session 8 — the trail</h1>
+<p class="cap">hosystem · one question: how the visitor’s walk renders · frozen inputs read from
+basis-of-design §1 piece · §2 palette · §3 type · §4 step · §6 diagrams · §7 definition-on-touch (all landed)</p>
+
+<p>The site records the visitor’s path client-side and renders it as a small arc tree:
+the nav’s planned order beside the walk actually taken, branching where the visitor
+diverged. It never blocks, nags, or gamifies. It must read in one look or cost nothing
+to ignore. Gold marks framework state only — visiting is <em>reader</em> state, so the
+trail is inked in sumi’s opacity ladder, the same grammar §7 landed for met terms.</p>
+
+<p><strong>The simulated visit</strong> (all four demos replay it):
+Practice → Walk (met <em class="term">koma</em>) → Skills (met <em class="term">kamae</em>) → back to Walk → Framework.<br>
+<span class="cap">Nav order assumed: Framework · Practice · Skills · Writing · Walk · Colophon —
+placeholder door names from the spec’s content map. Geometry and rules are what this session
+freezes; names bind at build. A “met” term is one whose pinned definition was dismissed (§7).</span></p>
+
+<p class="cap">Replay compresses the visit: in life each step arrives once, on its own page load,
+after the 240&nbsp;ms page transition — one §4 step (160&nbsp;ms, cubic-bezier(.2,0,0,1), 8&nbsp;px rise,
+seat). The demo populates at §4’s 380&nbsp;ms constant interval. Under
+<code style="font-family:var(--mono);font-size:.875em">prefers-reduced-motion</code> every arrival is an instant swap.</p>
+
+<hr>
+
+<!-- ============================================================ VARIANT A -->
+<h2>A — the corner mark</h2>
+<p class="commit">Commits to: the walk always at hand — a live instrument carried in the
+corner, gone when the session ends.</p>
+
+<div class="mockpage vpA" id="vpA">
+  <div class="fauxhead"></div>
+  <div class="fauxline"></div><div class="fauxline"></div><div class="fauxline short"></div>
+  <div class="fauxline"></div><div class="fauxline"></div><div class="fauxline short"></div>
+  <div class="fauxline"></div><div class="fauxline"></div>
+  <div class="cornermark" id="markA" title="your walk"></div>
+  <div class="cornerpanel" id="panelA" style="display:none">
+    <div class="ph">your walk — <span id="cntAp">0 steps</span></div>
+    <div id="expA"></div>
+  </div>
+</div>
+<div class="controls">
+  <button class="ctl" id="replayA">replay the walk</button>
+  <button class="ctl" id="endA">end session</button>
+  <span class="ctlnote">click the mark to expand · click elsewhere to close · session-only: “end session” loses the walk</span>
+</div>
+
+<pre class="spec"><b>placement</b>     fixed, bottom-left, 24 px inset both axes · z-index 5 (below §7’s card at 10)
+<b>resting</b>       84 × 104 px, unlabeled · doors: six 6×6 squares, vertical column (nav order,
+              §6’s descent), centers x 12, pitch 16 · plan line 1 px sumi@.12 through centers
+              · door ink: unentered sumi@.40, entered sumi 1.00, fill washi
+<b>thread</b>        time runs right: step k node 5×5 filled sumi at x 26 + (k−1)·11, y = its
+              door’s row · edges 1 px sumi, head 4×3 · met dots 2.5 px sumi@.40 above node
+<b>expansion</b>     tap/hover → 264 px labeled panel, same anchor, arrives as one §4 step ·
+              labels mono 10 · Escape / outside-tap closes
+<b>persistence</b>   sessionStorage only — the walk dies with the session; every session a fresh
+              mark, all doors @.40 · nothing survives, nothing accumulates
+<b>risk</b>          a permanent floating fixture — the closest of the four to a nag; competes
+              with content on narrow viewports</pre>
+
+<!-- ============================================================ VARIANT B -->
+<h2>B — footfalls in a row</h2>
+<p class="commit">Commits to: count and rhythm before topology — the walk as a row of
+pieces on a baseline, jumps ticked, history stacked above.</p>
+
+<div class="mockpage">
+  <div class="fauxhead"></div>
+  <div class="fauxline"></div><div class="fauxline"></div><div class="fauxline short"></div>
+  <div class="strip">
+    <div class="striphead"><span class="l">your walk</span><span class="r" id="cntB">5 steps</span></div>
+    <div id="demB"></div>
+  </div>
+</div>
+<div class="controls">
+  <button class="ctl" id="replayB">replay the walk</button>
+  <button class="ctl" id="retB">second visit</button>
+  <span class="ctlnote">hover a piece for its door · “second visit” stacks the earlier walk above, receded</span>
+</div>
+
+<pre class="spec"><b>placement</b>     footer strip, every page, in-column (42 rem), above the colophon rule ·
+              top rule 1 px sumi@.12 · caption “your walk” mono 11 sumi@.70 left, count right
+<b>row</b>           baseline 1 px sumi@.12 full width · each visit = solid koma h12 sumi (§1
+              sub-24 px inking), seated on the baseline, pitch 21 px, appended right
+<b>marks</b>         backward jump in nav order: open chevron 5×5 sumi@.40 pointing left, 4 px
+              above the apex (§6’s return-head shape as annotation) · revisited door:
+              koma fills sumi@.70 (seen before = recession) · met terms: 2.5 px dots
+              sumi@.40 right of the apex, pitch 4
+<b>expansion</b>     hover/tap a koma → door label mono 10 sumi@.70 beneath, instant (§7 grammar)
+<b>persistence</b>   localStorage, across visits · prior walks stack above at sumi@.40, koma h8,
+              row pitch 22, newest first, max 2 rows shown, older walks collapse to
+              “⋯ n earlier walks” mono 10 @.40 · cap 8 walks / 64 steps each, FIFO
+<b>risk</b>          spends the koma on page visits — §6 reserves the piece for steppable work;
+              and the row carries rhythm but not the plan-vs-walk gap</pre>
+
+<!-- ============================================================ VARIANT C -->
+<h2>C — the small door</h2>
+<p class="commit">Commits to: a record you consult, not a mark you carry — a footer glyph
+and count, full fidelity on its own colophon-adjacent page.</p>
+
+<div class="cpair">
+  <div class="mockpage" style="margin:0">
+    <div class="fauxhead"></div>
+    <div class="fauxline"></div><div class="fauxline"></div><div class="fauxline short"></div>
+    <div class="fauxline"></div><div class="fauxline short"></div>
+    <div class="cfoot">
+      <span id="glyC"></span>
+      <span class="walklink" id="linkC">your walk — 5 steps · 1 branch</span>
+    </div>
+  </div>
+  <div class="cpage">
+    <h4>the page it opens — /your-walk</h4>
+    <div id="demC"></div>
+  </div>
+</div>
+<div class="controls">
+  <button class="ctl" id="replayC">replay the walk</button>
+  <button class="ctl" id="retC">second visit</button>
+  <span class="ctlnote">the resting form is only the glyph + count; the tree lives behind the link</span>
+</div>
+
+<pre class="spec"><b>resting</b>       footer line, with the colophon links: glyph 16 × 20 (plan stroke 1 px
+              sumi@.40 straight; walk 1.25 px sumi zigzag beside it) + caption mono 11,
+              solid 1 px underline bero@.70 (link grammar, §5) — “your walk — n steps ·
+              k branches”; branch = a door entered a second time
+<b>the page</b>      /your-walk, colophon-adjacent, 42 rem measure · planned spine: six door
+              nodes 160×32 stroke 1, mono 600 12 titles, vertical descent pitch 52 (§6
+              idiom, sumi ink — doors are structure, not Kamae) · plan line 1 px sumi@.12
+              · steps lane at x 250: node 8×8 filled sumi at its door’s row, revisit
+              offset +24 px right, step numbers mono 10 sumi@.70, ties 1 px sumi@.12 to
+              the door edge · walk edges 1.25 px sumi, head 5×4 · met terms named mono 10
+              sumi@.40 beside their step
+<b>persistence</b>   localStorage, full log across visits · each earlier walk a receded thread
+              (@.40, unnumbered) a lane right of the current one, newest 3 rendered,
+              older collapse to a ledger count · cap 32 walks FIFO
+<b>risk</b>          the resting form states that a walk exists but not what one looks like —
+              the teaching happens only if the door is opened</pre>
+
+<!-- ============================================================ VARIANT D -->
+<h2>D — plan above, walk beneath</h2>
+<p class="commit">Commits to: the gap itself as the resting image — the nav’s straight line
+in the faintest ink, the walk’s zigzag inked beneath it, at the foot of every page.</p>
+
+<div class="mockpage">
+  <div class="fauxhead"></div>
+  <div class="fauxline"></div><div class="fauxline"></div><div class="fauxline short"></div>
+  <div class="strip">
+    <div class="striphead"><span class="l">your walk</span><span class="r" id="cntD">5 steps</span></div>
+    <div id="demD"></div>
+  </div>
+</div>
+<div class="controls">
+  <button class="ctl" id="replayD">replay the walk</button>
+  <button class="ctl" id="retD">second visit</button>
+  <span class="ctlnote">hover a step for its door and met terms · tap pins, outside-tap dismisses ·
+  “second visit”: doors remember at @.70, the thread starts fresh</span>
+</div>
+
+<pre class="spec"><b>placement</b>     footer strip, every page, in-column (42 rem), above the colophon rule ·
+              margin-top 4 rem · top rule 1 px sumi@.12 · padding 12 px 0 8 px · no fixed
+              elements anywhere
+<b>caption</b>       “your walk” mono 11 sumi@.70 left · “n steps” mono 11 sumi@.40 right
+<b>door row</b>      six nav doors, nav order, left→right · node 10×10, stroke 1, fill washi,
+              miter · centers evenly spaced, first/last inset 8 px · plan line 1 px
+              sumi@.12 through centers, behind nodes — the plan is the faintest ink on
+              the page; the walk is what gets inked · labels mono 10, 6 px below,
+              opacity = the node’s
+<b>door ink</b>      never entered sumi@.40 · entered on a past walk sumi@.70 · entered this
+              walk sumi 1.00 — §2’s opacity ladder as time depth; fill always washi;
+              no gold (visiting is reader state, not framework state)
+<b>thread</b>        band starts 14 px below labels · step k = 6×6 filled square sumi 1.00 at
+              its door’s column, y = band top + (k−1)·pitch · pitch 12 (n ≤ 5), else
+              48/(n−1), floor 6 · beyond 9 steps the last 9 render and “⋯ +k” prints
+              mono 10 sumi@.40 at band top-right
+<b>edges</b>         1.25 px sumi, filled head 5×4 miter, every segment — every step is a
+              forward step at equal ink; a revisit appends a new node lower in the same
+              column, never a return arrow (§6’s returns mean revision, which visits
+              don’t have; forward-only made literal)
+<b>met terms</b>     2.5 px dots sumi@.40, 4 px right of the step node, pitch 4, max 4 then
+              “+n” mono 9 @.40 — §7’s met ink
+<b>expansion</b>     hover/focus/tap a step → door label mono 10 sumi@.70 (met names appended
+              @.40) inside the strip, instant (§7’s reveal grammar), zero reflow · tap
+              pins, Escape / outside-tap dismisses, one at a time
+<b>arrival</b>       the new step arrives after the 240 ms page transition as one §4 step ·
+              nothing already at rest moves · reduced motion: instant
+<b>persistence</b>   localStorage <span style="font-weight:600">ho.trail.doors</span> = doors ever entered (persists across
+              visits) · sessionStorage <span style="font-weight:600">ho.trail.walk</span> = [{door, met[]}] — this walk
+              only, cap 64 steps, elided count kept · stores door ids and met-term ids
+              only: no timestamps, no URLs, nothing leaves the browser
+<b>returning</b>     fresh thread; previously entered doors greet at sumi@.70
+<b>empty state</b>   renders from step 1 — six doors and one node · never hidden, never nags</pre>
+
+<hr>
+
+<h2>Recommendation — D</h2>
+<p><strong>D, plan above, walk beneath.</strong></p>
+<p>1. The resting image <em>is</em> the argument. The nav’s straight line prints in the
+faintest ink on the page; the visitor’s zigzag is what gets inked beneath it. The
+framework’s signature reading — the gap between plan and actual tells the real story —
+is legible in one look, labeled, with no interaction required. A needs a tap to give up
+its labels, C needs a page visit, and B shows rhythm but never the gap.</p>
+<p>2. Present everywhere, in the way nowhere. The foot of the page is where a reader
+arrives when they have finished reading — the trail waits there instead of riding the
+viewport. No fixed overlay, no competition with §7’s card for the page’s only elevated
+layer, and ignoring it costs exactly nothing.</p>
+<p>3. The persistence split matches the grammar. Doors carry the long memory by §2’s
+opacity ladder (never entered @.40, entered once @.70, entered this walk 1.00); each
+walk is its own line and dies with the session. The record reads as a footprint, not a
+dossier — and forward-only is literal: a revisit appends a new node, it never draws a
+return.</p>
+<p>4. Shape discipline holds. §6 reserves the koma for steppable work; page visits are
+not work, so the trail spends squares and lines, not pieces. B breaks this; D keeps the
+piece meaning one thing everywhere on the site.</p>
+
+<div class="frozen">
+<h3 style="margin-top:0">Frozen if accepted</h3>
+<pre class="spec">trail          the visitor’s walk renders as a footer strip on every page: planned nav
+               order above, actual walk threaded beneath
+placement      in-column (42 rem measure), above the colophon rule · margin-top 4 rem ·
+               top rule 1 px sumi@.12 · padding 12 px 0 8 px · no fixed elements
+caption        “your walk” mono 11 px sumi@.70 left · “n steps” mono 11 px sumi@.40 right
+door row       six nav doors, nav order, left→right · node 10 × 10 px, stroke 1, fill
+               washi, square corners miter · centers evenly spaced, first/last inset
+               8 px from column edges · plan line 1 px sumi@.12 through centers, behind
+               nodes · labels mono 10 px centered 6 px below, opacity = node’s
+door ink       never entered sumi@.40 · entered a past walk sumi@.70 · entered this
+               walk sumi 1.00 · fill always washi · no gold ever on the trail
+thread         band top = labels + 14 px · step k = 6 × 6 px filled sumi 1.00 at its
+               door’s column, y = band top + (k−1)·pitch · pitch 12 px (n ≤ 5), else
+               48/(n−1) px, floor 6 · &gt; 9 steps: last 9 render, “⋯ +k” mono 10
+               sumi@.40 at band top-right · resting strip height ≤ 128 px
+edges          1.25 px sumi, filled triangle head 5 × 4 miter, every segment · all
+               steps equal ink; revisits append new nodes, never return arrows
+met terms      2.5 px dots sumi@.40, 4 px right of the step node, pitch 4 px, max 4
+               then “+n” mono 9 sumi@.40 (met = pinned reveal dismissed, §7)
+expansion      hover/focus/tap a step node → door label mono 10 sumi@.70, met names
+               appended @.40, inside the strip, instant, zero reflow · tap pins ·
+               Escape / outside-tap dismisses · one at a time
+arrival        new step arrives after the 240 ms page transition as one §4 step
+               (160 ms, cubic-bezier(.2,0,0,1), 8 px rise, seat) · nothing at rest
+               moves · prefers-reduced-motion: instant swap
+persistence    localStorage ho.trail.doors = set of door ids ever entered (across
+               visits) · sessionStorage ho.trail.walk = ordered [{door, met[]}], this
+               walk only, cap 64 steps with elided count kept · door ids and met-term
+               ids only — no timestamps, no URLs, nothing leaves the browser
+returning      fresh thread; previously entered doors greet at sumi@.70
+empty state    renders from step 1 (six doors, one node) · never hidden, never nags
+door names     Framework · Practice · Skills · Writing · Walk · Colophon are
+               placeholders from the spec’s content map — geometry and rules freeze
+               here; names bind at build</pre>
+</div>
+
+<h3>Parked</h3>
+<ul class="parked" style="font-size:.9375rem">
+  <li>The flip on trail nodes — session 9 (parked in advance).</li>
+  <li>The planned-vs-actual arc tree of <em>project</em> history — The Walk’s content, not this trail.</li>
+  <li>A colophon-adjacent “your walk” deep page (variant C’s second half) as a possible v2 appendix behind the strip.</li>
+  <li>Narrow-column behavior (door labels below ~480 px column width) — coherence check.</li>
+  <li>The trail’s dark-mode printing — the dark-ground session.</li>
+  <li>Whether trail label reveals adopt §4’s 160 ms step — rides §7’s identical deferral to the coherence check.</li>
+</ul>
+
+<script>
+(function(){
+  "use strict";
+  var INK={washi:"#eef1ef",sumi:"#1f2123",bero:"#29618e",gold:"#a9832a",
+           s70:"#5d5f60",s40:"#9b9e9d",s12:"#d5d8d7",b70:"#648cab",b40:"#9fb7c8"};
+  var NAV=["Framework","Practice","Skills","Writing","Walk","Colophon"];
+  var WALK=[
+    {door:"Practice",met:[]},
+    {door:"Walk",met:["koma"]},
+    {door:"Skills",met:["kamae"]},
+    {door:"Walk",met:[]},
+    {door:"Framework",met:[]}
+  ];
+  var STEP=160, EASE="cubic-bezier(0.2,0,0,1)", INTERVAL=380;
+  var REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var NS="http://www.w3.org/2000/svg";
+
+  function el(tag,attrs,parent){
+    var e=document.createElementNS(NS,tag);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(x,y,str,fill,cls,anchor,parent){
+    var t=el("text",{x:x,y:y,fill:fill,"class":cls},parent);
+    if(anchor) t.setAttribute("text-anchor",anchor);
+    t.textContent=str;
+    return t;
+  }
+  function mkSvg(parent,w,h){
+    var s=el("svg",{viewBox:"0 0 "+w+" "+h,width:"100%"},null);
+    s.style.maxWidth=w+"px";
+    parent.innerHTML="";
+    parent.appendChild(s);
+    return s;
+  }
+  // §4 step: 8px rise + fade, 160ms, seat. Instant under reduced motion.
+  function arrive(g){
+    if(REDUCED) return;
+    g.classList.add("arrivable");
+    g.style.transform="translateY(8px)";
+    g.style.opacity="0";
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      g.style.transition="transform "+STEP+"ms "+EASE+", opacity "+STEP+"ms "+EASE;
+      g.style.transform="translateY(0)";
+      g.style.opacity="1";
+    });});
+  }
+  // forward edge with filled triangle head (miter), stops at node edges
+  function arrow(parent,x1,y1,x2,y2,color,w,headL,headW,gapS,gapE){
+    var dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);
+    if(L<0.001) return;
+    var ux=dx/L,uy=dy/L;
+    var sx=x1+ux*gapS,sy=y1+uy*gapS;
+    var ex=x2-ux*gapE,ey=y2-uy*gapE;
+    var bx=ex-ux*headL,by=ey-uy*headL;
+    el("line",{x1:sx,y1:sy,x2:bx,y2:by,stroke:color,"stroke-width":w},parent);
+    var px=-uy,py=ux;
+    el("polygon",{points:ex+","+ey+" "+(bx+px*headW/2)+","+(by+py*headW/2)+" "+(bx-px*headW/2)+","+(by-py*headW/2),
+      fill:color,"stroke-linejoin":"miter"},parent);
+  }
+  function komaPath(parent,x,seatY,h,fill){
+    var s=h/100;
+    return el("path",{d:"M37 0 L66 22 L74 100 L0 100 L8 22 Z",
+      transform:"translate("+x+","+(seatY-h)+") scale("+s+")",fill:fill},parent);
+  }
+  function doorInk(door,now,past){
+    if(now.has(door)) return INK.sumi;
+    if(past.has(door)) return INK.s70;
+    return INK.s40;
+  }
+  function enteredNow(n){
+    var s=new Set();
+    for(var k=0;k<n;k++) s.add(WALK[k].door);
+    return s;
+  }
+  var ALL_DOORS=new Set(WALK.map(function(s){return s.door;}));
+  function clearPins(){
+    document.querySelectorAll("[data-pin]").forEach(function(g){
+      delete g.dataset.pin;
+      var l=g.querySelector(".lbl"); if(l) l.style.opacity=0;
+    });
+  }
+  document.addEventListener("click",clearPins);
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") clearPins(); });
+
+  function hoverable(g,lbl){
+    lbl.classList.add("lbl");
+    lbl.style.opacity=0;
+    g.style.cursor="default";
+    g.addEventListener("mouseenter",function(){ lbl.style.opacity=1; });
+    g.addEventListener("mouseleave",function(){ if(!g.dataset.pin) lbl.style.opacity=0; });
+    g.addEventListener("click",function(e){
+      e.stopPropagation();
+      var was=g.dataset.pin;
+      clearPins();
+      if(!was){ g.dataset.pin="1"; lbl.style.opacity=1; }
+    });
+  }
+  function runReplay(state,fn){
+    clearInterval(state.timer);
+    var k=0;
+    fn(0,false);
+    state.timer=setInterval(function(){
+      k++;
+      fn(k,true);
+      if(k>=WALK.length) clearInterval(state.timer);
+    },INTERVAL);
+  }
+
+  /* ------------------------------------------------ variant D ------- */
+  var dState={timer:null,ret:false};
+  function renderD(n,anim){
+    document.getElementById("cntD").textContent=n+(n===1?" step":" steps");
+    var svg=mkSvg(document.getElementById("demD"),640,106);
+    var now=enteredNow(n), past=dState.ret?ALL_DOORS:new Set();
+    var cx=function(i){return 8+i*(624/5);};
+    el("line",{x1:cx(0),y1:11,x2:cx(5),y2:11,stroke:INK.s12,"stroke-width":1},svg);
+    NAV.forEach(function(d,i){
+      var c=doorInk(d,now,past);
+      el("rect",{x:cx(i)-5,y:6,width:10,height:10,fill:INK.washi,stroke:c,"stroke-width":1,
+        "stroke-linejoin":"miter"},svg);
+      txt(cx(i),36,d,c,"m10","middle",svg);
+    });
+    var bandTop=52, pitch=(n<=5)?12:Math.max(6,48/(n-1));
+    var pos=function(k){return {x:cx(NAV.indexOf(WALK[k].door)), y:bandTop+k*pitch};};
+    for(var k=0;k<n;k++){
+      var g=el("g",{},svg), p=pos(k);
+      if(k>0){ var q=pos(k-1); arrow(g,q.x,q.y,p.x,p.y,INK.sumi,1.25,5,4,4,4); }
+      el("rect",{x:p.x-3,y:p.y-3,width:6,height:6,fill:INK.sumi},g);
+      WALK[k].met.forEach(function(m,j){
+        el("circle",{cx:p.x+7+j*4,cy:p.y,r:1.25,fill:INK.s40},g);
+      });
+      var right=p.x<320;
+      var label=WALK[k].door+(WALK[k].met.length?" · met: "+WALK[k].met.join(", "):"");
+      var t=txt(right?p.x+11:p.x-11,p.y+3,label,INK.s70,"m10",right?"start":"end",g);
+      hoverable(g,t);
+      if(anim&&k===n-1) arrive(g);
+    }
+  }
+  renderD(WALK.length,false);
+  document.getElementById("replayD").addEventListener("click",function(){runReplay(dState,renderD);});
+  document.getElementById("retD").addEventListener("click",function(){
+    dState.ret=!dState.ret;
+    this.classList.toggle("on",dState.ret);
+    clearInterval(dState.timer);
+    if(dState.ret) runReplay(dState,renderD); else renderD(WALK.length,false);
+  });
+
+  /* ------------------------------------------------ variant A ------- */
+  var aState={timer:null,expanded:false,n:WALK.length};
+  function renderAcompact(n,anim){
+    var svg=mkSvg(document.getElementById("markA"),84,104);
+    svg.style.width="84px";
+    var now=enteredNow(n);
+    var dc=function(i){return 12+i*16;};
+    el("line",{x1:12,y1:dc(0),x2:12,y2:dc(5),stroke:INK.s12,"stroke-width":1},svg);
+    NAV.forEach(function(d,i){
+      var c=now.has(d)?INK.sumi:INK.s40;
+      el("rect",{x:9,y:dc(i)-3,width:6,height:6,fill:INK.washi,stroke:c,"stroke-width":1},svg);
+    });
+    var px=function(k){return 26+k*11;};
+    for(var k=0;k<n;k++){
+      var g=el("g",{},svg);
+      var x=px(k), y=dc(NAV.indexOf(WALK[k].door));
+      if(k>0){
+        var xq=px(k-1), yq=dc(NAV.indexOf(WALK[k-1].door));
+        arrow(g,xq,yq,x,y,INK.sumi,1,4,3,3,3);
+      }
+      el("rect",{x:x-2.5,y:y-2.5,width:5,height:5,fill:INK.sumi},g);
+      WALK[k].met.forEach(function(m,j){
+        el("circle",{cx:x,cy:y-6-j*4,r:1.25,fill:INK.s40},g);
+      });
+      if(anim&&k===n-1) arrive(g);
+    }
+  }
+  function renderAexpanded(n){
+    document.getElementById("cntAp").textContent=n+(n===1?" step":" steps");
+    var svg=mkSvg(document.getElementById("expA"),240,178);
+    var now=enteredNow(n);
+    var dc=function(i){return 14+i*28;};
+    el("line",{x1:16,y1:dc(0),x2:16,y2:dc(5),stroke:INK.s12,"stroke-width":1},svg);
+    NAV.forEach(function(d,i){
+      var c=now.has(d)?INK.sumi:INK.s40;
+      el("rect",{x:12,y:dc(i)-4,width:8,height:8,fill:INK.washi,stroke:c,"stroke-width":1},svg);
+      txt(28,dc(i)+3,d,c,"m10","start",svg);
+    });
+    var px=function(k){return 128+k*22;};
+    for(var k=0;k<n;k++){
+      var x=px(k), y=dc(NAV.indexOf(WALK[k].door));
+      if(k>0){
+        var xq=px(k-1), yq=dc(NAV.indexOf(WALK[k-1].door));
+        arrow(svg,xq,yq,x,y,INK.sumi,1.25,5,4,4,4);
+      }
+      el("rect",{x:x-3,y:y-3,width:6,height:6,fill:INK.sumi},svg);
+      WALK[k].met.forEach(function(m,j){
+        el("circle",{cx:x,cy:y-7-j*4,r:1.25,fill:INK.s40},svg);
+      });
+    }
+  }
+  function openPanelA(){
+    aState.expanded=true;
+    document.getElementById("markA").style.display="none";
+    var p=document.getElementById("panelA");
+    p.style.display="block";
+    renderAexpanded(aState.n);
+    arrive(p);
+  }
+  function closePanelA(){
+    if(!aState.expanded) return;
+    aState.expanded=false;
+    document.getElementById("panelA").style.display="none";
+    document.getElementById("markA").style.display="block";
+  }
+  renderAcompact(aState.n,false);
+  document.getElementById("markA").addEventListener("click",function(e){e.stopPropagation();openPanelA();});
+  document.getElementById("panelA").addEventListener("click",function(e){e.stopPropagation();});
+  document.addEventListener("click",closePanelA);
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") closePanelA(); });
+  document.getElementById("replayA").addEventListener("click",function(){
+    closePanelA();
+    runReplay(aState,function(k,anim){ aState.n=k; renderAcompact(k,anim); });
+  });
+  document.getElementById("endA").addEventListener("click",function(){
+    clearInterval(aState.timer); closePanelA(); aState.n=0; renderAcompact(0,false);
+  });
+
+  /* ------------------------------------------------ variant B ------- */
+  var bState={timer:null,ret:false};
+  function renderB(n,anim){
+    document.getElementById("cntB").textContent=n+(n===1?" step":" steps");
+    var H=bState.ret?84:58;
+    var svg=mkSvg(document.getElementById("demB"),640,H);
+    var baseY=bState.ret?64:40;
+    if(bState.ret){
+      el("line",{x1:0,y1:22,x2:640,y2:22,stroke:INK.s12,"stroke-width":1},svg);
+      WALK.forEach(function(s,k){ komaPath(svg,6+k*16,22,8,INK.s40); });
+      txt(6+WALK.length*16+8,25,"· 1 earlier walk",INK.s40,"m10","start",svg);
+    }
+    el("line",{x1:0,y1:baseY,x2:640,y2:baseY,stroke:INK.s12,"stroke-width":1},svg);
+    var seen=new Set();
+    for(var k=0;k<n;k++){
+      var g=el("g",{},svg);
+      var x=6+k*21, door=WALK[k].door;
+      var fill=seen.has(door)?INK.s70:INK.sumi;
+      komaPath(g,x,baseY,12,fill);
+      var ax=x+37*0.12, apexY=baseY-12;
+      WALK[k].met.forEach(function(m,j){
+        el("circle",{cx:ax+6+j*4,cy:apexY-1,r:1.25,fill:INK.s40},g);
+      });
+      if(k>0 && NAV.indexOf(door)<NAV.indexOf(WALK[k-1].door)){
+        el("polyline",{points:(ax+2.5)+","+(apexY-4)+" "+(ax-2.5)+","+(apexY-6.5)+" "+(ax+2.5)+","+(apexY-9),
+          fill:"none",stroke:INK.s40,"stroke-width":1},g);
+      }
+      var t=txt(x+4.4,baseY+13,door,INK.s70,"m10","middle",g);
+      hoverable(g,t);
+      seen.add(door);
+      if(anim&&k===n-1) arrive(g);
+    }
+  }
+  renderB(WALK.length,false);
+  document.getElementById("replayB").addEventListener("click",function(){runReplay(bState,renderB);});
+  document.getElementById("retB").addEventListener("click",function(){
+    bState.ret=!bState.ret;
+    this.classList.toggle("on",bState.ret);
+    clearInterval(bState.timer);
+    renderB(WALK.length,false);
+  });
+
+  /* ------------------------------------------------ variant C ------- */
+  var cState={timer:null,ret:false};
+  // footer glyph: plan line + walk zigzag
+  (function(){
+    var svg=mkSvg(document.getElementById("glyC"),16,20);
+    svg.style.width="16px";
+    el("line",{x1:4,y1:2,x2:4,y2:18,stroke:INK.s40,"stroke-width":1},svg);
+    el("polyline",{points:"10,2 13,6 8,10 12,14 9,18",fill:"none",stroke:INK.sumi,
+      "stroke-width":1.25,"stroke-linejoin":"miter"},svg);
+  })();
+  function renderC(n,anim){
+    document.getElementById("linkC").textContent=
+      "your walk — "+n+(n===1?" step":" steps")+" · "+(n>=4?"1 branch":"0 branches");
+    var svg=mkSvg(document.getElementById("demC"),560,318);
+    var now=enteredNow(n), past=cState.ret?ALL_DOORS:new Set();
+    var rowY=function(i){return 10+i*52;};
+    var rowC=function(i){return rowY(i)+16;};
+    el("line",{x1:88,y1:rowY(0)+32,x2:88,y2:rowY(5),stroke:INK.s12,"stroke-width":1},svg);
+    NAV.forEach(function(d,i){
+      var c=doorInk(d,now,past);
+      el("rect",{x:8,y:rowY(i),width:160,height:32,fill:INK.washi,stroke:c,"stroke-width":1,
+        "stroke-linejoin":"miter"},svg);
+      txt(20,rowY(i)+20,d,c,"m12b","start",svg);
+    });
+    // step positions (revisit offsets right)
+    var seenCount={}, P=[];
+    WALK.forEach(function(s,k){
+      var rep=seenCount[s.door]||0;
+      seenCount[s.door]=rep+1;
+      P[k]={x:250+rep*24, y:rowC(NAV.indexOf(s.door))};
+    });
+    // an earlier walk, receded (across-visits rendering)
+    if(cState.ret){
+      txt(420,14,"an earlier walk",INK.s40,"m10","start",svg);
+      var seen2={}, Q=[];
+      WALK.forEach(function(s,k){
+        var rep=seen2[s.door]||0; seen2[s.door]=rep+1;
+        Q[k]={x:430+rep*18, y:rowC(NAV.indexOf(s.door))};
+      });
+      for(var m=0;m<WALK.length;m++){
+        if(m>0) arrow(svg,Q[m-1].x,Q[m-1].y,Q[m].x,Q[m].y,INK.s40,1,4,3,4,4);
+        el("rect",{x:Q[m].x-3,y:Q[m].y-3,width:6,height:6,fill:INK.s40},svg);
+      }
+    }
+    for(var k=0;k<n;k++){
+      var g=el("g",{},svg);
+      el("line",{x1:168,y1:P[k].y,x2:P[k].x-7,y2:P[k].y,stroke:INK.s12,"stroke-width":1},g);
+      if(k>0) arrow(g,P[k-1].x,P[k-1].y,P[k].x,P[k].y,INK.sumi,1.25,5,4,5,5);
+      el("rect",{x:P[k].x-4,y:P[k].y-4,width:8,height:8,fill:INK.sumi},g);
+      txt(P[k].x-8,P[k].y-7,String(k+1),INK.s70,"m10","end",g);
+      if(WALK[k].met.length)
+        txt(P[k].x+12,P[k].y+3,"met: "+WALK[k].met.join(", "),INK.s40,"m10","start",g);
+      if(anim&&k===n-1) arrive(g);
+    }
+  }
+  renderC(WALK.length,false);
+  document.getElementById("replayC").addEventListener("click",function(){runReplay(cState,renderC);});
+  document.getElementById("retC").addEventListener("click",function(){
+    cState.ret=!cState.ret;
+    this.classList.toggle("on",cState.ret);
+    clearInterval(cState.timer);
+    renderC(WALK.length,false);
+  });
+  document.getElementById("linkC").addEventListener("click",function(){
+    var pg=document.getElementById("demC");
+    pg.scrollIntoView({behavior:REDUCED?"auto":"smooth",block:"nearest"});
+  });
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-04</h2>
+  <p>Winner: <strong>D (plan above, walk beneath)</strong>, accepted as recommended.
+  Reasons: the resting image is the framework's signature plan-vs-actual reading
+  itself, legible in one look with no interaction; present on every page and in the
+  way on none. The koma stays off the trail — visits are not steppable work (§6's
+  rule). Values landed in <code>design/basis-of-design.md</code> §8.</p>
+</section>
+
+</body>
+</html>

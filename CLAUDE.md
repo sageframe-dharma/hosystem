@@ -12,12 +12,28 @@ from it and only from it.
 
 Founding / design phase. No build code exists yet. The path:
 
-1. Design sessions 1–9 (spec §6) run from the pre-written prompts in
-   `design/claude-design/prompts/`, one per isolated conversation.
+1. Design sessions 1–9 (spec §6) run here, in this repo — **one fresh session per
+   question** (see "Running a design session" below).
 2. Winners land in `design/basis-of-design.md` as numbers.
 3. Coherence check (one hand-built page, all frozen elements together) →
    design spike in Eleventy against real ingested artifacts.
 4. `KICKSTART.md` builds v1. Its gate checklist must be fully true first.
+
+## Running a design session
+
+When the practitioner says "run design session N":
+
+1. Read `design/claude-design/prompts/session-NN-*.md` and follow it exactly. It is
+   self-contained; do not pull in other context beyond what it and this file say.
+2. Where the prompt says to paste frozen inputs, read them from
+   `design/basis-of-design.md`. If a required landing is missing, stop and say so.
+3. Write the variants page to `design/claude-design/sessions/session-NN-variants.html`
+   and tell the practitioner to open it in a browser.
+4. The practitioner judges. On their pick: append a short session record
+   (winner, reasons, parked items) to the variants file or alongside it, land the
+   frozen values in `design/basis-of-design.md` (status → landed), commit both.
+5. One session per conversation. When it lands, the session ends. The next question
+   gets a fresh session.
 
 ## Rules (compressed — full versions in the spec)
 

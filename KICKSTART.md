@@ -16,7 +16,10 @@ what order, and what to do.
       reference target.
 - [ ] `framework/glossary.md` in `sageframe-no-kaji/ho-system` carries `plain:` cuts
       (the one-sentence hover definitions). This gates v1 content.
-- [ ] Cloudflare DNS for `hosystem.sageframe.net` is ready, or explicitly deferred.
+- [x] Cloudflare DNS for `hosystem.sageframe.net` is ready, or explicitly deferred.
+      **Explicitly deferred, 2026-07-05** — the name currently serves the
+      practitioner's reverse-proxy stack; Cloudflare Pages wiring happens after
+      the pages are done. Out of v1 build scope; build to `_site`, do not deploy.
 
 If any box is unchecked, stop and surface it. Do not improvise past the gate.
 

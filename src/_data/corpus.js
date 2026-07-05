@@ -60,7 +60,15 @@ export default function () {
         githubBase: site.github[source],
         titleFallback: slugOf(rel),
       });
-      return { ...doc, slug: slugOf(rel), url: url(section, rel), section, sourceRepo: source };
+      const repoRel = rel.replace(new RegExp(`^${source}/`), "");
+      return {
+        ...doc,
+        slug: slugOf(rel),
+        url: url(section, rel),
+        section,
+        sourceRepo: source,
+        sourceUrl: `${site.github[source]}/${repoRel}`,
+      };
     });
 
   const walkDocs = renderSet(walkRels, "walk", "sharibako");

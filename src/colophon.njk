@@ -7,7 +7,7 @@ description: "This site's own record. hosystem is built as a Ho System project; 
 ---
 <h1>Colophon</h1>
 
-<p>This site is built as a Ho System project, so its own record renders here — not a
+<p>This site is built as a Ho System project, so its own record renders here—not a
 description of the practice, but the practice's artifacts doing the site's own work. The
 governing test the site holds itself to: every dynamic behavior renders something the
 framework actually does. The trail in the footer is your real walk. The flip is a real state
@@ -17,10 +17,10 @@ change. This page is the site's own construction, on the record.</p>
 <p>The look was decided the way the framework decides design: isolated sessions, one question
 each, landing as explicit numbers in a <strong>Basis of Design</strong>. The piece, the
 palette, the type, the step, the document, the diagram, definition-on-touch, the trail, the
-flip, and the narrow trail — each a session, each frozen, each changed only by a commit that
+flip, and the narrow trail—each a session, each frozen, each changed only by a commit that
 names its reason (the propagation ledger). A coherence check assembled every frozen element;
 a spike validated them in Eleventy against the real corpus. This build ports the frozen
-basis — forward-only, the record intact.</p>
+basis—forward-only, the record intact.</p>
 
 <h2>What it renders, and from where</h2>
 <p>The site authors almost nothing. It ingests the practitioner's corpus at build time and
@@ -30,12 +30,12 @@ renders it verbatim, pinning each source's commit so the build is reproducible:<
   <div class="ledger-row"><span class="ledger-key">ho-system</span><span class="ledger-val">{{ site.manifest.sources["ho-system"].sha | default("—") }} · {{ site.manifest.sources["ho-system"].files | length }} files</span></div>
   <div class="ledger-row"><span class="ledger-key">sharibako</span><span class="ledger-val">{{ site.manifest.sources.sharibako.sha | default("—") }} · {{ site.manifest.sources.sharibako.files | length }} files</span></div>
   <div class="ledger-row"><span class="ledger-key">ingested</span><span class="ledger-val">{{ site.manifest.generated | default("—") }}</span></div>
-  <div class="ledger-row"><span class="ledger-key">fonts</span><span class="ledger-val">self-hosted subsets — no third-party requests</span></div>
+  <div class="ledger-row"><span class="ledger-key">fonts</span><span class="ledger-val">self-hosted subsets—no third-party requests</span></div>
 </div>
 
 <h2>The stack</h2>
 <p>Eleventy · Cloudflare Pages · vanilla JavaScript · static only. No frameworks, no server
 code, no tracking. The chain diagrams are one SVG source generated at build time. The trail
-is localStorage only — nothing leaves your browser.</p>
+is localStorage only—nothing leaves your browser.</p>
 
 <p class="caption">Colophon v0. As the site's own build hos close, they land here.</p>

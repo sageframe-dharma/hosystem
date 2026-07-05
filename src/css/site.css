@@ -161,7 +161,8 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .door-card p { margin: 0 0 0.5rem; }
 .door-card .go { font-family: var(--mono); font-size: 0.8125rem; }
 
-/* ── index lists (Framework / Skills / Walk / Writing) ─────────────────────── */
+/* ── index lists (Framework / Skills / Walk / Writing) — terse chrome (constraint #0);
+      inks from §2 tokens, type from §3 tokens, rules 1px sumi@.12 (§2 ladder) ───────── */
 .doc-list { list-style: none; padding: 0; margin: 1.5rem 0; }
 .doc-list li { border-top: 1px solid var(--sumi-12); padding: 0.6rem 0; margin: 0; }
 .doc-list li:last-child { border-bottom: 1px solid var(--sumi-12); }

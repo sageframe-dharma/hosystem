@@ -40,7 +40,7 @@ never silently.
 | 8 | the trail | landed 2026-07-04 | [§8](#8--the-trail) |
 | 9 | the flip | landed 2026-07-04 | [§9](#9--the-flip) |
 | 10 | the threaded split | v2 — not yet open | — |
-| 11 | the narrow trail | open | — |
+| 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
 
 ## 1 — the piece
 
@@ -379,6 +379,35 @@ firing list (final)
               the canonical chain diagram (§6: gold never appears there); the favicon
               (§1: front face, frozen); anything on hover, scroll, or emphasis
 ```
+
+## 11 — the narrow trail
+
+_Landed 2026-07-05. Winner: variant A amended at judgment (A′) — A's frame with
+B's right-angle graphing. Session record:
+`claude-design/sessions/session-11-variants.html`._
+
+Below a 480 px column the trail stays §8's object with these numbers:
+
+```
+breakpoint     one: column < 480 px (≥ 480 px is §8, frozen)
+labels         mono 9 · this-walk doors only · clamped to the column
+band top       door bottom + 36 px (16 px label slot + 20 px air)
+pitch          14 px (n ≤ 5) · else 56/(n−1), floor 7
+edges          right-angle routing (amended at judgment — B's language on A's
+               frame): node bottom-center, down to a lane at mid-pitch, across,
+               down into the next node's top-center · head 4 × 4 · no segment
+               ever travels at a node's y · equal-x steps: straight vertical,
+               bottom-center → top-center
+met dots       first dot 6 px off the node edge · row grammar per §8
+caption        one left line "your walk · n steps" · no right caption below 480
+expansion      in the clearance band (band top − 10 px, clamped 4 px)
+resting strip  ≤ 160 px
+everything else §8 verbatim
+```
+
+**Open (raised at this landing):** whether the right-angle edge language extends
+to the ≥480 px trail — a §8 propagation if taken; §8's angled thread stands until
+it is.
 
 ## Propagation ledger
 

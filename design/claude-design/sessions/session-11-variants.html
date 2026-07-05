@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — session 11 · the narrow trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --washi:#eef1ef; --sumi:#1f2123; --bero:#29618e; --gold:#a9832a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--washi); color:var(--sumi);
+    font:400 1.0625rem/1.65 'Source Serif 4','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+    padding:3rem 1.5rem 6rem;
+  }
+  main{max-width:66rem;margin:0 auto}
+  h1{font-size:1.75rem;line-height:1.25;font-weight:600;margin:0 0 1rem}
+  h2{font-size:1.375rem;line-height:1.3;font-weight:600;margin:3.5rem 0 .5rem}
+  h3{font-size:1.125rem;line-height:1.4;font-weight:600;margin:2rem 0 .5rem}
+  p{margin:0 0 1.25rem}
+  .mono{font-family:'Source Code Pro',monospace}
+  .meta{font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.5;color:rgba(31,33,35,.7);margin-bottom:.5rem}
+  .commit{font-style:italic;margin:0 0 .75rem}
+  ul.fixes{list-style:none;padding:0;margin:0 0 1rem;font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.6;color:rgba(31,33,35,.7)}
+  ul.fixes li::before{content:"· "}
+  .controls{display:flex;align-items:center;gap:1.25rem;margin:0 0 1rem;font-family:'Source Code Pro',monospace;font-size:.8125rem}
+  button{
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;color:var(--sumi);
+    background:var(--washi);border:1px solid rgba(31,33,35,.4);border-radius:0;
+    padding:.3rem .9rem;cursor:pointer;
+  }
+  button:hover{border-color:var(--sumi)}
+  label.msr{color:rgba(31,33,35,.7);cursor:pointer;user-select:none}
+  .demos{display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex-start;margin-bottom:1rem}
+  figure{margin:0}
+  figcaption{font-family:'Source Code Pro',monospace;font-size:.8125rem;color:rgba(31,33,35,.7);margin-top:.5rem}
+  .frame{border:1px solid rgba(31,33,35,.25);background:var(--washi);padding:0}
+  .ghost{font-size:.9375rem;line-height:1.55;margin:14px 0 0;color:rgba(31,33,35,.85)}
+  .strip{margin-top:4rem;border-top:1px solid rgba(31,33,35,.12);padding:12px 0 8px}
+  .strip svg{display:block}
+  svg text{user-select:none}
+  @keyframes stepin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .arrive{animation:stepin 160ms cubic-bezier(.2,0,0,1) both}
+  @media (prefers-reduced-motion: reduce){.arrive{animation:none}}
+  pre.frozen{
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.6;
+    border:1px solid rgba(31,33,35,.4);padding:1rem 1.25rem;overflow-x:auto;margin:1rem 0 2rem;
+    background:var(--washi);white-space:pre;
+  }
+  ul.parked{list-style:none;padding:0;margin:0;font-size:.9375rem}
+  ul.parked li::before{content:"— "}
+  hr{border:none;border-top:1px solid rgba(31,33,35,.12);margin:3rem 0}
+</style>
+</head>
+<body>
+<main>
+
+<h1>the narrow trail — session 11</h1>
+
+<p>One question: how the trail renders when the column is narrower than ~480&nbsp;px.
+§8&rsquo;s reading-width geometry is frozen and untouched; this page designs only below it.
+The coherence check rejected the first narrow rendering on three counts — the thread sat
+too tight to the door squares, edge lines crossed the met dots, and the captions collided.
+Every variant below fixes all three. They differ in how.</p>
+
+<p class="meta">replayed visit — Practice → Walk → Skills → Walk → Framework · met terms simulated per §7
+· Colophon greets from a past visit (sumi@.70) · gold never appears on the trail</p>
+
+<p class="meta">hover a step for its door · tap to pin · Escape or outside-tap dismisses ·
+&ldquo;measures&rdquo; draws the clearance ruler and one met-dot row in bero (demo chrome, not trail ink)
+· replay honors prefers-reduced-motion</p>
+
+<!-- ================================================================ A -->
+<h2>A — the candidate, given air</h2>
+<p class="commit">Commits to §8&rsquo;s own grammar, thinned: only doors entered this walk keep
+their names; the thread drops 20&nbsp;px clear of the label row; edges anchor bottom→top so no
+edge can travel along a met-dot row; the two captions merge into one line.</p>
+<ul class="fixes">
+  <li>clearance — band top = door bottom + 36 px (16 px label slot + 20 px air; §8 was labels + 14) · labels mono 9 (from 10), this-walk doors only</li>
+  <li>crossing — edges leave a node&rsquo;s bottom-center and land on the next node&rsquo;s top-center: the dot row at every node&rsquo;s y is geometrically unreachable · first dot 6 px off the node edge</li>
+  <li>captions — one left line, &ldquo;your walk · n steps&rdquo;; the right caption does not render below 480</li>
+</ul>
+<div class="controls" data-variant="A"><button>replay</button><label class="msr"><input type="checkbox"> measures</label></div>
+<div class="demos">
+  <figure><div class="frame" data-trail="A" data-w="420"></div><figcaption>420 px column</figcaption></figure>
+  <figure><div class="frame" data-trail="A" data-w="360"></div><figcaption>360 px column</figcaption></figure>
+</div>
+
+<!-- ================================================================ B -->
+<h2>B — the quiet strip</h2>
+<p class="commit">Commits to no resting labels at all — every door names itself only on touch;
+with the label row gone the strip is the shortest of the four, and orthogonal edges keep every
+run between rows, off the dot lines.</p>
+<ul class="fixes">
+  <li>clearance — band top = door bottom + 18 px, with nothing between the squares and the thread</li>
+  <li>crossing — edges route down · across · down (lane at mid-pitch, head 4 × 4): no segment ever travels at a node&rsquo;s y · pitch 14</li>
+  <li>captions — &ldquo;n steps&rdquo; only, right; &ldquo;your walk&rdquo; is spoken by expansion, not at rest</li>
+</ul>
+<div class="controls" data-variant="B"><button>replay</button><label class="msr"><input type="checkbox"> measures</label></div>
+<div class="demos">
+  <figure><div class="frame" data-trail="B" data-w="420"></div><figcaption>420 px column</figcaption></figure>
+  <figure><div class="frame" data-trail="B" data-w="360"></div><figcaption>360 px column</figcaption></figure>
+</div>
+
+<!-- ================================================================ C -->
+<h2>C — the abbreviated row</h2>
+<p class="commit">Commits to keeping all six doors named, at two characters each — and moves the
+met dots off the thread entirely, into a right-edge ledger gutter no edge can reach.</p>
+<ul class="fixes">
+  <li>clearance — band top = door bottom + 31 px (labels mono 9 + 16 px air)</li>
+  <li>crossing — met dots live in a 24 px right gutter beyond the last door column; edges span door columns only and cannot reach them</li>
+  <li>captions — stacked left (&ldquo;your walk&rdquo; over &ldquo;n steps&rdquo;); the right side is empty</li>
+</ul>
+<div class="controls" data-variant="C"><button>replay</button><label class="msr"><input type="checkbox"> measures</label></div>
+<div class="demos">
+  <figure><div class="frame" data-trail="C" data-w="420"></div><figcaption>420 px column</figcaption></figure>
+  <figure><div class="frame" data-trail="C" data-w="360"></div><figcaption>360 px column</figcaption></figure>
+</div>
+
+<!-- ================================================================ D -->
+<h2>D — only the present is named</h2>
+<p class="commit">Commits to the most air and the least ink: 16&nbsp;px pitch, only the current
+door labeled, met terms as a count, a single &ldquo;your walk&rdquo; caption.</p>
+<ul class="fixes">
+  <li>clearance — band top = door bottom + 36 px; pitch 16 (the tallest, airiest thread)</li>
+  <li>crossing — bottom→top edge anchoring (as A), and the dots become a &ldquo;·n&rdquo; count that sits where they sat</li>
+  <li>captions — &ldquo;your walk&rdquo; alone, left; the step count moves to expansion</li>
+</ul>
+<div class="controls" data-variant="D"><button>replay</button><label class="msr"><input type="checkbox"> measures</label></div>
+<div class="demos">
+  <figure><div class="frame" data-trail="D" data-w="420"></div><figcaption>420 px column</figcaption></figure>
+  <figure><div class="frame" data-trail="D" data-w="360"></div><figcaption>360 px column</figcaption></figure>
+</div>
+
+<hr>
+
+<!-- ================================================================ recommendation -->
+<h2>Recommendation — A</h2>
+
+<p><strong>1. Continuity.</strong> At the breakpoint the trail must read as the same object,
+and A is the only variant where 479&nbsp;px reads as 480 with the numbers moved: same diagonal
+thread, same full-name labels, same met-dot grammar, same caption content. B changes the
+thread&rsquo;s geometric language (orthogonal runs), C changes both the naming and the dot
+grammar, D deletes the step count — half of what the caption says.</p>
+
+<p><strong>2. The crossing fix is structural, not tuned.</strong> Anchoring edges
+bottom-center → top-center makes an edge on a met-dot row geometrically impossible for any
+walk at any n — not just the replayed visit. The other two fixes are single numbers
+(+20&nbsp;px of air, one merged caption), so the frozen surface is as small as it can be. And
+the label rule is the coherence check&rsquo;s own candidate, which §8&rsquo;s rejection note
+says stands: fewer names is also exactly what clears the row at 360&nbsp;px.</p>
+
+<p><strong>3. It keeps the resting form self-carrying.</strong> Plan above (six squares, the
+plan line), walk beneath (the thread), the walked doors named — one look still says
+plan-vs-walk without a single touch. B asks the reader to touch before anything is named;
+C&rsquo;s two-letter doors are terse but not clear, which is the wrong half of the voice rule.</p>
+
+<p>If 360&nbsp;px still feels crowded at judgment, B is the principled retreat — quietest and
+shortest — at the cost of an unnamed resting row.</p>
+
+<h3>Frozen if accepted</h3>
+<pre class="frozen">narrow trail   variant A — the candidate, given air
+breakpoint     column &lt; 480 px → this section · ≥ 480 px renders §8 verbatim ·
+               one breakpoint, no second stage · column = content measure, not viewport
+unchanged      strip placement, top rule, padding 12 px 0 8 px, margin-top 4 rem,
+               caption type sizes, door row (10 × 10 nodes, stroke 1, plan line,
+               first/last inset 8 px), door ink .40/.70/1.00, step node 6 × 6 sumi,
+               edge ink 1.25 px + filled head 5 × 4 miter, met dot 2.5 px sumi@.40
+               pitch 4 px max 4 then &quot;+n&quot;, &gt; 9 steps elision, expansion model,
+               arrival motion, persistence, empty state — all §8 values
+labels         only doors entered this walk (current included) are named at rest ·
+               mono 9 px (from 10), 6 px below the node, centered, clamped to the
+               column (edge-aligned at first/last) · past-walk and never-entered
+               doors unlabeled at rest · every door still names itself on expansion
+clearance      thread band top = door-node bottom + 36 px
+               (16 px label slot + 20 px air; §8 was labels + 14)
+pitch          14 px (n ≤ 5) · else 56/(n−1) px, floor 7 px
+edges          anchored bottom-center → top-center of step nodes, never side- or
+               center-anchored — no edge can travel along any node&#39;s met-dot row
+met dots       first dot center 6 px right of the node&#39;s right edge (§8: 4 px),
+               at node y · counts, pitch, &quot;+n&quot; per §8
+caption        one line, left only: &quot;your walk&quot; mono 11 sumi@.70 +
+               &quot; · n steps&quot; mono 11 sumi@.40 · the right caption does not render
+               below 480 · count updates with the arriving step
+expansion      renders in the clearance band: baseline = band top − 10 px,
+               left-aligned to the step&#39;s column, clamped 4 px from column edges
+height         resting strip ≤ 160 px at narrow</pre>
+
+<h3>Parked</h3>
+<ul class="parked">
+  <li>the ≥ 480 px form — frozen, §8; not reopened here.</li>
+  <li>the flip on trail nodes — §9 governs; nothing on the trail flips.</li>
+  <li>a &ldquo;your walk&rdquo; deep page — v2.</li>
+  <li>bottom→top edge anchoring at reading width — the same crossing is geometrically possible at 42 rem; a new ho if it is ever seen in the wild.</li>
+  <li>below ~340 px (fold-phone widths) — 360 px is the floor exercised here.</li>
+  <li>the trail&rsquo;s dark-mode printing — §2 defers dark mode wholesale.</li>
+</ul>
+
+<!-- ================================================================ A′ (amended at judgment) -->
+<h2>A′ — amended at judgment: A&rsquo;s frame, B&rsquo;s graphing</h2>
+<p class="commit">Practitioner&rsquo;s cut (2026-07-05): keep A&rsquo;s labels, clearances,
+met-dot grammar, and caption — draw the thread with B&rsquo;s right-angle routing
+(down · across · down, lane at mid-pitch, head 4 × 4) instead of the angled lines.
+No segment ever travels at a node&rsquo;s y; equal-x steps stay a straight vertical drop.</p>
+<div class="controls" data-variant="AP"><button>replay</button><label class="msr"><input type="checkbox"> measures</label></div>
+<div class="demos">
+  <figure><div class="frame" data-trail="AP" data-w="420"></div><figcaption>420 px column</figcaption></figure>
+  <figure><div class="frame" data-trail="AP" data-w="360"></div><figcaption>360 px column</figcaption></figure>
+</div>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  var SUMI='#1f2123', BERO='#29618e', WASHI='#eef1ef';
+  var MONO="'Source Code Pro',monospace";
+  var DOORS=['Framework','Practice','Skills','Writing','Walk','Colophon'];
+  var ABBR=['Fr','Pr','Sk','Wr','Wa','Co'];
+  var WALK=[
+    {d:1,met:['kamae']},
+    {d:4,met:['ho','dandori']},
+    {d:2,met:[]},
+    {d:4,met:['shu-ha-ri']},
+    {d:0,met:['kata','seed','koma']}
+  ];
+  var PAST={5:true}; // Colophon entered on a past visit → greets at .70
+
+  var VARIANTS={
+    A:{labels:'walked', labelSize:9, bandGap:36, pitch:14, edges:'vt',     met:'row',    metGap:6, caption:'combined', insetR:13, doorTap:false},
+    AP:{labels:'walked',labelSize:9, bandGap:36, pitch:14, edges:'ortho',  met:'row',    metGap:6, caption:'combined', insetR:13, doorTap:false},
+    B:{labels:'none',   labelSize:10,bandGap:18, pitch:14, edges:'ortho',  met:'row',    metGap:4, caption:'count',    insetR:13, doorTap:true },
+    C:{labels:'abbr',   labelSize:9, bandGap:31, pitch:12, edges:'center', met:'gutter', metGap:4, caption:'stacked',  insetR:28, doorTap:false},
+    D:{labels:'current',labelSize:10,bandGap:36, pitch:16, edges:'vt',     met:'count',  metGap:5, caption:'name',     insetR:13, doorTap:false}
+  };
+
+  var TRAILS=[]; // all instances, for outside-click / escape
+
+  function el(n,a,parent){
+    var e=document.createElementNS(NS,n);
+    for(var k in a) e.setAttribute(k,a[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent,x,y,s,o){
+    o=o||{};
+    var t=el('text',{x:x,y:y,'font-family':MONO,'font-size':(o.size||10),
+      fill:(o.fill||SUMI),'fill-opacity':(o.op==null?1:o.op),
+      'text-anchor':(o.anchor||'start')},parent);
+    t.textContent=s;
+    return t;
+  }
+  function cnt(m){return m===1?'1 step':m+' steps';}
+  function lw(s,size){return s.length*size*0.6;} // mono advance = 0.6 em
+
+  function makeTrail(mount,cfg,W){
+    // greeked prose + strip
+    var p=document.createElement('p'); p.className='ghost';
+    p.textContent='The ho closes when its deliverable is committed. The next session opens in clean context, against the next ho.';
+    mount.appendChild(p);
+    var strip=document.createElement('div'); strip.className='strip'; mount.appendChild(strip);
+
+    var capH = cfg.caption==='stacked' ? 30 : 16;
+    var doorY = capH+13, doorB = doorY+5;
+    var bandTop = doorB + cfg.bandGap;
+    var pitch = cfg.pitch;                       // n = 5 ≤ 5 in the replayed visit
+    var H = bandTop + 4*pitch + 3 + 9;
+    var xs=[]; for(var i=0;i<6;i++) xs.push(13 + i*(W-13-cfg.insetR)/5);
+
+    var svg=el('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H},null);
+    strip.appendChild(svg);
+
+    var state={m:5, measures:false, timers:[], pinned:null, overlay:null};
+
+    function stepXY(k){ return [ xs[WALK[k-1].d], bandTop+(k-1)*pitch ]; }
+
+    function head(g,tx,ty,ux,uy,len,wid){
+      var bx=tx-ux*len, by=ty-uy*len, px=-uy, py=ux;
+      el('polygon',{points:tx+','+ty+' '+(bx+px*wid/2)+','+(by+py*wid/2)+' '+(bx-px*wid/2)+','+(by-py*wid/2),
+        fill:SUMI,'stroke-miterlimit':10},g);
+      return [bx,by];
+    }
+
+    function drawEdge(g,x1,y1,x2,y2){
+      var b,dx,dy,L,ux,uy,p1,p2;
+      if(cfg.edges==='ortho' && x1!==x2){
+        var lane=y1+pitch/2;
+        b=head(g,x2,y2-3,0,1,4,4);
+        el('path',{d:'M'+x1+','+(y1+3)+' L'+x1+','+lane+' L'+x2+','+lane+' L'+x2+','+b[1],
+          fill:'none',stroke:SUMI,'stroke-width':1.25,'stroke-miterlimit':10},g);
+        return;
+      }
+      if(cfg.edges==='center'){
+        dx=x2-x1; dy=y2-y1; L=Math.hypot(dx,dy); ux=dx/L; uy=dy/L;
+        p1=[x1+ux*4, y1+uy*4]; p2=[x2-ux*4, y2-uy*4];
+      }else{ // 'vt' (and ortho with equal x): bottom-center → top-center
+        p1=[x1,y1+3]; p2=[x2,y2-3];
+      }
+      dx=p2[0]-p1[0]; dy=p2[1]-p1[1]; L=Math.hypot(dx,dy); ux=dx/L; uy=dy/L;
+      b=head(g,p2[0],p2[1],ux,uy,5,4);
+      el('line',{x1:p1[0],y1:p1[1],x2:b[0],y2:b[1],stroke:SUMI,'stroke-width':1.25},g);
+    }
+
+    function drawMet(g,x,y,met){
+      if(!met.length) return;
+      var n=Math.min(met.length,4), j, cx;
+      if(cfg.met==='row'){
+        for(j=0;j<n;j++){
+          cx=x+3+cfg.metGap+1.25+j*4;
+          el('circle',{cx:cx,cy:y,r:1.25,fill:SUMI,'fill-opacity':.4},g);
+        }
+        if(met.length>4) txt(g,x+3+cfg.metGap+n*4+2,y+3,'+'+(met.length-4),{size:9,op:.4});
+      }else if(cfg.met==='gutter'){
+        for(j=0;j<n;j++){
+          cx=W-4-1.25-j*4;
+          el('circle',{cx:cx,cy:y,r:1.25,fill:SUMI,'fill-opacity':.4},g);
+        }
+        if(met.length>4) txt(g,W-4-1.25-n*4-2,y+3,'+'+(met.length-4),{size:9,op:.4,anchor:'end'});
+      }else if(cfg.met==='count'){
+        txt(g,x+3+cfg.metGap,y+3,'·'+met.length,{size:9,op:.4});
+      }
+    }
+
+    function drawMeasures(){
+      var g=el('g',{},svg);
+      var mx=(xs[2]+xs[3])/2;
+      el('line',{x1:mx,y1:doorB,x2:mx,y2:bandTop,stroke:BERO,'stroke-width':1},g);
+      el('line',{x1:mx-3,y1:doorB,x2:mx+3,y2:doorB,stroke:BERO,'stroke-width':1},g);
+      el('line',{x1:mx-3,y1:bandTop,x2:mx+3,y2:bandTop,stroke:BERO,'stroke-width':1},g);
+      txt(g,mx+5,(doorB+bandTop)/2+3,cfg.bandGap+'px',{size:9,fill:BERO});
+      var y2=bandTop+pitch; // step 2's row: Walk, two met dots
+      el('line',{x1:4,y1:y2,x2:W-4,y2:y2,stroke:BERO,'stroke-width':.75,
+        'stroke-dasharray':'2 3','stroke-opacity':.7},g);
+      txt(g,W-4,y2-4,'met-dot row — kept clear',{size:9,fill:BERO,anchor:'end'});
+    }
+
+    function clearExp(){
+      if(state.overlay) state.overlay.innerHTML='';
+    }
+    function showExpStep(k){
+      clearExp();
+      var s=WALK[k-1], name=DOORS[s.d];
+      var metStr=s.met.length?' · '+s.met.join(', '):'';
+      var wEst=lw(name+metStr,10);
+      var ey=bandTop-(cfg.bandGap<=18?6:10);
+      var ex=Math.min(Math.max(stepXY(k)[0],4),W-4-wEst); if(wEst>W-8) ex=4;
+      var t=el('text',{x:ex,y:ey,'font-family':MONO,'font-size':10,fill:SUMI},state.overlay);
+      var a=el('tspan',{'fill-opacity':.7},t); a.textContent=name;
+      if(metStr){ var bsp=el('tspan',{'fill-opacity':.4},t); bsp.textContent=metStr; }
+    }
+    function showExpDoor(i){
+      clearExp();
+      var name=DOORS[i], w=lw(name,10);
+      var x=xs[i], anchor='middle';
+      if(x-w/2<1){x=0;anchor='start';} else if(x+w/2>W-1){x=W;anchor='end';}
+      txt(state.overlay,x,doorB+14,name,{size:10,op:.7,anchor:anchor});
+    }
+
+    function render(m,animate){
+      state.m=m; state.pinned=null;
+      svg.innerHTML='';
+      var walked={}, k, i;
+      for(k=0;k<m;k++) walked[WALK[k].d]=true;
+      var cur = m>0 ? WALK[m-1].d : null;
+
+      // ---- caption
+      var t,tsp;
+      if(cfg.caption==='combined'){
+        t=el('text',{x:0,y:10,'font-family':MONO,'font-size':11,fill:SUMI},svg);
+        tsp=el('tspan',{'fill-opacity':.7},t); tsp.textContent='your walk';
+        if(m>0){ tsp=el('tspan',{'fill-opacity':.4},t); tsp.textContent=' · '+cnt(m); }
+      }else if(cfg.caption==='count'){
+        if(m>0) txt(svg,W,10,cnt(m),{size:11,op:.4,anchor:'end'});
+      }else if(cfg.caption==='stacked'){
+        txt(svg,0,10,'your walk',{size:11,op:.7});
+        if(m>0) txt(svg,0,24,cnt(m),{size:10,op:.4});
+      }else{ // 'name'
+        txt(svg,0,10,'your walk',{size:11,op:.7});
+      }
+
+      // ---- plan line (behind nodes)
+      el('line',{x1:xs[0],y1:doorY,x2:xs[5],y2:doorY,stroke:SUMI,'stroke-opacity':.12,'stroke-width':1},svg);
+
+      // ---- doors + labels
+      for(i=0;i<6;i++){
+        var op = walked[i] ? 1 : (PAST[i] ? .7 : .4);
+        el('rect',{x:xs[i]-5,y:doorY-5,width:10,height:10,fill:WASHI,stroke:SUMI,
+          'stroke-opacity':op,'stroke-width':1,'stroke-miterlimit':10},svg);
+        var show=false, lbl=DOORS[i], lop=op;
+        if(cfg.labels==='walked'){ show=!!walked[i]; lop=1; }
+        else if(cfg.labels==='abbr'){ show=true; lbl=ABBR[i]; }
+        else if(cfg.labels==='current'){ show=(i===cur); lop=1; }
+        if(show){
+          var size=cfg.labelSize, w=lw(lbl,size), lx=xs[i], anchor='middle';
+          if(lx-w/2<1){lx=0;anchor='start';} else if(lx+w/2>W-1){lx=W;anchor='end';}
+          txt(svg,lx,doorB+6+Math.round(size*0.78),lbl,{size:size,op:lop,anchor:anchor});
+        }
+        if(cfg.doorTap){
+          el('rect',{x:xs[i]-8,y:doorY-8,width:16,height:16,fill:'transparent',
+            cursor:'pointer','data-door':i},svg);
+        }
+      }
+
+      // ---- steps
+      for(k=1;k<=m;k++){
+        var g=el('g',{},svg);
+        if(animate && k===m) g.setAttribute('class','arrive');
+        var xy=stepXY(k), x=xy[0], y=xy[1];
+        if(k>1){ var pq=stepXY(k-1); drawEdge(g,pq[0],pq[1],x,y); }
+        el('rect',{x:x-3,y:y-3,width:6,height:6,fill:SUMI},g);
+        drawMet(g,x,y,WALK[k-1].met);
+        el('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',
+          cursor:'pointer','data-step':k},g);
+      }
+
+      if(state.measures) drawMeasures();
+      state.overlay=el('g',{},svg);
+    }
+
+    // ---- interaction: hover = transient, tap = pin, per §8
+    svg.addEventListener('mouseover',function(e){
+      if(state.pinned) return;
+      var d=e.target.dataset||{};
+      if(d.step) showExpStep(+d.step);
+      else if(d.door) showExpDoor(+d.door);
+    });
+    svg.addEventListener('mouseout',function(e){
+      if(state.pinned) return;
+      var d=e.target.dataset||{};
+      if(d.step||d.door) clearExp();
+    });
+    svg.addEventListener('click',function(e){
+      var d=e.target.dataset||{};
+      var key = d.step ? 's'+d.step : (d.door ? 'd'+d.door : null);
+      if(!key) return;
+      e.stopPropagation();
+      if(state.pinned===key){ state.pinned=null; clearExp(); }
+      else{
+        state.pinned=key;
+        if(d.step) showExpStep(+d.step); else showExpDoor(+d.door);
+      }
+    });
+
+    function replay(){
+      state.timers.forEach(clearTimeout); state.timers=[];
+      clearExp(); state.pinned=null;
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        render(5,false); return;      // instant swap fallback, §4
+      }
+      render(0,false);                // empty state: six doors, caption
+      var k;
+      for(k=1;k<=5;k++){
+        (function(kk){
+          state.timers.push(setTimeout(function(){ render(kk,true); },
+            240 + (kk-1)*380));       // 240 ms page transition, then the 380 ms beat
+        })(k);
+      }
+    }
+    function setMeasures(on){ state.measures=on; render(state.m,false); }
+    function dismiss(){ if(state.pinned){state.pinned=null; clearExp();} else clearExp(); }
+
+    render(5,false);                  // resting form, one look
+    var inst={svg:svg, replay:replay, setMeasures:setMeasures, dismiss:dismiss};
+    TRAILS.push(inst);
+    return inst;
+  }
+
+  // ---- build all demos
+  var groups={};
+  document.querySelectorAll('.frame[data-trail]').forEach(function(mount){
+    var v=mount.getAttribute('data-trail'), W=+mount.getAttribute('data-w');
+    mount.style.width=W+'px';
+    var inst=makeTrail(mount,VARIANTS[v],W);
+    (groups[v]=groups[v]||[]).push(inst);
+  });
+  document.querySelectorAll('.controls[data-variant]').forEach(function(ctrl){
+    var v=ctrl.getAttribute('data-variant');
+    ctrl.querySelector('button').addEventListener('click',function(){
+      groups[v].forEach(function(t){t.replay();});
+    });
+    ctrl.querySelector('input').addEventListener('change',function(e){
+      groups[v].forEach(function(t){t.setMeasures(e.target.checked);});
+    });
+  });
+
+  // ---- outside-tap / Escape dismiss, per §8
+  document.addEventListener('click',function(e){
+    TRAILS.forEach(function(t){ if(!t.svg.contains(e.target)) t.dismiss(); });
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') TRAILS.forEach(function(t){t.dismiss();});
+  });
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-05</h2>
+  <p>Winner: <strong>A′ — A amended at judgment with B&rsquo;s graphing</strong>
+  (&ldquo;keep the labels, but do the squares and right-angle lines instead of the
+  angled lines&rdquo;). A&rsquo;s labels, clearances, met-dot grammar, and merged
+  caption stand; the thread routes orthogonally (down · across · down, lane at
+  mid-pitch), which subsumes A&rsquo;s crossing fix — no segment ever travels at a
+  node&rsquo;s y. The A′ demo above shows the amended values live at 420 and 360 px.
+  Raised to the practitioner, left open: whether the right-angle language extends to
+  the ≥480 px trail (a §8 propagation). Values landed in
+  <code>design/basis-of-design.md</code> §11.</p>
+</section>
+
+</body>
+</html>

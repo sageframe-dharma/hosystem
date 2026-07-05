@@ -306,8 +306,12 @@ thread         band top = labels + 14 px · step k = 6 × 6 px filled sumi 1.00 
                door's column, y = band top + (k−1)·pitch · pitch 12 px (n ≤ 5), else
                48/(n−1) px, floor 6 · > 9 steps: last 9 render, "⋯ +k" mono 10
                sumi@.40 at band top-right · resting strip height ≤ 128 px
-edges          1.25 px sumi, filled triangle head 5 × 4 miter, every segment · all
-               steps equal ink; revisits append new nodes, never return arrows
+edges          right-angle routing (propagated 2026-07-05, see ledger): node
+               bottom-center, down to a lane at mid-pitch, across, down into the
+               next node's top-center · equal-x steps straight vertical,
+               bottom-center → top-center · no segment ever travels at a node's y
+               · 1.25 px sumi, filled triangle head 5 × 4 miter, every segment ·
+               all steps equal ink; revisits append new nodes, never return arrows
 met terms      2.5 px dots sumi@.40, 4 px right of the step node, pitch 4 px, max 4
                then "+n" mono 9 sumi@.40 (met = pinned reveal dismissed, §7)
 expansion      hover/focus/tap a step node → door label mono 10 sumi@.70, met names
@@ -405,9 +409,8 @@ resting strip  ≤ 160 px
 everything else §8 verbatim
 ```
 
-**Open (raised at this landing):** whether the right-angle edge language extends
-to the ≥480 px trail — a §8 propagation if taken; §8's angled thread stands until
-it is.
+**Resolved (2026-07-05):** the right-angle edge language extends to the ≥480 px
+trail — §8 propagated, see the ledger. The trail draws one way at every width.
 
 ## Propagation ledger
 
@@ -415,3 +418,4 @@ it is.
 |---|---|---|---|
 | 2026-07-04 | §9 the flip | duration 160 → 240 ms; easing one whole-flip curve → symmetric halves (collapse cubic-bezier(0.4, 0, 1, 1) over 0–120 ms, land cubic-bezier(0, 0, 0.2, 1) over 120–240 ms); face swap 32 → 120 ms; adjacent tints cut at 120 ms | Practitioner at the coherence check: at 160 ms the turn was illegible — "I don't get to see the back." The flip is the site's one kinetic signature and must read as a physical turn. Amended values seen moving in the coherence page's amendment demo. |
 | 2026-07-04 | §7 timing | card arrival instant (0 ms) → one §4 step (160 ms); dismissal stays instant | Deferred question resolved by the practitioner at the coherence check, overriding the builder's instant recommendation; both behaviors were shown side by side. |
+| 2026-07-05 | §8 edges | angled point-to-point thread → right-angle routing (down · across · down, lane at mid-pitch; equal-x steps straight vertical); head 5 × 4 and all inks unchanged | Practitioner at the session 11 landing: "they read SO MUCH BETTER." Right angles read as steps taken in sequence where diagonals read as abstract graph edges; the routing also makes an edge on a met-dot row geometrically impossible at every width, closing session 11's parked 42 rem crossing risk. Seen moving in session 11's A′ demo; the trail now draws one way at every width. The spike (built 2026-07-04) predates this propagation — v1 implements from the basis, not the spike, on this value. |

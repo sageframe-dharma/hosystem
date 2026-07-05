@@ -1,0 +1,19 @@
+---
+layout: base.njk
+title: Glossary
+permalink: /glossary/
+---
+
+<p class="spike-note">The framework's real glossary (ingested), rendered with per-term
+anchors so definition-on-touch's "full entry →" resolves one link away (§4).</p>
+
+<h1>Glossary</h1>
+
+<dl class="glossary">
+  {%- for entry in glossary %}
+  <dt id="{{ entry.anchor }}" class="cjk"><strong>{{ entry.term }}</strong></dt>
+  <dd class="cjk">{{ entry.html | safe }}</dd>
+  {%- endfor %}
+</dl>
+
+<p class="caption"><a class="chain-link" href="/">← back to the document</a></p>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · hosystem spike</title>
+  <link rel="icon" href="/favicon.svg">
+  {# SPIKE SHORTCUT: Source Serif 4 + Source Code Pro from Google Fonts CDN.
+     v1 must self-host these (spec §8: no third-party requests). The piece-face
+     subset (歩 と) is already self-hosted. Documented in SPIKE.md. #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/spike.css">
+</head>
+<body>
+  <main class="wrap{% if not page.reduced %} step{% endif %}">
+    {{ content | safe }}
+  </main>
+
+  {# single sources read by the vanilla JS #}
+  <script type="application/json" id="plain-cuts">{{ meta.plainCuts | dump | safe }}</script>
+  <script type="application/json" id="doors">{{ meta.doors | dump | safe }}</script>
+
+  <script src="/js/defotouch.js" defer></script>
+  <script src="/js/reveal.js" defer></script>
+  <script src="/js/flip.js" defer></script>
+  <script src="/js/trail.js" defer></script>
+</body>
+</html>

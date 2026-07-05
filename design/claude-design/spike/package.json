@@ -1,0 +1,20 @@
+{
+  "name": "hosystem-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Design spike for hosystem — the frozen Basis of Design validated in Eleventy against real ingested artifacts (spec step 5).",
+  "scripts": {
+    "ingest": "node scripts/ingest.mjs",
+    "font": "node scripts/build-font.mjs",
+    "prebuild": "npm run ingest && npm run font",
+    "build": "eleventy",
+    "serve": "eleventy --serve",
+    "clean": "rm -rf _site vendor"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "3.0.0",
+    "gray-matter": "4.0.3",
+    "markdown-it": "14.1.0"
+  }
+}

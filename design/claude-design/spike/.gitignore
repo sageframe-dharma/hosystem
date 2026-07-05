@@ -1,0 +1,10 @@
+# build + deps
+node_modules/
+_site/
+
+# ingested corpus — pulled at build (npm run ingest), never committed.
+# Reproduced from the SHAs recorded in vendor/manifest.json.
+vendor/
+
+# the piece-face subset woff2 IS committed (src/fonts/piece-subset.woff2) so the
+# build runs without network / fonttools; scripts/build-font.mjs regenerates it.

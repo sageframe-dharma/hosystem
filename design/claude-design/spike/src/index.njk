@@ -1,0 +1,114 @@
+---
+layout: base.njk
+title: ho-04.6 — Plain-prompt init
+---
+
+<p class="spike-note">hosystem design spike · the frozen Basis of Design rendered against a real
+ingested sharibako ho · sources pinned in <code>vendor/manifest.json</code></p>
+
+<h1 class="cjk">{{ doc.title }}</h1>
+
+{# ── §5 documents: frontmatter as a typed ledger, visible, nothing hidden ── #}
+<div class="ledger" aria-label="frontmatter">
+  {%- for row in doc.rows %}
+  <div class="ledger-row">
+    <span class="ledger-key">{{ row.key }}</span>
+    <span class="ledger-val cjk">
+      {%- if row.key == "status" -%}
+        <span class="state-mark" data-record="{{ doc.source }}" data-state="closed" title="status marker: flips to gold on the news rule (§9)">
+          <span class="flip">
+            <span class="face face-front">{% koma 12, {"mode":"solid","face":"front"} %}</span>
+            <span class="face face-promoted">{% koma 12, {"mode":"solid","face":"promoted"} %}</span>
+          </span>
+        </span><span class="state-label">{{ row.value }}</span>
+      {%- elif row.key == "builds-on" -%}
+        <ul>{% for item in row.value %}<li><a class="chain-link" href="https://github.com/sageframe-no-kaji/sharibako/blob/main/{% if '/' in item %}{{ item }}{% else %}ho-process/{{ item }}{% endif %}">{{ item }}</a></li>{% endfor %}</ul>
+      {%- elif row.key == "supersedes" -%}
+        <ul>{% for item in row.value %}<li><button type="button" class="chain-link supersedes-marker" aria-expanded="false" aria-controls="supersession">{{ item }}</button></li>{% endfor %}</ul>
+      {%- elif row.value is iterable and row.value is not string -%}
+        <ul>{% for item in row.value %}<li>{{ item }}</li>{% endfor %}</ul>
+      {%- else -%}
+        {{ row.value }}
+      {%- endif -%}
+    </span>
+  </div>
+  {%- endfor %}
+</div>
+
+{# ── §5 supersession reveal: what fell beside what replaced it ── #}
+<div class="supersession" id="supersession" role="region" aria-label="supersession">
+  <div class="supersession-panes">
+    <div class="pane pane-fell">
+      <h4>fell · {{ doc.supersession.fell.title }}</h4>
+      {{ doc.supersession.fell.html | safe }}
+    </div>
+    <div class="pane pane-replaced">
+      <h4>replaced · {{ doc.supersession.replaced.title }}</h4>
+      {{ doc.supersession.replaced.html | safe }}
+    </div>
+  </div>
+</div>
+
+{# ── §5 body: register-classified sections (§3 treatments) ── #}
+{%- for sec in doc.sections %}
+<section class="register register-{{ sec.register }}">{{ sec.html | safe }}</section>
+{%- endfor %}
+
+{# ── §6 diagrams: the Kamae chain, generated at build time, three scales ── #}
+<figure class="chain-figure">
+  <div class="chain-scales">
+    <div><div class="chain-scale-label">full ≥480px</div>{% chainSvg "full" %}</div>
+    <div><div class="chain-scale-label">header ≥160px</div>{% chainSvg "header" %}</div>
+    <div><div class="chain-scale-label">glyph &lt;160px</div>{% chainSvg "glyph" %}</div>
+  </div>
+  <figcaption class="caption">One SVG source, three scales by reduction (§6). Kamae 1–4 bero
+  (thinking), Kamae 5 sumi (doing); the crossing arrow prints kachi. Gold never appears
+  here. The chain is structure, not state.</figcaption>
+</figure>
+
+{# ── live arc tree (§6 live instance) + the flip (§9 firing list item 2) ── #}
+<h2>The ho-04 arc: a live instance</h2>
+<p>Unlike the canonical chain above, this arc renders <em>state</em>: a closed ho promotes
+to gold と on the news rule (§9); a superseded ho renders pre-flipped at gold@0.40 and never
+fires.</p>
+<div class="arc">
+  {%- for node in meta.arc %}
+  <div class="arc-node">
+    {%- if node.state == "superseded" -%}
+      <span title="superseded: recession, not promotion">{% koma 28, {"mode":"keyline","face":"promoted","tint":"#d2c5a0"} %}</span>
+    {%- else -%}
+      <span class="state-mark" data-record="{{ node.id }}" data-state="{{ node.state }}">
+        <span class="flip">
+          <span class="face face-front">{% koma 28, {"mode":"keyline","face":"front"} %}</span>
+          <span class="face face-promoted">{% koma 28, {"mode":"keyline","face":"promoted"} %}</span>
+        </span>
+      </span>
+    {%- endif -%}
+    <span class="arc-label cjk">{{ node.label }} · {{ node.title }}</span>
+  </div>
+  {%- endfor %}
+</div>
+
+<div class="spike-bar">
+  spike aids (not site chrome):
+  <button type="button" onclick="window.__flipReplay && window.__flipReplay()">replay promotion as news</button>
+  <button type="button" onclick="window.__flipReset && window.__flipReset()">reset witness log</button>
+  <span class="spike-note">first visit seeds the log silently (no flip); replay forgets the
+  closed records so a reload fires the real flip.</span>
+</div>
+
+{# ── §8 the trail: real localStorage / sessionStorage, ≥480px form ── #}
+<div id="trail" class="trail" data-door="walk" aria-label="your walk"></div>
+<div class="spike-bar">
+  spike navigation (drives the real trail storage):
+  {%- for d in meta.doors %}
+  <button type="button" onclick="window.__trailEnter && window.__trailEnter('{{ d.id }}')">{{ d.name }}</button>
+  {%- endfor %}
+  <button type="button" onclick="window.__trailReset && window.__trailReset()">reset walk</button>
+</div>
+
+<div class="colophon-rule caption">
+  ingested: sharibako @ <code>{{ meta.manifest.sources.sharibako.sha | default('—') }}</code> ·
+  ho-system @ <code>{{ meta.manifest.sources["ho-system"].sha | default('—') }}</code> ·
+  <a class="chain-link" href="/glossary/">the glossary</a>
+</div>

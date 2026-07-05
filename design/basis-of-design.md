@@ -40,6 +40,7 @@ never silently.
 | 8 | the trail | landed 2026-07-04 | [§8](#8--the-trail) |
 | 9 | the flip | landed 2026-07-04 | [§9](#9--the-flip) |
 | 10 | the threaded split | v2 — not yet open | — |
+| 11 | the narrow trail | open | — |
 
 ## 1 — the piece
 

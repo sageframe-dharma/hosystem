@@ -1,0 +1,63 @@
+{# document.njk — render one ingested framework/ho document (Basis §5).
+   Frontmatter → typed ledger (visible, authored order); status → 12 px solid koma state
+   mark that flips on the news rule (§9); builds-on/supersedes → live links (§5); when a
+   `supersession` object is passed, the supersedes marker opens the facing-panes reveal. #}
+
+{% macro render(doc, supersession) %}
+<h1 class="cjk">{{ doc.titleHtml | safe }}</h1>
+
+<div class="ledger" aria-label="frontmatter">
+  {%- for row in doc.rows %}
+  <div class="ledger-row">
+    <span class="ledger-key">{{ row.key }}</span>
+    <span class="ledger-val cjk">
+      {%- if row.key == "status" -%}
+        {%- if row.state == "closed" -%}
+          <span class="state-mark" data-record="{{ doc.source }}" data-state="closed" title="status marker: flips to gold on the news rule (§9)">
+            <span class="flip">
+              <span class="face face-front">{% koma 12, {"mode":"solid","face":"front"} %}</span>
+              <span class="face face-promoted">{% koma 12, {"mode":"solid","face":"promoted"} %}</span>
+            </span>
+          </span>
+        {%- elif row.state == "superseded" -%}
+          <span class="state-mark" title="superseded: recession, not promotion">{% koma 12, {"mode":"solid","face":"promoted","tint":"#d2c5a0"} %}</span>
+        {%- else -%}
+          <span class="state-mark" title="{{ row.state }}">{% koma 12, {"mode":"solid","face":"front"} %}</span>
+        {%- endif -%}
+        <span class="state-label">{{ row.value }}</span>
+      {%- elif row.key == "supersedes" and supersession -%}
+        <ul>{% for item in row.value %}<li><button type="button" class="chain-link supersedes-marker" aria-expanded="false" aria-controls="supersession">{{ item }}</button></li>{% endfor %}</ul>
+      {%- elif (row.key == "builds-on" or row.key == "supersedes") and row.links -%}
+        <ul>{% for l in row.links %}<li>{% if l.href %}<a class="chain-link" href="{{ l.href }}">{{ l.text }}</a>{% else %}{{ l.text }}{% endif %}</li>{% endfor %}</ul>
+      {%- elif row.value is iterable and row.value is not string -%}
+        <ul>{% for item in row.value %}<li>{{ item }}</li>{% endfor %}</ul>
+      {%- else -%}
+        {{ row.value }}
+      {%- endif -%}
+    </span>
+  </div>
+  {%- endfor %}
+</div>
+
+{%- if supersession %}
+<div class="supersession" id="supersession" role="region" aria-label="supersession">
+  <div class="supersession-panes">
+    <div class="pane pane-fell">
+      <h4>fell · {{ supersession.fell.title }}</h4>
+      {{ supersession.fell.html | safe }}
+    </div>
+    <div class="pane pane-replaced">
+      <h4>replaced · {{ supersession.replaced.title }}</h4>
+      {{ supersession.replaced.html | safe }}
+    </div>
+  </div>
+</div>
+{%- endif %}
+
+{%- for sec in doc.sections %}
+<section class="register register-{{ sec.register }}">{{ sec.html | safe }}</section>
+{%- endfor %}
+
+<p class="caption">Rendered from the corpus, verbatim ·
+  <a class="chain-link" href="{{ site.github[doc.sourceRepo] }}/{{ doc.source | replace(doc.sourceRepo + '/', '') }}">source on GitHub →</a></p>
+{% endmacro %}

@@ -2,3 +2,11 @@ node_modules/
 _site/
 .DS_Store
 .env
+
+# ingested corpus — pulled at build (npm run ingest), never committed.
+# Reproduced from the SHAs recorded in vendor/manifest.json (fetch-step, spec §8).
+vendor/
+
+# The webfont subsets ARE committed (src/fonts/*.woff2) so the build runs offline
+# with no third-party requests (spec §8 hard boundary). scripts/build-font.mjs and
+# scripts/build-fonts.mjs regenerate them idempotently.

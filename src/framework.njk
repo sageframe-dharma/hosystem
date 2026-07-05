@@ -1,0 +1,40 @@
+---
+layout: base.njk
+title: The Framework
+door: framework
+permalink: /framework/
+description: "The Framework — the named parts of the Ho System, rendered with the canonical Kamae chain, plus downloadable templates."
+---
+<h1>The Framework</h1>
+
+<p>The named parts of the practice, rendered as the documents that define them. The
+narrative spine is the <strong>Kamae chain</strong> — five documents that carry a project
+from opinions to a working session, each step narrowing what is possible. It is the
+obviously-right order, never a locked door.</p>
+
+<figure class="chain-figure">
+  <div class="chain-scales">
+    <div><div class="chain-scale-label">full ≥480px</div>{% chainSvg "full" %}</div>
+    <div><div class="chain-scale-label">header ≥160px</div>{% chainSvg "header" %}</div>
+    <div><div class="chain-scale-label">glyph &lt;160px</div>{% chainSvg "glyph" %}</div>
+  </div>
+  <figcaption class="caption">One SVG source, three scales by reduction (§6). Kamae 1–4 in
+  bero (thinking), Kamae 5 in sumi (doing); the crossing arrow prints kachi. The koma marks
+  only where work is steppable. Gold never appears here — the chain is structure, not state.</figcaption>
+</figure>
+
+<h2>The documents</h2>
+<ul class="doc-list">
+  {%- for d in corpus.frameworkDocs %}
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.id %}{{ d.frontmatter.id }} · {% endif %}{{ d.frontmatter.type or "" }}</span></li>
+  {%- endfor %}
+</ul>
+
+<h2>Templates</h2>
+<p>The framework's document templates, tool-agnostic, ready to use. Download the raw
+Markdown; the skills that author them are one door over.</p>
+<ul class="tmpl-list">
+  {%- for t in corpus.templates %}
+  <li><span>{{ t.title }}</span> <span class="dl"><a class="chain-link" href="{{ t.href }}" download>download .md</a> · <a class="chain-link" href="{{ t.github }}">source</a></span></li>
+  {%- endfor %}
+</ul>

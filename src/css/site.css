@@ -1,0 +1,280 @@
+/* ============================================================================
+   hosystem v1 — the frozen Basis of Design as tokens + rules.
+   Every value traces to design/basis-of-design.md; section tags cite it. Ported
+   from the accepted design spike; the CDN body fonts are now self-hosted (§8).
+   ========================================================================== */
+
+/* ── §2 palette — three inks + paper, opacity ladder as resolved flats ─────── */
+:root {
+  --washi: #eef1ef;
+  --sumi: #1f2123;
+  --bero: #29618e;
+  --gold: #a9832a;
+  /* opacity-ladder resolved flats on washi (§2) */
+  --sumi-70: #5d5f60;
+  --sumi-40: #9b9e9d;
+  --sumi-12: #d5d8d7;
+  --bero-70: #648cab;
+  --bero-40: #9fb7c8;
+  --gold-40: #d2c5a0; /* superseded */
+  --kachi: #040c13;   /* sumi × bero */
+  --matsuba: #1b3117; /* bero × gold */
+
+  /* ── §4 the step — the unit all motion is built from ── */
+  --step-dur: 160ms;
+  --step-ease: cubic-bezier(0.2, 0, 0, 1);
+  --step-rise: 8px;
+  --hold: 220ms;      /* hold between steps */
+  --interval: 380ms;  /* constant sequence beat */
+  --page-hold: 80ms;  /* §4 page transition: cut → 80 ms bare washi → one step */
+
+  /* ── §9 the flip — 240 ms, symmetric halves, swap at 120 ms ── */
+  --flip-dur: 240ms;
+
+  /* ── §5 measure ── */
+  --measure: 42rem;
+}
+
+/* ── §3 type — self-hosted faces (§8 no third-party requests) ──────────────── */
+/* Source Serif 4 — 400 / 400 italic / 600 (§3) */
+@font-face {
+  font-family: "Source Serif 4"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("/fonts/source-serif-4-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Serif 4"; font-style: italic; font-weight: 400; font-display: swap;
+  src: url("/fonts/source-serif-4-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Serif 4"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("/fonts/source-serif-4-600.woff2") format("woff2");
+}
+/* Source Code Pro — 400 / 600 (§3) */
+@font-face {
+  font-family: "Source Code Pro"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("/fonts/source-code-pro-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Code Pro"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("/fonts/source-code-pro-600.woff2") format("woff2");
+}
+/* piece-face subset (歩 と) prepended to the CJK stack for the faces only (§3) */
+@font-face {
+  font-family: "HoPiece"; font-weight: 400 700; font-display: swap;
+  src: url("/fonts/piece-subset.woff2") format("woff2");
+  unicode-range: U+6B69, U+3068; /* 歩, と */
+}
+
+:root {
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --cjk: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --serif-cjk: "Source Serif 4", Georgia, var(--cjk);
+}
+
+/* ── base ──────────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--washi);
+  color: var(--sumi);
+  font-family: var(--serif);
+  font-size: 1.0625rem;   /* §3 body */
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.wrap { max-width: var(--measure); margin: 0 auto; padding: 2.5rem 1.25rem 0; } /* §5 measure 42rem */
+
+/* ── §3 type scale ─────────────────────────────────────────────────────────── */
+h1 { font-size: 1.75rem; line-height: 1.25; font-weight: 600; margin: 0 0 1rem; }
+h2 { font-size: 1.375rem; line-height: 1.3; font-weight: 600; margin: 2.5rem 0 1rem; } /* §5 rhythm */
+h3 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+p { margin: 0 0 1.25rem; }              /* §5 paragraphs 1.25rem */
+ul, ol { margin: 0 0 1.25rem; padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+code, kbd { font-family: var(--mono); font-size: 0.875em; background: none; }
+.caption { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); }
+a { color: var(--bero); }
+hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
+
+/* CJK faces — piece characters resolve HoPiece first, then plain mincho stack */
+.cjk, .koma text { font-family: var(--serif-cjk); }
+
+/* ── §3 registers ──────────────────────────────────────────────────────────── */
+.register-discursive { font-family: var(--serif); color: var(--sumi); }
+.register-procedural {                                   /* mono, §5 left rule */
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  border-left: 2px solid var(--sumi-40);
+  padding-left: 1rem;
+}
+.register-procedural code { font-size: 0.875em; }
+.register-emergent {                                     /* serif italic bero, left rule */
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--bero);
+  border-left: 2px solid var(--bero-40);
+  padding-left: 1rem;
+}
+.register + .register { margin-top: 1.5rem; }            /* §5 blocks 1.5rem */
+
+/* ── §3 marked term (resting look only) ────────────────────────────────────── */
+.term {
+  font: inherit; color: var(--sumi); background: none; border: 0; padding: 0;
+  cursor: help;
+  text-decoration: underline dotted 1px;
+  text-decoration-color: var(--bero-70);
+  text-underline-offset: 0.2em;
+}
+.term:focus-visible { outline: 2px solid var(--bero); outline-offset: 2px; }
+.term[aria-expanded="true"] { text-decoration-style: solid; } /* §7 open: dotted → solid */
+.term.met { text-decoration-color: var(--sumi-40); }          /* §7 met: recession by opacity */
+
+/* ── site header / nav — quiet chrome (constraint #0; §2 palette, §3 mono) ──── */
+.site-head { max-width: var(--measure); margin: 0 auto; padding: 1.25rem 1.25rem 0; }
+.site-head .bar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--sumi); }
+.brand .koma { display: block; }
+.brand .wordmark { font-family: var(--mono); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.02em; }
+.nav { display: flex; gap: 0.9rem; flex-wrap: wrap; font-family: var(--mono); font-size: 0.8125rem; }
+.nav a { color: var(--sumi-70); text-decoration: none; }
+.nav a:hover { color: var(--sumi); }
+.nav a[aria-current="page"] { color: var(--sumi); text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.25em; }
+.head-rule { max-width: var(--measure); margin: 0.75rem auto 0; border-top: 1px solid var(--sumi-12); }
+
+/* ── front page onramp (site-authored, terse — §0/§2 vision) ───────────────── */
+.onramp .lede { font-size: 1.375rem; line-height: 1.4; margin: 0 0 1.5rem; }
+.claim { border-left: 2px solid var(--bero-40); padding-left: 1rem; font-style: italic; color: var(--bero); margin: 0 0 2rem; }
+.cta {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.9375rem; text-decoration: none; color: var(--sumi);
+  border: 1px solid var(--sumi-40); padding: 0.5rem 0.875rem;
+}
+.cta:hover { border-color: var(--sumi); }
+.cta .koma { display: block; }
+.doors-three { display: grid; gap: 1.25rem; margin: 2.5rem 0; }
+.door-card { border-top: 1px solid var(--sumi-12); padding-top: 0.75rem; }
+.door-card h3 { margin: 0 0 0.25rem; }
+.door-card p { margin: 0 0 0.5rem; }
+.door-card .go { font-family: var(--mono); font-size: 0.8125rem; }
+
+/* ── index lists (Framework / Skills / Walk / Writing) ─────────────────────── */
+.doc-list { list-style: none; padding: 0; margin: 1.5rem 0; }
+.doc-list li { border-top: 1px solid var(--sumi-12); padding: 0.6rem 0; margin: 0; }
+.doc-list li:last-child { border-bottom: 1px solid var(--sumi-12); }
+.doc-list a { text-decoration: none; color: var(--sumi); }
+.doc-list a:hover { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
+.doc-list .meta { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); }
+.skill { border-top: 1px solid var(--sumi-12); padding: 1rem 0; }
+.skill:last-of-type { border-bottom: 1px solid var(--sumi-12); }
+.skill h3 { margin: 0 0 0.35rem; font-family: var(--mono); font-size: 1rem; }
+.skill p { margin: 0 0 0.5rem; }
+.skill .anatomy { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); }
+.tmpl-list { list-style: none; padding: 0; margin: 1.5rem 0; }
+.tmpl-list li { border-top: 1px solid var(--sumi-12); padding: 0.5rem 0; display: flex; justify-content: space-between; gap: 1rem; }
+.tmpl-list li:last-child { border-bottom: 1px solid var(--sumi-12); }
+.tmpl-list .dl { font-family: var(--mono); font-size: 0.8125rem; }
+
+/* ── §5 documents — frontmatter as a typed ledger ──────────────────────────── */
+.ledger { border: 1px solid var(--sumi-40); margin-bottom: 2.5rem; font-family: var(--mono); font-size: 0.875rem; }
+.ledger-row { display: grid; grid-template-columns: 9rem 1fr; padding: 0.5rem 0.875rem; border-bottom: 1px solid var(--sumi-12); }
+.ledger-row:last-child { border-bottom: 0; }
+.ledger-key { color: var(--sumi-70); }
+.ledger-val { color: var(--sumi); }
+.ledger-val ul { margin: 0; padding-left: 1.1rem; }
+.ledger-val li { margin: 0.1rem 0; }
+
+/* §5 state mark — 12 px solid koma before the status value */
+.state-mark { display: inline-block; margin-right: 0.5rem; vertical-align: -2px; line-height: 0; }
+.state-mark .koma { display: block; }
+.state-label { color: var(--sumi); } /* adjacent labels full sumi */
+
+/* §5 chain links — solid underline = link (dotted = marked term) */
+.chain-link { color: var(--sumi); text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
+.chain-link.supersedes-marker { cursor: pointer; background: none; border: 0; padding: 0; font: inherit; }
+
+/* §5 supersession reveal — facing panes inside a bordered extension of the header */
+.supersession { border: 1px solid var(--sumi-40); border-top: 0; margin: -2.5rem 0 2.5rem; padding: 1rem 0.875rem; display: none; }
+.supersession.open { display: block; }
+.supersession-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+@media (max-width: 40rem) { .supersession-panes { grid-template-columns: 1fr; } } /* §5 stacks below 40rem */
+.pane { font-size: 0.9375rem; }
+.pane h4 { margin: 0 0 0.5rem; font-family: var(--mono); font-size: 0.8125rem; }
+.pane-fell { border-left: 2px solid var(--gold-40); padding-left: 0.875rem; color: var(--sumi-70); }
+.pane-replaced { border-left: 2px solid var(--gold); padding-left: 0.875rem; color: var(--sumi); }
+
+/* ── §6 diagrams — chain container ─────────────────────────────────────────── */
+.chain-figure { margin: 2.5rem 0; text-align: center; }
+.chain-figure figcaption { margin-top: 0.75rem; }
+.chain-scales { display: flex; align-items: flex-start; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
+.chain-scale-label { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); }
+
+/* ── §7 definition-on-touch card ───────────────────────────────────────────── */
+.defcard {
+  position: absolute; z-index: 10;                 /* the page's only elevated layer */
+  width: min(24rem, var(--col, 40rem) - 1rem);
+  padding: 0.625rem 0.875rem;
+  background: var(--washi); border: 1px solid var(--sumi-40); border-radius: 0; box-shadow: none;
+}
+.defcard .plain { font-family: var(--serif); font-size: 0.9375rem; line-height: 1.55; color: var(--sumi); margin: 0; }
+.defcard .full { display: inline-block; margin-top: 0.5rem; font-family: var(--mono); font-size: 0.8125rem; color: var(--bero); }
+
+/* ── §8 the trail — footer strip ───────────────────────────────────────────── */
+.trail { margin-top: 4rem; border-top: 1px solid var(--sumi-12); padding: 12px 0 8px; }
+.trail svg { display: block; max-width: 100%; height: auto; }
+
+/* ── colophon rule / page footer ───────────────────────────────────────────── */
+.colophon-rule { border-top: 1px solid var(--sumi-12); margin-top: 1rem; padding: 1rem 0 2.5rem; }
+
+/* ── live arc tree (§6 live instances / §9 flip) ───────────────────────────── */
+.arc { display: flex; gap: 1.5rem; align-items: flex-end; margin: 1.5rem 0; flex-wrap: wrap; }
+.arc-node { text-align: center; font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); }
+.arc-node a { color: inherit; text-decoration: none; }
+.arc-node .flip { display: inline-block; }
+.arc-label { display: block; margin-top: 0.35rem; }
+
+/* ── §9 the flip — 2D vertical squash, symmetric halves, swap at 120 ms ─────── */
+.flip { position: relative; display: inline-block; }
+.flip .face { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.flip .face-front { position: relative; }          /* front holds layout box */
+.flip .face-promoted { transform: scaleY(0); }
+.flip.flipping .face-front { animation: flip-front var(--flip-dur) forwards; }
+.flip.flipping .face-promoted { animation: flip-promoted var(--flip-dur) forwards; }
+.flip.promoted .face-front { transform: scaleY(0); }
+.flip.promoted .face-promoted { transform: scaleY(1); }
+
+@keyframes flip-front {
+  0%   { transform: scaleY(1); animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  50%  { transform: scaleY(0); }
+  100% { transform: scaleY(0); }
+}
+@keyframes flip-promoted {
+  0%   { transform: scaleY(0); }
+  50%  { transform: scaleY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+  100% { transform: scaleY(1); }
+}
+
+/* ── §4 the step — arrival utility; sequence stagger via --i ────────────────── */
+.step { animation: step-in var(--step-dur) var(--step-ease) both; }
+.seq > * { animation: step-in var(--step-dur) var(--step-ease) both; animation-delay: calc(var(--i, 0) * var(--interval)); }
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(var(--step-rise)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* card arrival = one §4 step (§7 timing amendment, propagation ledger) */
+.defcard.arriving { animation: step-in var(--step-dur) var(--step-ease) both; }
+
+/* ── prefers-reduced-motion — everything at 0 ms / instant swap (§4, §7, §9) ── */
+@media (prefers-reduced-motion: reduce) {
+  .step, .seq > *, .defcard.arriving { animation: none !important; }
+  .flip.flipping .face-front { animation: none; transform: scaleY(0); }
+  .flip.flipping .face-promoted { animation: none; transform: scaleY(1); }
+}
+
+/* ── glossary ──────────────────────────────────────────────────────────────── */
+.glossary dt { margin-top: 1.25rem; font-family: var(--mono); }
+.glossary dd { margin: 0.25rem 0 0; padding-left: 0; }
+.glossary dd .plain { color: var(--sumi-70); font-style: italic; }

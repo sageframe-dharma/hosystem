@@ -1,0 +1,14 @@
+---
+pagination:
+  data: corpus.frameworkDocs
+  size: 1
+  alias: doc
+layout: base.njk
+door: framework
+permalink: "{{ doc.url }}"
+eleventyComputed:
+  title: "{{ doc.title }}"
+---
+{% from "document.njk" import render %}
+<p class="caption"><a class="chain-link" href="/framework/">← The Framework</a> · the named parts, rendered</p>
+{{ render(doc, null) }}

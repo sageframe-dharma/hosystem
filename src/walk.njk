@@ -1,0 +1,60 @@
+---
+layout: base.njk
+title: The Walk
+door: walk
+permalink: /walk/
+description: "The Walk — sharibako's chain and hos rendered as the real documents they are, supersession live, the arc rendered as state."
+---
+<h1>The Walk</h1>
+
+<p>The cleanest current-convention instance of the practice: <strong>sharibako</strong>, a
+real project, its whole chain and hos rendered as the documents they are — frontmatter
+visible, styled as the typed metadata it is, not hidden as if it were plumbing. Every
+document here is <a class="chain-link" href="https://github.com/sageframe-no-kaji/sharibako">verifiable
+in the public repo</a>.</p>
+
+<h2>The arc, as state</h2>
+<p>Unlike the canonical chain, an arc renders <em>state</em>. A closed ho promotes to gold
+と the first time you witness its closure (the news rule, §9); a superseded ho renders
+pre-flipped at gold@0.40 and never fires — recession, not promotion. Here is sharibako's
+ho-04 arc:</p>
+
+<div class="arc">
+  {%- for node in corpus.arc %}
+  <div class="arc-node">
+    <a href="{{ node.url }}">
+    {%- if node.state == "superseded" -%}
+      <span title="superseded: recession, not promotion">{% koma 28, {"mode":"keyline","face":"promoted","tint":"#d2c5a0"} %}</span>
+    {%- else -%}
+      <span class="state-mark" data-record="{{ node.id }}" data-state="{{ node.state }}">
+        <span class="flip">
+          <span class="face face-front">{% koma 28, {"mode":"keyline","face":"front"} %}</span>
+          <span class="face face-promoted">{% koma 28, {"mode":"keyline","face":"promoted"} %}</span>
+        </span>
+      </span>
+    {%- endif -%}
+    <span class="arc-label cjk">{{ node.label }} · {{ node.title }}</span>
+    </a>
+  </div>
+  {%- endfor %}
+</div>
+
+<h2>The visible architecture change</h2>
+<p>The most persuasive single thing the practice can show is a plan meeting reality on the
+record. <a class="chain-link" href="{{ corpus.showcase }}">ho-04.6 — plain-prompt init</a>
+supersedes ho-04.4's dashboard surface. Open its <code>supersedes</code> marker to see what
+fell beside what replaced it, side by side. Nothing is erased; the record moves forward only.</p>
+
+<h2>The Kamae chain</h2>
+<ul class="doc-list">
+  {%- for d in corpus.walkKamae %}
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{{ d.frontmatter.type or "kamae" }}</span></li>
+  {%- endfor %}
+</ul>
+
+<h2>The hos</h2>
+<ul class="doc-list">
+  {%- for d in corpus.walkHos %}
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{{ d.frontmatter.shape }} · {% endif %}{{ d.frontmatter.status or "" }}</span></li>
+  {%- endfor %}
+</ul>

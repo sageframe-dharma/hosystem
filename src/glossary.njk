@@ -1,0 +1,22 @@
+---
+layout: base.njk
+title: Glossary
+permalink: /glossary/
+description: "The Ho System's working vocabulary — the framework's real glossary, each term with its plain cut and full definition."
+---
+<h1>Glossary</h1>
+
+<p>The framework's working vocabulary, ingested and rendered verbatim. Every term of art on
+the site is one touch from its plain cut — the one-sentence definition with no term of art
+inside it. Here each term carries both: the plain cut and the full entry, with the defining
+document named.</p>
+
+<dl class="glossary">
+  {%- for entry in glossary %}
+  <dt id="{{ entry.anchor }}" class="cjk"><strong>{{ entry.term }}</strong></dt>
+  <dd class="cjk">
+    {%- if entry.plain %}<span class="plain">{{ entry.plain }}</span><br>{% endif -%}
+    {{ entry.html | safe }}
+  </dd>
+  {%- endfor %}
+</dl>

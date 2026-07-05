@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if title %}{{ title }} · {% endif %}hosystem</title>
+  <meta name="description" content="{{ description or site.tagline }}">
+  <link rel="icon" href="/favicon.svg">
+  {# §8: body fonts are self-hosted — no third-party requests. Preload the two most-used. #}
+  <link rel="preload" href="/fonts/source-serif-4-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/source-code-pro-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <header class="site-head">
+    <div class="bar">
+      <a class="brand" href="/" aria-label="hosystem — home">
+        {% koma 22, {"mode":"keyline","face":"front"} %}
+        <span class="wordmark">hosystem</span>
+      </a>
+      <nav class="nav" aria-label="primary">
+        {%- for d in site.doors %}
+        <a href="{{ d.url }}"{% if page.url == d.url or (d.url != "/" and page.url.startsWith(d.url)) %} aria-current="page"{% endif %}>{{ d.name }}</a>
+        {%- endfor %}
+      </nav>
+    </div>
+  </header>
+  <div class="head-rule"></div>
+
+  <main class="wrap{% if not page.reduced %} step{% endif %}">
+    {{ content | safe }}
+
+    {# ── §8 the trail: real localStorage / sessionStorage; recorded on every page ── #}
+    {%- if door %}
+    <div id="trail" class="trail" data-door="{{ door }}" aria-label="your walk"></div>
+    {%- endif %}
+
+    <div class="colophon-rule caption">
+      ingested: sharibako @ <code>{{ site.manifest.sources.sharibako.sha | default('—') | truncate(12, true, '') }}</code> ·
+      ho-system @ <code>{{ site.manifest.sources["ho-system"].sha | default('—') | truncate(12, true, '') }}</code> ·
+      <a class="chain-link" href="/glossary/">the glossary</a> ·
+      <a class="chain-link" href="/colophon/">the colophon</a>
+    </div>
+  </main>
+
+  {# single sources read by the vanilla JS #}
+  <script type="application/json" id="plain-cuts">{{ meta.plainCuts | dump | safe }}</script>
+  <script type="application/json" id="doors">{{ meta.doors | dump | safe }}</script>
+
+  <script src="/js/defotouch.js" defer></script>
+  <script src="/js/reveal.js" defer></script>
+  <script src="/js/flip.js" defer></script>
+  <script src="/js/trail.js" defer></script>
+</body>
+</html>

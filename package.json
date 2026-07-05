@@ -1,0 +1,22 @@
+{
+  "name": "hosystem",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The public site of the Ho System (歩) — a walk through the practice's real artifacts. Built as a Ho System project; renders its own record as the colophon.",
+  "scripts": {
+    "ingest": "node scripts/ingest.mjs",
+    "font": "node scripts/build-font.mjs",
+    "fonts": "node scripts/build-fonts.mjs",
+    "prebuild": "npm run ingest && npm run font && npm run fonts",
+    "build": "eleventy",
+    "serve": "eleventy --serve",
+    "check-links": "node scripts/check-links.mjs",
+    "clean": "rm -rf _site vendor"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "3.0.0",
+    "gray-matter": "4.0.3",
+    "markdown-it": "14.1.0"
+  }
+}

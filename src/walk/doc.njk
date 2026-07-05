@@ -1,0 +1,14 @@
+---
+pagination:
+  data: corpus.walkDocs
+  size: 1
+  alias: doc
+layout: base.njk
+door: walk
+permalink: "{{ doc.url }}"
+eleventyComputed:
+  title: "{{ doc.title }}"
+---
+{% from "document.njk" import render %}
+<p class="caption"><a class="chain-link" href="/walk/">← The Walk</a> · sharibako, the current-convention chain</p>
+{{ render(doc, corpus.supersession if doc.url == corpus.showcase else null) }}

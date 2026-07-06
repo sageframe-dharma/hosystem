@@ -67,7 +67,11 @@
     const n = walk.length;
 
     // ── geometry (§8 wide / §11 narrow) ──
-    const doorTop = 8, doorSz = 10, doorBottom = doorTop + doorSz;
+    // §8: the caption line and the door row are SEPARATE rows inside the strip's
+    // padding — the caption sits in its own row above the doors and clears them at
+    // every width. captionY is the caption baseline; the door row starts below it.
+    const captionY = 9; // caption baseline (mono 11): cap-top ≈ 2, descender ≈ 12
+    const doorTop = 16, doorSz = 10, doorBottom = doorTop + doorSz; // door row below the caption
     const half = 3; // step node is 6×6
     const pitch = narrow
       ? (n <= 5 ? 14 : Math.max(7, 56 / (n - 1)))
@@ -79,7 +83,16 @@
     const metFirst = narrow ? half + 6 : 4; // §11 first dot 6 px off node edge
     const restCap = narrow ? 160 : 128;
     const centerX = (i) => 8 + (i * (W - 16)) / (DOORS.length - 1);
-    const clampX = (x, w) => Math.max(4, Math.min(x, W - 4 - w));
+    // clamp a middle-anchored label's center so its box stays inside the strip at every
+    // width (§11 "clamped to the column", propagated to §8 — a label never renders
+    // outside the strip). Source Code Pro is monospaced at a 0.6 em advance, so the box
+    // half-width is exact; interior labels keep their centering, end labels pull inward.
+    const clampLabelX = (cx, textLen, size) => {
+      const halfW = (textLen * size * 0.6) / 2, pad = 2;
+      if (cx - halfW < pad) return pad + halfW;
+      if (cx + halfW > W - pad) return W - pad - halfW;
+      return cx;
+    };
 
     const shownStart = n > 9 ? n - 9 : 0;      // > 9 steps: last 9 render (§8)
     const shown = walk.slice(shownStart);
@@ -88,11 +101,12 @@
     host.innerHTML = "";
     const svg = el("svg", { viewBox: `0 0 ${W} ${height}`, width: W, height, role: "img", "aria-label": "your walk" });
 
-    // caption — wide: left "your walk" + right "n steps"; narrow: one left line (§11)
-    if (narrow) svg.appendChild(text(8, 11, `your walk · ${n} step${n === 1 ? "" : "s"}`, 11, INK.s70, "start"));
+    // caption — its own row above the doors (captionY). wide: left "your walk" +
+    // right "n steps"; narrow: one left line (§11)
+    if (narrow) svg.appendChild(text(8, captionY, `your walk · ${n} step${n === 1 ? "" : "s"}`, 11, INK.s70, "start"));
     else {
-      svg.appendChild(text(8, 11, "your walk", 11, INK.s70, "start"));
-      svg.appendChild(text(W - 8, 11, `${n} step${n === 1 ? "" : "s"}`, 11, INK.s40, "end"));
+      svg.appendChild(text(8, captionY, "your walk", 11, INK.s70, "start"));
+      svg.appendChild(text(W - 8, captionY, `${n} step${n === 1 ? "" : "s"}`, 11, INK.s40, "end"));
     }
 
     // plan line through door centers (behind nodes)
@@ -105,10 +119,11 @@
       const ink = thisWalk ? INK.s100 : entered ? INK.s70 : INK.s40;
       const cx = centerX(i);
       svg.appendChild(el("rect", { x: cx - doorSz / 2, y: doorTop, width: doorSz, height: doorSz, fill: "#eef1ef", stroke: ink, "stroke-width": 1, "stroke-linejoin": "miter" }));
-      // §11: labels for this-walk doors only; §8: all doors, opacity = node's ink
+      // §11: labels for this-walk doors only; §8: all doors, opacity = node's ink.
+      // clamp the label inside the strip at every width so it never clips the edge.
       if (!narrow || thisWalk) {
-        const lx = clampX(cx, 0);
-        svg.appendChild(text(Math.max(4, Math.min(lx, W - 4)), labelBaseline, d.name, labelSize, ink, "middle"));
+        const lx = clampLabelX(cx, d.name.length, labelSize);
+        svg.appendChild(text(lx, labelBaseline, d.name, labelSize, ink, "middle"));
       }
     });
 

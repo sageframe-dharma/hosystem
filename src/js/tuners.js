@@ -3,7 +3,8 @@
 // tokens layer (:root in site.css, each value cited to the basis). This panel exposes the
 // by-feel-adjustable ones so the practitioner can see them moving during a landing pass, then
 // commit landed values back into the Basis. It is NOT site chrome: it renders only when the
-// URL carries ?tuners, so ordinary visitors never see it and it ships inert.
+// URL carries ?tuners, so ordinary visitors never see it and it ships inert. (Sister dev
+// param: ?flip in flip.js replays the §9 flip live, with no witness-log side effects.)
 (function () {
   "use strict";
   if (!/[?&]tuners\b/.test(location.search)) return; // dev-only gate

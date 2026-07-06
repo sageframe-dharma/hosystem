@@ -41,6 +41,7 @@ never silently.
 | 9 | the flip | landed 2026-07-04 | [§9](#9--the-flip) |
 | 10 | the threaded split | v2 — not yet open | — |
 | 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
+| 12 | wayfinding | open | — |
 
 ## 1 — the piece
 

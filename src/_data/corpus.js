@@ -47,6 +47,39 @@ export default function () {
 
   const url = (section, rel) => `/${section}/${slugOf(rel)}/`;
 
+  // ── §12 breadcrumb: door / collection / record — always short ids, never titles.
+  // The record id: walk docs reduce to their leading ho-/kamae- number (ho-04.6);
+  // framework docs already are short ids (ho-structure). The collection: walk docs use
+  // the project (sharibako); framework docs use the first subfolder under framework/
+  // (structure, templates…) or the leading non-framework area (practitioner). Ancestors
+  // (door + collection) link to the nearest existing landing — the door page; the current
+  // segment carries no link. Door landings and home carry no crumb (rendered as tops).
+  const recordId = (section, s) => {
+    if (section === "walk") {
+      const m = s.match(/^(ho-[\d.]+|kamae-[\d.]+)/i);
+      return m ? m[1] : s;
+    }
+    return s;
+  };
+  const crumbFor = (rel, section, source) => {
+    const doorUrl = `/${section}/`;
+    const rid = recordId(section, slugOf(rel));
+    if (section === "walk") {
+      return [
+        { id: "walk", href: doorUrl },
+        { id: source, href: doorUrl }, // the project — sharibako
+        { id: rid, current: true },
+      ];
+    }
+    // framework: dirs between source and file; drop a leading "framework" (== the door)
+    const dirs = rel.replace(new RegExp(`^${source}/`), "").split("/").slice(0, -1);
+    const rest = dirs[0] === "framework" ? dirs.slice(1) : dirs;
+    const out = [{ id: "framework", href: doorUrl }];
+    if (rest.length) out.push({ id: rest[0], href: doorUrl });
+    out.push({ id: rid, current: true });
+    return out;
+  };
+
   // ── registry: basename.md → on-site url (drives link resolution) ──────────
   const registry = {};
   for (const rel of walkRels) registry[basename(rel)] = url("walk", rel);
@@ -68,6 +101,7 @@ export default function () {
         section,
         sourceRepo: source,
         sourceUrl: `${site.github[source]}/${repoRel}`,
+        crumb: crumbFor(rel, section, source),
       };
     });
 

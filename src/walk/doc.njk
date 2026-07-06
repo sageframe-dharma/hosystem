@@ -10,5 +10,6 @@ eleventyComputed:
   title: "{{ doc.title }}"
 ---
 {% from "document.njk" import render %}
-<p class="caption"><a class="chain-link" href="/walk/">← The Walk</a> · sharibako, the current-convention chain</p>
+{% from "crumb.njk" import crumb %}
+{{ crumb(doc.crumb) }}
 {{ render(doc, corpus.supersession if doc.url == corpus.showcase else null) }}

@@ -1,0 +1,18 @@
+{# crumb.njk — the §12 breadcrumb: one line of short ids at the very top of the content
+   column, above the h1. Site chrome on every deep page (depth ≥ 2). Ancestors are links
+   (§5's affordance: solid 1px bero@.70 underline); the current segment is plain full-ink
+   text with aria-current="page". Renders the full path server-side (the no-JS fallback,
+   clipped by CSS overflow); crumb.js measures and collapses middles right-to-left on
+   overflow, reading the same segments from data-crumb. #}
+{% macro crumb(segs) %}
+{%- if segs and segs.length -%}
+<nav class="crumb" aria-label="breadcrumb" data-crumb='{{ segs | dump | safe }}'>
+  {%- for s in segs -%}
+    {%- if not loop.first %}<span class="crumb-sep"> / </span>{% endif -%}
+    {%- if s.current %}<span class="crumb-seg crumb-current" aria-current="page">{{ s.id }}</span>
+    {%- elif s.href %}<a class="crumb-seg" href="{{ s.href }}">{{ s.id }}</a>
+    {%- else %}<span class="crumb-seg">{{ s.id }}</span>{% endif -%}
+  {%- endfor -%}
+</nav>
+{%- endif -%}
+{% endmacro %}

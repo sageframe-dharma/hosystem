@@ -1,8 +1,11 @@
-// trail.js — the visitor's walk (Basis §8 + §11). Plan above, walk threaded beneath, with
-// RIGHT-ANGLE routing at every width (§8 propagated 2026-07-05: the trail draws one way at
-// every width; edges go down · across · down, lane at mid-pitch). §11 narrows the same
-// object below a 480 px column. localStorage ho.trail.doors (ever-entered, across visits) ·
-// sessionStorage ho.trail.walk (this walk, ordered, cap 64). Nothing leaves the browser.
+// trail.js — the visitor's walk (Basis §8 + §11 + §12). Plan above, walk threaded beneath,
+// with RIGHT-ANGLE routing at every width (§8 propagated 2026-07-05: the trail draws one way
+// at every width; edges go down · across · down, lane at mid-pitch). §11 narrows the same
+// object below a 480 px column. §12 makes the plan-row doors NAVIGATE (node + label are one
+// link to the door's landing), and shows a one-time first-visit hint under the caption.
+// Pitch floors 10 (wide) / 11 (narrow) and last-6 elision are the 2026-07-06 propagation.
+// localStorage ho.trail.doors (ever-entered, across visits) · sessionStorage ho.trail.walk
+// (this walk, ordered, cap 64). Nothing leaves the browser.
 (function () {
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
@@ -11,7 +14,7 @@
   if (!host || !DOORS.length) return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const INK = { s100: "#1f2123", s70: "#5d5f60", s40: "#9b9e9d", s12: "#d5d8d7" };
+  const INK = { s100: "#1f2123", s70: "#5d5f60", s40: "#9b9e9d", s12: "#d5d8d7", bero70: "#648cab" };
   const MONO = "'Source Code Pro',ui-monospace,monospace";
   const doorIndex = Object.fromEntries(DOORS.map((d, i) => [d.id, i]));
 
@@ -25,6 +28,28 @@
     walk.push({ door: doorId, met: [] });
     try { sessionStorage.setItem("ho.trail.walk", JSON.stringify(walk.slice(-64))); } catch { /* */ }
   }
+
+  // ── §12 first-visit hint state ──────────────────────────────────────────────
+  // "renders until the first door navigation or the second visit, whichever comes first,
+  // then never again." A visit = a browser session (the trail's own sessionStorage walk).
+  // localStorage ho.trail.hinted = 1 retires it for good; ho.trail.visited marks that a
+  // first visit has happened so a later fresh session counts as the second. Storage
+  // unavailable → the hint renders once per page load (harmless), per §12.
+  let showHint = false;
+  try {
+    if (localStorage.getItem("ho.trail.hinted") !== "1") {
+      const newSession = !sessionStorage.getItem("ho.trail.visit");
+      sessionStorage.setItem("ho.trail.visit", "1");
+      if (newSession && localStorage.getItem("ho.trail.visited") === "1") {
+        localStorage.setItem("ho.trail.hinted", "1"); // second visit — retire the hint
+      } else {
+        localStorage.setItem("ho.trail.visited", "1"); // first visit — greet
+        showHint = true;
+      }
+    }
+  } catch { showHint = true; }
+  const retireHint = () => { try { localStorage.setItem("ho.trail.hinted", "1"); } catch { /* */ } };
+
   // met terms attach to the current (last) step — links §7 to §8
   window.addEventListener("ho:met", (e) => {
     const walk = readWalk();
@@ -66,16 +91,19 @@
     const narrow = W < 480; // §11 breakpoint: column < 480 px
     const n = walk.length;
 
-    // ── geometry (§8 wide / §11 narrow) ──
-    // §8: the caption line and the door row are SEPARATE rows inside the strip's
-    // padding — the caption sits in its own row above the doors and clears them at
-    // every width. captionY is the caption baseline; the door row starts below it.
-    const captionY = 9; // caption baseline (mono 11): cap-top ≈ 2, descender ≈ 12
-    const doorTop = 16, doorSz = 10, doorBottom = doorTop + doorSz; // door row below the caption
+    // ── geometry (§8 wide / §11 narrow; §12 hint offset) ──
+    // §8: the caption line and the door row are SEPARATE rows inside the strip's padding.
+    // §12: on the first visit a hint line sits under the caption and pushes the door row
+    // (and everything beneath) down by 14 px — inside the ≤128/≤160 budgets.
+    const captionY = 9;              // caption baseline (mono 11)
+    const hintY = captionY + 13;     // §12 hint baseline (mono 10), one line under the caption
+    const off = showHint ? 14 : 0;   // the hint adds one 14 px line, first visit only
+    const doorTop = 16 + off, doorSz = 10, doorBottom = doorTop + doorSz;
+    const doorCy = doorTop + doorSz / 2;
     const half = 3; // step node is 6×6
     const pitch = narrow
-      ? (n <= 5 ? 14 : Math.max(7, 56 / (n - 1)))
-      : (n <= 5 ? 12 : Math.max(6, 48 / (n - 1)));
+      ? (n <= 5 ? 14 : Math.max(11, 56 / (n - 1)))   // §11 floor 11 (propagated 2026-07-06)
+      : (n <= 5 ? 12 : Math.max(10, 48 / (n - 1)));  // §8  floor 10 (propagated 2026-07-06)
     const labelSize = narrow ? 9 : 10;
     const labelBaseline = doorBottom + 6 + 8;
     const bandTop = narrow ? doorBottom + 36 : labelBaseline + 14;
@@ -84,17 +112,17 @@
     const restCap = narrow ? 160 : 128;
     const centerX = (i) => 8 + (i * (W - 16)) / (DOORS.length - 1);
     // clamp a middle-anchored label's center so its box stays inside the strip at every
-    // width (§11 "clamped to the column", propagated to §8 — a label never renders
-    // outside the strip). Source Code Pro is monospaced at a 0.6 em advance, so the box
-    // half-width is exact; interior labels keep their centering, end labels pull inward.
+    // width (§11 "clamped to the column", propagated to §8). Source Code Pro is monospaced
+    // at a 0.6 em advance, so the box half-width is exact.
+    const halfLabel = (textLen, size) => (textLen * size * 0.6) / 2;
     const clampLabelX = (cx, textLen, size) => {
-      const halfW = (textLen * size * 0.6) / 2, pad = 2;
+      const halfW = halfLabel(textLen, size), pad = 2;
       if (cx - halfW < pad) return pad + halfW;
       if (cx + halfW > W - pad) return W - pad - halfW;
       return cx;
     };
 
-    const shownStart = n > 9 ? n - 9 : 0;      // > 9 steps: last 9 render (§8)
+    const shownStart = n > 6 ? n - 6 : 0;      // > 6 steps: last 6 render (§8, tightened 2026-07-06)
     const shown = walk.slice(shownStart);
     const height = Math.min(restCap, bandTop + Math.max(0, shown.length - 1) * pitch + half + 20);
 
@@ -109,26 +137,59 @@
       svg.appendChild(text(W - 8, captionY, `${n} step${n === 1 ? "" : "s"}`, 11, INK.s40, "end"));
     }
 
-    // plan line through door centers (behind nodes)
-    svg.appendChild(el("line", { x1: centerX(0), y1: doorTop + doorSz / 2, x2: centerX(DOORS.length - 1), y2: doorTop + doorSz / 2, stroke: INK.s12, "stroke-width": 1 }));
+    // §12 hint — first visit only, one line under the caption, mono 10 sumi@.40
+    if (showHint) svg.appendChild(text(8, hintY, "plan above · your steps beneath · doors open", 10, INK.s40, "start"));
 
-    // doors + labels (never entered s40 · past walk s70 · this walk s100; fill washi)
+    // plan line through door centers (behind nodes)
+    svg.appendChild(el("line", { x1: centerX(0), y1: doorCy, x2: centerX(DOORS.length - 1), y2: doorCy, stroke: INK.s12, "stroke-width": 1 }));
+
+    // doors + labels — §12: node + label are ONE link to the door's landing. Never entered
+    // s40 · past walk s70 · this walk s100; fill washi. Resting look is §8 verbatim: no
+    // resting underline. Hover/focus-visible puts the solid 1px bero@.70 underline on the
+    // LABEL only; the node ink and geometry are untouched. Hit target ≥ 24 × 24.
     DOORS.forEach((d, i) => {
       const entered = ever.has(d.id);
       const thisWalk = walk.some((w) => w.door === d.id);
       const ink = thisWalk ? INK.s100 : entered ? INK.s70 : INK.s40;
       const cx = centerX(i);
-      svg.appendChild(el("rect", { x: cx - doorSz / 2, y: doorTop, width: doorSz, height: doorSz, fill: "#eef1ef", stroke: ink, "stroke-width": 1, "stroke-linejoin": "miter" }));
-      // §11: labels for this-walk doors only; §8: all doors, opacity = node's ink.
-      // clamp the label inside the strip at every width so it never clips the edge.
-      if (!narrow || thisWalk) {
-        const lx = clampLabelX(cx, d.name.length, labelSize);
-        svg.appendChild(text(lx, labelBaseline, d.name, labelSize, ink, "middle"));
+      const showLabel = !narrow || thisWalk; // §11: labels for this-walk doors only
+      const lx = showLabel ? clampLabelX(cx, d.name.length, labelSize) : cx;
+      const lw = halfLabel(d.name.length, labelSize) * 2;
+
+      const a = el("a", { role: "link", "aria-label": d.name, tabindex: "0" });
+      // href in both namespaced and plain forms so it navigates as a real link
+      a.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", d.url);
+      a.setAttribute("href", d.url);
+
+      // hit target ≥ 24 × 24, centered on node + label (transparent)
+      const hitW = Math.max(24, lw + 6);
+      const hitTop = Math.min(doorCy - 12, doorTop - 4);
+      const hitBottom = showLabel ? labelBaseline + 3 : doorBottom + 4;
+      a.appendChild(el("rect", { x: cx - hitW / 2, y: hitTop, width: hitW, height: Math.max(24, hitBottom - hitTop), fill: "transparent" }));
+
+      // the door node (resting look, §8 verbatim)
+      a.appendChild(el("rect", { x: cx - doorSz / 2, y: doorTop, width: doorSz, height: doorSz, fill: "#eef1ef", stroke: ink, "stroke-width": 1, "stroke-linejoin": "miter" }));
+
+      // the label + its (hidden) hover/focus underline
+      if (showLabel) {
+        a.appendChild(text(lx, labelBaseline, d.name, labelSize, ink, "middle"));
+        const uy = labelBaseline + 2.5;
+        const underline = el("line", { x1: lx - lw / 2, y1: uy, x2: lx + lw / 2, y2: uy, stroke: INK.bero70, "stroke-width": 1, visibility: "hidden" });
+        a.appendChild(underline);
+        const on = () => underline.setAttribute("visibility", "visible");
+        const offU = () => underline.setAttribute("visibility", "hidden");
+        a.addEventListener("mouseenter", on); a.addEventListener("mouseleave", offU);
+        a.addEventListener("focus", on); a.addEventListener("blur", offU);
       }
+      // the first door navigation retires the hint (§12); native anchor nav follows
+      a.addEventListener("click", retireHint);
+      a.addEventListener("keydown", (e) => { if (e.key === "Enter") retireHint(); });
+      svg.appendChild(a);
     });
 
-    // thread: nodes + right-angle edges + met dots
-    if (n > 9) svg.appendChild(text(W - 8, bandTop - 4, `⋯ +${n - 9}`, 10, INK.s40, "end"));
+    // thread: nodes + right-angle edges + met dots. > 6 steps: last 6 render, "⋯ +k" at
+    // the band top-right carries the rest (§8, tightened to last-6 on 2026-07-06).
+    if (n > 6) svg.appendChild(text(W - 8, bandTop - 4, `⋯ +${n - 6}`, 10, INK.s40, "end"));
     let prev = null;
     shown.forEach((stepObj, k) => {
       const di = doorIndex[stepObj.door];
@@ -152,7 +213,8 @@
     wireExpansion(svg, narrow, bandTop);
   }
 
-  // §8/§11 expansion: hover/focus/tap a step → door label + met names, instant, zero reflow
+  // §8/§11 expansion: hover/focus/tap a STEP node → door label + met names, instant, zero
+  // reflow. Step nodes never navigate (§12) — this is the only affordance they carry.
   let tip = null;
   function wireExpansion(svg, narrow, bandTop) {
     svg.querySelectorAll(".trail-step").forEach((node) => {

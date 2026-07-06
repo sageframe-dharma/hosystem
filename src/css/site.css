@@ -223,9 +223,26 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .defcard .plain { font-family: var(--serif); font-size: 0.9375rem; line-height: 1.55; color: var(--sumi); margin: 0; }
 .defcard .full { display: inline-block; margin-top: 0.5rem; font-family: var(--mono); font-size: 0.8125rem; color: var(--bero); }
 
+/* ── §12 breadcrumb — one line of short ids, top of the content column ───────── */
+/* mono 400 0.8125rem/1.5 · never wraps (crumb.js collapses on overflow) · margin 0 0 1rem */
+.crumb { font-family: var(--mono); font-size: 0.8125rem; line-height: 1.5; margin: 0 0 1rem; white-space: nowrap; overflow: hidden; }
+.crumb .crumb-seg { color: var(--sumi-70); }          /* ancestors sumi@.70 */
+.crumb a.crumb-seg {                                   /* §5 link affordance — solid 1px bero@.70 */
+  color: var(--sumi-70);
+  text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em;
+}
+.crumb .crumb-current { color: var(--sumi); text-decoration: none; } /* where you stand — full ink, plain */
+.crumb .crumb-sep { color: var(--sumi-40); }           /* spaced slash */
+.crumb .crumb-ell { color: var(--sumi-40); }           /* collapsed middles — non-interactive */
+.crumb a.crumb-seg:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
+
 /* ── §8 the trail — footer strip ───────────────────────────────────────────── */
 .trail { margin-top: 4rem; border-top: 1px solid var(--sumi-12); padding: 12px 0 8px; }
 .trail svg { display: block; max-width: 100%; height: auto; }
+/* §12 trail doors navigate: cursor pointer + focus-visible 1px sumi outline offset 2px on
+   the door hit area. The resting record look is untouched — no resting underline. */
+.trail svg a { cursor: pointer; }
+.trail svg a:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
 
 /* ── colophon rule / page footer ───────────────────────────────────────────── */
 .colophon-rule { border-top: 1px solid var(--sumi-12); margin-top: 1rem; padding: 1rem 0 2.5rem; }

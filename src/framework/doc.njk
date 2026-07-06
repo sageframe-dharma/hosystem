@@ -10,5 +10,6 @@ eleventyComputed:
   title: "{{ doc.title }}"
 ---
 {% from "document.njk" import render %}
-<p class="caption"><a class="chain-link" href="/framework/">← The Framework</a> · the named parts, rendered</p>
+{% from "crumb.njk" import crumb %}
+{{ crumb(doc.crumb) }}
 {{ render(doc, null) }}

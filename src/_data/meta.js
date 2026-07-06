@@ -7,7 +7,8 @@ export default function () {
   const site = siteData();
   return {
     plainCuts: plainCutIndex(),
-    // door ids + names bound from ONE source (site.doors) — trail.js reads only this.
-    doors: site.doors.map((d) => ({ id: d.id, name: d.name })),
+    // door ids + names + landing urls bound from ONE source (site.doors) — trail.js reads
+    // only this. The url is what §12's navigating trail doors link to.
+    doors: site.doors.map((d) => ({ id: d.id, name: d.name, url: d.url })),
   };
 }

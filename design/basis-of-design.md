@@ -41,7 +41,7 @@ never silently.
 | 9 | the flip | landed 2026-07-04 | [§9](#9--the-flip) |
 | 10 | the threaded split | v2 — not yet open | — |
 | 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
-| 12 | wayfinding | open | — |
+| 12 | wayfinding | landed 2026-07-06 | [§12](#12--wayfinding) |
 
 ## 1 — the piece
 
@@ -305,8 +305,9 @@ door ink       never entered sumi@.40 · entered a past walk sumi@.70 · entered
                walk sumi 1.00 · fill always washi · no gold ever on the trail
 thread         band top = labels + 14 px · step k = 6 × 6 px filled sumi 1.00 at its
                door's column, y = band top + (k−1)·pitch · pitch 12 px (n ≤ 5), else
-               48/(n−1) px, floor 6 · > 9 steps: last 9 render, "⋯ +k" mono 10
-               sumi@.40 at band top-right · resting strip height ≤ 128 px
+               48/(n−1) px, floor 10 (propagated 2026-07-06, see ledger) · beyond
+               6 steps: last 6 render, "⋯ +k" mono 10 sumi@.40 at band top-right ·
+               resting strip height ≤ 128 px
 edges          right-angle routing (propagated 2026-07-05, see ledger): node
                bottom-center, down to a lane at mid-pitch, across, down into the
                next node's top-center · equal-x steps straight vertical,
@@ -397,7 +398,8 @@ Below a 480 px column the trail stays §8's object with these numbers:
 breakpoint     one: column < 480 px (≥ 480 px is §8, frozen)
 labels         mono 9 · this-walk doors only · clamped to the column
 band top       door bottom + 36 px (16 px label slot + 20 px air)
-pitch          14 px (n ≤ 5) · else 56/(n−1), floor 7
+pitch          14 px (n ≤ 5) · else 56/(n−1), floor 11 (propagated 2026-07-06,
+               see ledger) · beyond 6 steps: last 6 render per §8
 edges          right-angle routing (amended at judgment — B's language on A's
                frame): node bottom-center, down to a lane at mid-pitch, across,
                down into the next node's top-center · head 4 × 4 · no segment
@@ -413,6 +415,50 @@ everything else §8 verbatim
 **Resolved (2026-07-05):** the right-angle edge language extends to the ≥480 px
 trail — §8 propagated, see the ledger. The trail draws one way at every width.
 
+## 12 — wayfinding
+
+_Landed 2026-07-06. Winner: variant A (the path line). Session record:
+`claude-design/sessions/session-12-variants.html`._
+
+```
+breadcrumb     one line of short ids · site chrome on every deep page (depth ≥ 2)
+  content      door / collection / record — "walk / sharibako / ho-04.6",
+               "framework / structure / ho-structure" · always ids, never titles
+  placement    very top of the content column, above the h1 · margin 0 0 1rem
+  type         mono 400 0.8125rem / 1.5
+  ink          ancestors sumi@.70 · current segment sumi 1.00, plain text,
+               aria-current="page" — where you stand prints full ink
+  links        ancestors only · solid 1px underline bero@.70 #648cab,
+               text-underline-offset 0.2em — §5's link affordance, nothing new
+  separator    " / " (spaced slash) sumi@.40
+  truncation   the line never wraps · on overflow, middle segments collapse
+               right-to-left into one "…" sumi@.40, non-interactive, first +
+               current kept · still overflowing: the first collapses too
+               ("… / ho-structure") · the current segment never collapses
+  landings     door landing pages and the home carry no crumb — they are tops
+  a11y         <nav aria-label="breadcrumb"> · links in natural tab order
+trail doors    navigate — door node + label are one link to the door's landing
+  rest         §8/§11 ink and geometry verbatim · no resting underline —
+               the record look holds; the strip never restyles into a nav bar
+  touch        hover/focus-visible: the door label gains the solid 1px underline
+               bero@.70 (the label only — node ink and geometry untouched) ·
+               cursor pointer
+  focus        focus-visible: 1px sumi outline, offset 2px, on the door hit area
+  hit target   ≥ 24 × 24 px centered on node + label
+  steps        step nodes never navigate — §8 expansion only · the thread stays
+               the record; the plan row is the way forward
+caption        unchanged — "your walk" mono 11 sumi@.70 left · "n steps" mono 11
+               sumi@.40 right (§8) · merged single line below 480 px (§11)
+hint           first visit only, one line under the caption row, left-aligned:
+               "plan above · your steps beneath · doors open"
+               mono 10 sumi@.40 · renders until the first door navigation or the
+               second visit, whichever comes first, then never again · no dismiss
+               chrome, no animation, never nags · localStorage ho.trail.hinted = 1 ·
+               storage unavailable → renders once per page load, harmless
+strip height   the hint adds 14 px to the resting strip on first visit only,
+               inside §8's ≤ 128 px budget (§11's ≤ 160 px at narrow)
+```
+
 ## Propagation ledger
 
 | date | section | change | reason |
@@ -420,3 +466,4 @@ trail — §8 propagated, see the ledger. The trail draws one way at every width
 | 2026-07-04 | §9 the flip | duration 160 → 240 ms; easing one whole-flip curve → symmetric halves (collapse cubic-bezier(0.4, 0, 1, 1) over 0–120 ms, land cubic-bezier(0, 0, 0.2, 1) over 120–240 ms); face swap 32 → 120 ms; adjacent tints cut at 120 ms | Practitioner at the coherence check: at 160 ms the turn was illegible — "I don't get to see the back." The flip is the site's one kinetic signature and must read as a physical turn. Amended values seen moving in the coherence page's amendment demo. |
 | 2026-07-04 | §7 timing | card arrival instant (0 ms) → one §4 step (160 ms); dismissal stays instant | Deferred question resolved by the practitioner at the coherence check, overriding the builder's instant recommendation; both behaviors were shown side by side. |
 | 2026-07-05 | §8 edges | angled point-to-point thread → right-angle routing (down · across · down, lane at mid-pitch; equal-x steps straight vertical); head 5 × 4 and all inks unchanged | Practitioner at the session 11 landing: "they read SO MUCH BETTER." Right angles read as steps taken in sequence where diagonals read as abstract graph edges; the routing also makes an edge on a met-dot row geometrically impossible at every width, closing session 11's parked 42 rem crossing risk. Seen moving in session 11's A′ demo; the trail now draws one way at every width. The spike (built 2026-07-04) predates this propagation — v1 implements from the basis, not the spike, on this value. |
+| 2026-07-06 | §8 + §11 thread pitch | pitch floor 6 → 10 (§8) and 7 → 11 (§11); elision tightens from last-9 to last-6 rendered steps | Dense-walk collapse found at the v1 review: at the old floors the right-angle routing had zero vertical clearance against 6 px nodes and collapsed to a horizontal bar with the arrowhead on the node body — the routing (propagated 2026-07-05) was never seen moving at that density. Raised floors restore the verticals (pitch − node ≥ 4 px); the tighter rendered tail keeps the strip inside the frozen height budgets (≤128 / ≤160). Open, not taken: met dots clip when a step lands on the last door's column — candidate mirror-left rule awaits its own ruling. |

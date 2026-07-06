@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hosystem — session 12 · wayfinding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --washi:#eef1ef; --sumi:#1f2123; --bero:#29618e; --gold:#a9832a;
+    --sumi70:rgba(31,33,35,.7); --sumi40:rgba(31,33,35,.4); --sumi12:rgba(31,33,35,.12);
+    --bero70:rgba(41,97,142,.7);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--washi); color:var(--sumi);
+    font:400 1.0625rem/1.65 'Source Serif 4','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+    padding:3rem 1.5rem 6rem;
+  }
+  main{max-width:72rem;margin:0 auto}
+  h1{font-size:1.75rem;line-height:1.25;font-weight:600;margin:0 0 1rem}
+  h2{font-size:1.375rem;line-height:1.3;font-weight:600;margin:3.5rem 0 .5rem}
+  h3{font-size:1.125rem;line-height:1.4;font-weight:600;margin:2rem 0 .5rem}
+  p{margin:0 0 1.25rem;max-width:42rem}
+  .mono{font-family:'Source Code Pro',monospace}
+  .meta{font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.5;color:var(--sumi70);margin-bottom:.5rem;max-width:none}
+  .commit{font-style:italic;margin:0 0 .75rem}
+  ul.faces{list-style:none;padding:0;margin:0 0 1rem;font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.6;color:var(--sumi70);max-width:60rem}
+  ul.faces li::before{content:"· "}
+  .controls{display:flex;align-items:center;gap:1.25rem;margin:0 0 1rem;font-family:'Source Code Pro',monospace;font-size:.8125rem}
+  .controls button{
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;color:var(--sumi);
+    background:var(--washi);border:1px solid var(--sumi40);border-radius:0;
+    padding:.3rem .9rem;cursor:pointer;
+  }
+  .controls button:hover{border-color:var(--sumi)}
+  label.opt{color:var(--sumi70);cursor:pointer;user-select:none}
+  .demos{display:flex;gap:2.5rem;flex-wrap:wrap;align-items:flex-start;margin-bottom:.75rem}
+  figure{margin:0}
+  figcaption{font-family:'Source Code Pro',monospace;font-size:.8125rem;color:var(--sumi70);margin-top:.5rem}
+  .frame{border:1px solid rgba(31,33,35,.25);background:var(--washi);width:640px;max-width:100%}
+  .note{
+    font-family:'Source Code Pro',monospace;font-size:.75rem;color:var(--bero);
+    min-height:1.2rem;margin:0 0 1.5rem;
+  }
+  pre.frozen{
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.6;
+    border:1px solid var(--sumi40);padding:1rem 1.25rem;overflow-x:auto;margin:1rem 0 2rem;
+    background:var(--washi);white-space:pre;max-width:60rem;
+  }
+  ul.parked{list-style:none;padding:0;margin:0;font-size:.9375rem;max-width:42rem}
+  ul.parked li::before{content:"— "}
+  hr{border:none;border-top:1px solid var(--sumi12);margin:3rem 0;max-width:none}
+
+  /* ---------- mock page chrome (matches the shipped v1 chrome) ---------- */
+  .mock-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px 12px;
+  }
+  .mock-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--sumi)}
+  .mock-brand .wordmark{font-family:'Source Code Pro',monospace;font-weight:600;font-size:.875rem}
+  .mock-nav{display:flex;gap:14px;font-family:'Source Code Pro',monospace;font-size:.75rem}
+  .mock-nav a{color:var(--sumi70);text-decoration:none}
+  .mock-nav a:hover,.mock-nav a:focus-visible{
+    text-decoration:underline solid;text-decoration-color:var(--bero70);
+    text-decoration-thickness:1px;text-underline-offset:.2em;
+  }
+  .head-rule{border-top:1px solid var(--sumi12)}
+  .mock-body{padding:20px 24px 20px}
+  .mock-h1{font-size:1.375rem;line-height:1.3;font-weight:600;margin:0 0 1.25rem}
+  .mock-h1 code{font-family:'Source Code Pro',monospace;font-size:.875em}
+  .ghost{font-size:.9375rem;line-height:1.55;margin:0;color:rgba(31,33,35,.85)}
+  .ghost .term{
+    background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;
+    text-decoration:underline dotted 1px;text-decoration-color:rgba(100,140,171,1);
+    text-underline-offset:.2em;
+  }
+
+  /* ---------- §5 ledger, frozen values ---------- */
+  .ledger{border:1px solid var(--sumi40);margin:0 0 2.5rem}
+  .ledger-row{
+    display:grid;grid-template-columns:9rem 1fr;padding:.5rem .875rem;
+    border-top:1px solid var(--sumi12);
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.5;
+  }
+  .ledger-row:first-child{border-top:none}
+  .ledger-key{color:var(--sumi70)}
+  .ledger-val{color:var(--sumi)}
+  .ledger-val .koma-mark{vertical-align:-1px;margin-right:.5rem}
+  .ledger-val a{color:var(--sumi);}
+  .lnk,.ledger-val a{
+    text-decoration:underline solid;text-decoration-color:var(--bero70);
+    text-decoration-thickness:1px;text-underline-offset:.2em;color:inherit;
+  }
+  a:focus-visible,button:focus-visible{outline:1px solid var(--sumi);outline-offset:2px}
+
+  /* ---------- breadcrumb forms ---------- */
+  nav.crumb{
+    font-family:'Source Code Pro',monospace;font-size:.8125rem;line-height:1.5;
+    margin:0 0 1rem;white-space:nowrap;overflow:hidden;
+  }
+  nav.crumb a{color:var(--sumi70)}
+  nav.crumb .sep{color:var(--sumi40)}
+  nav.crumb .ell{color:var(--sumi40)}
+  nav.crumb .cur{color:var(--sumi)}
+  nav.crumb.parent-only a{color:var(--sumi70)}
+  /* C — chain idiom at crumb scale */
+  nav.crumb-chain{display:flex;align-items:center;gap:0;margin:0 0 .75rem;font-family:'Source Code Pro',monospace}
+  nav.crumb-chain .chip{
+    display:inline-block;border:1px solid var(--sumi40);background:var(--washi);
+    padding:2px 8px 3px;font-size:.625rem;font-weight:600;line-height:1.3;
+    color:var(--sumi70);text-decoration:none;border-radius:0;
+  }
+  nav.crumb-chain a.chip:hover,nav.crumb-chain a.chip:focus-visible{
+    text-decoration:underline solid;text-decoration-color:var(--bero70);
+    text-decoration-thickness:1px;text-underline-offset:.2em;
+  }
+  nav.crumb-chain .chip.cur{border-color:var(--sumi);color:var(--sumi)}
+  nav.crumb-chain svg{display:block}
+
+  /* ---------- trail strip ---------- */
+  .strip{margin-top:4rem;border-top:1px solid var(--sumi12);padding:12px 0 8px}
+  .strip svg{display:block}
+  svg text{user-select:none}
+  svg a{cursor:pointer}
+  svg a:focus-visible{outline:1px solid var(--sumi);outline-offset:2px}
+  /* D — the standing line, the strip's first line */
+  .standing{
+    font-family:'Source Code Pro',monospace;font-size:.6875rem;line-height:1.5;
+    margin:0 0 6px;white-space:nowrap;overflow:hidden;
+  }
+  .standing .lbl{color:var(--sumi70)}
+  .standing .sep{color:var(--sumi40)}
+  .standing a{color:var(--sumi70)}
+  .standing .cur{color:var(--sumi)}
+  /* demo toast — demo chrome, not site ink */
+  #toast{
+    position:fixed;left:1rem;bottom:1rem;z-index:20;
+    font-family:'Source Code Pro',monospace;font-size:.75rem;color:var(--bero);
+    background:var(--washi);border:1px solid var(--bero70);padding:.35rem .7rem;
+    display:none;
+  }
+  @keyframes stepin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .arrive{animation:stepin 160ms cubic-bezier(.2,0,0,1) both}
+  @media (prefers-reduced-motion: reduce){.arrive{animation:none}}
+
+  /* crumb samples row */
+  .samples{display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;margin:0 0 .75rem}
+  .sample{border:1px dashed rgba(31,33,35,.25);padding:10px 14px;background:var(--washi)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>wayfinding — session 12</h1>
+
+<p>One question: how a visitor knows where they are, and moves on from there. Born at
+the v1 review — the practitioner, who wrote every document on this site, got lost in
+it: &ldquo;I need some sort of breadcrumbs&rdquo;; and, standing on the trail,
+&ldquo;why can&rsquo;t I continue it here.&rdquo; Three faces, answered together by
+every variant: a deep page says where it sits (breadcrumbs), the trail offers a way
+forward (do doors navigate?), and a first look at the strip says what it is (the
+trail announcing itself).</p>
+
+<p>The trail&rsquo;s geometry is §8/§11, frozen — every strip below draws it verbatim
+(right-angle routing per the ledger propagation). This session adds affordance and
+meaning only. Gold stays state; the crumb and the doors invent no new ink and no new
+affordance: solid underline = link, dotted = term, everywhere.</p>
+
+<p class="meta">each demo is one mock deep page — the real ho-04.6 ledger header under real
+breadcrumbs — with a simulated 3-step walk: Framework → Practice → Walk · Colophon greets
+from a past visit (sumi@.70)</p>
+
+<p class="meta">everything claimed interactive is interactive: tab reaches crumb and door
+links, Enter follows · where doors navigate, clicking one appends the step that would
+arrive with the page (demo route prints beneath the frame in bero — demo chrome, not site
+ink) · hover/focus/tap a step node for §8 expansion, tap pins, Escape or outside-tap
+dismisses · replay honors prefers-reduced-motion</p>
+
+<!-- ================================================================ A -->
+<h2>A — the path line</h2>
+<p class="commit">Commits to the plain path spoken once at the very top, doors that open
+on touch, and a hint that appears exactly once.</p>
+<ul class="faces">
+  <li>breadcrumbs — full path of short ids at the very top of the column, above the h1: &ldquo;walk / sharibako / ho-04.6&rdquo; · mono 13 · ancestors sumi@.70 + solid bero@.70 underline (§5&rsquo;s link grammar) · current sumi 1.00, plain — where you stand prints full ink</li>
+  <li>doors — navigate: node + label are one link · at rest §8 verbatim · hover/focus puts the solid underline on the label only; geometry untouched · clicking a door here appends the step that would arrive with the page</li>
+  <li>announcement — one line under the caption, first visit only: &ldquo;plan above · your steps beneath · doors open&rdquo; mono 10 sumi@.40 · gone after the first door navigation or the second visit, never again</li>
+</ul>
+<div class="controls" data-variant="A">
+  <button type="button" data-act="replay">replay</button>
+  <label class="opt"><input type="checkbox" data-act="hint" checked> first visit (hint renders)</label>
+</div>
+<div class="demos">
+  <figure><div class="frame" data-page="A"></div>
+  <figcaption>ho-04.6 under the path line · trail: doors open</figcaption></figure>
+</div>
+<p class="note" data-note="A"></p>
+<div class="samples">
+  <div class="sample">
+    <nav class="crumb" aria-label="breadcrumb"><a href="#" class="lnk demo-route" data-route="/framework/">framework</a><span class="sep"> / </span><a href="#" class="lnk demo-route" data-route="/framework/structure/">structure</a><span class="sep"> / </span><span class="cur" aria-current="page">ho-structure</span></nav>
+    <figcaption>the second test case, same grammar</figcaption>
+  </div>
+  <div class="sample" style="width:260px">
+    <nav class="crumb" aria-label="breadcrumb"><a href="#" class="lnk demo-route" data-route="/framework/">framework</a><span class="sep"> / </span><span class="ell">…</span><span class="sep"> / </span><span class="cur" aria-current="page">ho-structure</span></nav>
+    <figcaption>260 px column — middles collapse right-to-left into one …, first + current kept</figcaption>
+  </div>
+  <div class="sample" style="width:160px">
+    <nav class="crumb" aria-label="breadcrumb"><span class="ell">…</span><span class="sep"> / </span><span class="cur" aria-current="page">ho-structure</span></nav>
+    <figcaption>160 px — still overflowing: the first collapses too; the current segment never does</figcaption>
+  </div>
+</div>
+
+<!-- ================================================================ B -->
+<h2>B — climb out, one step</h2>
+<p class="commit">Commits to one-step climbing, a trail that stays a pure record, and a
+caption that teaches forever.</p>
+<ul class="faces">
+  <li>breadcrumbs — parent only, at the very top: &ldquo;← the walk&rdquo; · mono 13 sumi@.70, solid bero@.70 underline · the deeper context is already a ledger row (project: sharibako) — the crumb points one level up and stops</li>
+  <li>doors — record-only, untouched: &ldquo;continue&rdquo; lives where it already exists — the six doors in the site header and the crumb&rsquo;s climb · the strip never becomes chrome</li>
+  <li>announcement — the caption itself teaches, permanently: left &ldquo;your walk so far · 3 steps&rdquo;, right &ldquo;plan above · steps below&rdquo; mono 11 (@.70 name, @.40 rest)</li>
+</ul>
+<div class="controls" data-variant="B">
+  <button type="button" data-act="replay">replay</button>
+</div>
+<div class="demos">
+  <figure><div class="frame" data-page="B"></div>
+  <figcaption>ho-04.6 under the parent arrow · trail: record only</figcaption></figure>
+</div>
+<p class="note" data-note="B"></p>
+<div class="samples">
+  <div class="sample">
+    <nav class="crumb parent-only" aria-label="breadcrumb"><a href="#" class="lnk demo-route" data-route="/framework/structure/">← structure</a></nav>
+    <figcaption>the second test case — parent only; the door above it is a second click</figcaption>
+  </div>
+</div>
+
+<!-- ================================================================ C -->
+<h2>C — the chain at crumb scale</h2>
+<p class="commit">Commits to one idiom at every scale — the crumb is a tiny chain docked
+on the ledger, the doors open, and the rhyme does the teaching.</p>
+<ul class="faces">
+  <li>breadcrumbs — §6&rsquo;s language miniaturized, directly above the ledger box: washi chips (stroke 1 sumi@.40, mono 600 10) joined by 1 px sumi@.40 forward arrows, head 4 × 3.5 · current chip full sumi · ancestor chips are links, underline on touch</li>
+  <li>doors — navigate, same affordance as A: the label takes the solid underline on hover/focus, the node never restyles</li>
+  <li>announcement — by rhyme, no new words: crumb nodes, diagram nodes, trail doors are one grammar — the strip reads as &ldquo;the same squares you have been clicking&rdquo; · caption stays &ldquo;your walk · n steps&rdquo; verbatim</li>
+</ul>
+<div class="controls" data-variant="C">
+  <button type="button" data-act="replay">replay</button>
+</div>
+<div class="demos">
+  <figure><div class="frame" data-page="C"></div>
+  <figcaption>ho-04.6 with the chain crumb docked on the ledger · trail: doors open</figcaption></figure>
+</div>
+<p class="note" data-note="C"></p>
+<div class="samples">
+  <div class="sample">
+    <nav class="crumb-chain" aria-label="breadcrumb" data-chain='["framework","structure","ho-structure"]' data-routes='["/framework/","/framework/structure/"]'></nav>
+    <figcaption>the second test case at chip scale</figcaption>
+  </div>
+</div>
+
+<!-- ================================================================ D -->
+<h2>D — wayfinding lives at the foot</h2>
+<p class="commit">Commits to one wayfinding surface: the strip says where you stand,
+where you have been, and where the doors are — all at the foot of the page.</p>
+<ul class="faces">
+  <li>breadcrumbs — in the footer, as the strip&rsquo;s first line: &ldquo;here—walk / sharibako / ho-04.6&rdquo; mono 11 (label @.70, path per A&rsquo;s inks, closed em dash per §3) · the top of the page adds nothing; the h1 and ledger carry the top</li>
+  <li>doors — navigate (A&rsquo;s affordance): standing line, thread, and doors make past · present · next one object</li>
+  <li>announcement — the standing line is the announcement: the strip&rsquo;s subject is you — here (line), your steps (thread), the ways on (doors) · caption stays &ldquo;your walk · n steps&rdquo;</li>
+</ul>
+<div class="controls" data-variant="D">
+  <button type="button" data-act="replay">replay</button>
+</div>
+<div class="demos">
+  <figure><div class="frame" data-page="D"></div>
+  <figcaption>ho-04.6 bare at the top · the strip carries all the wayfinding</figcaption></figure>
+</div>
+<p class="note" data-note="D"></p>
+
+<hr>
+
+<!-- ================================================================ recommendation -->
+<h2>Recommendation — A</h2>
+
+<p><strong>1. It answers both of the practitioner&rsquo;s actual reaches, with the least
+new chrome.</strong> &ldquo;I need some sort of breadcrumbs&rdquo; gets the path spoken
+in words at the exact place a lost reader looks — the top of the column — and
+&ldquo;why can&rsquo;t I continue it here&rdquo; gets the direct answer: now you can;
+the doors he stood on open. B refuses the second reach entirely (the header nav he was
+not reaching for is the only way on); D grants both but makes climbing out require the
+scroll to the foot — a lost reader is lost at the top.</p>
+
+<p><strong>2. Nothing is invented.</strong> The crumb reuses §5&rsquo;s link grammar
+(solid 1&nbsp;px bero@.70 underline) and §2&rsquo;s ink states (current = full ink,
+ancestors receded to @.70 — the state map&rsquo;s own reading of &ldquo;where you
+stand&rdquo;); the door affordance is the same underline arriving on the label at
+touch, so at rest the strip is §8 verbatim and the record never becomes a nav bar. The
+hint teaches once and disappears — B makes every page carry its lesson forever, which
+fails terse over a lifetime of visits; C spends chip-and-arrow chrome to say what
+eleven mono characters say plainly.</p>
+
+<p><strong>3. It survives the site&rsquo;s real depth mechanically.</strong> Short ids
+in mono make both test cases fit a 360&nbsp;px column untruncated
+(&ldquo;framework / structure / ho-structure&rdquo; ≈ 289&nbsp;px at 13&nbsp;px mono);
+the overflow rule is one deterministic move (middles collapse right-to-left into a
+single &ldquo;…&rdquo;), not a tuned layout.</p>
+
+<p>If the plain line reads too quiet at judgment, C is the principled alternative —
+same doors, same inks, the idiom made visible — at the cost of chrome the voice rule
+would rather not spend. If doors-navigate feels like too much motion toward nav, B is
+the retreat, and the &ldquo;continue&rdquo; question comes back as a new session.</p>
+
+<h3>Frozen if accepted</h3>
+<pre class="frozen">wayfinding     variant A — the path line
+breadcrumb     one line of short ids · site chrome on every deep page (depth ≥ 2)
+  content      door / collection / record — &quot;walk / sharibako / ho-04.6&quot;,
+               &quot;framework / structure / ho-structure&quot; · always ids, never titles
+  placement    very top of the content column, above the h1 — replaces the
+               ad-hoc &quot;← The Walk&quot; caption line · margin 0 0 1rem
+  type         mono 400 0.8125rem / 1.5
+  ink          ancestors sumi@.70 · current segment sumi 1.00, plain text,
+               aria-current=&quot;page&quot; (where you stand prints full ink — §2&rsquo;s grammar)
+  links        ancestors only · solid 1px underline bero@.70 #648cab,
+               text-underline-offset 0.2em — §5&rsquo;s link affordance, nothing new
+  separator    &quot; / &quot; (spaced slash) sumi@.40
+  truncation   the line never wraps · on overflow, middle segments collapse
+               right-to-left into one &quot;…&quot; sumi@.40, non-interactive, first +
+               current kept · still overflowing: the first collapses too
+               (&quot;… / ho-structure&quot;) · the current segment never collapses
+  landings     door landing pages and the home carry no crumb — they are tops
+  a11y         &lt;nav aria-label=&quot;breadcrumb&quot;&gt; · links in natural tab order
+trail doors    navigate — door node + label are one link to the door&rsquo;s landing
+  rest         §8/§11 ink and geometry verbatim · no resting underline —
+               the record look holds; the strip never restyles into a nav bar
+  touch        hover/focus-visible: the door label gains the solid 1px underline
+               bero@.70 (the label only — node ink and geometry untouched) ·
+               cursor pointer
+  focus        focus-visible: 1px sumi outline, offset 2px, on the door hit area
+  hit target   ≥ 24 × 24 px centered on node + label
+  steps        step nodes never navigate — §8 expansion only · the thread stays
+               the record; the plan row is the way forward
+caption        unchanged — &quot;your walk&quot; mono 11 sumi@.70 left · &quot;n steps&quot; mono 11
+               sumi@.40 right (§8) · merged single line below 480 px (§11)
+hint           first visit only, one line under the caption row, left-aligned:
+               &quot;plan above · your steps beneath · doors open&quot;
+               mono 10 sumi@.40 · renders until the first door navigation or the
+               second visit, whichever comes first, then never again · no dismiss
+               chrome, no animation, never nags · localStorage ho.trail.hinted = 1 ·
+               storage unavailable → the hint renders once per page load, harmless
+strip height   the hint adds 14 px to the resting strip on first visit only,
+               inside §8&rsquo;s ≤ 128 px budget (§11&rsquo;s ≤ 160 px at narrow)</pre>
+
+<h3>Parked</h3>
+<ul class="parked">
+  <li>the &ldquo;your walk&rdquo; deep page — v2; the doors open now, a richer &ldquo;continue&rdquo; surface waits.</li>
+  <li>client-side search — v2.</li>
+  <li>site-wide nav/header redesign — the header is untouched by this session.</li>
+  <li>crumbs on mid-tier listing pages (a chain&rsquo;s own page, if one ever exists) — same grammar, when the page exists.</li>
+  <li>the trail&rsquo;s geometry — §8/§11, frozen; nothing here redraws it.</li>
+  <li>dark-mode printing of crumb and hint — §2 defers dark mode wholesale.</li>
+</ul>
+</main>
+<script>
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  var SUMI='#1f2123', BERO='#29618e', WASHI='#eef1ef', GOLD='#a9832a';
+  var BERO70='rgba(41,97,142,.7)';
+  var MONO="'Source Code Pro',monospace";
+  var DOORS=['Framework','Practice','Skills','Writing','Walk','Colophon'];
+  var ROUTES=['/framework/','/practice/','/skills/','/writing/','/walk/','/colophon/'];
+  // the simulated 3-step walk: Framework → Practice → Walk (current)
+  var BASE=[{d:0,met:['kamae']},{d:1,met:[]},{d:4,met:['supersedes','dogfood']}];
+  var PAST={5:true};             // Colophon entered on a past visit → greets at .70
+  var CFG={
+    A:{crumb:'path',  hint:true,  teach:false, standing:false, doorsNav:true },
+    B:{crumb:'parent',hint:false, teach:true,  standing:false, doorsNav:false},
+    C:{crumb:'chain', hint:false, teach:false, standing:false, doorsNav:true },
+    D:{crumb:'none',  hint:false, teach:false, standing:true,  doorsNav:true }
+  };
+  var TRAILS=[];
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function el(n,a,parent){
+    var e=document.createElementNS(NS,n);
+    for(var k in a) e.setAttribute(k,a[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent,x,y,s,o){
+    o=o||{};
+    var t=el('text',{x:x,y:y,'font-family':MONO,'font-size':(o.size||10),
+      fill:(o.fill||SUMI),'fill-opacity':(o.op==null?1:o.op),
+      'text-anchor':(o.anchor||'start'),'font-weight':(o.weight||400)},parent);
+    t.textContent=s;
+    return t;
+  }
+  function lw(s,size){return s.length*size*0.6;}   // mono advance ≈ 0.6 em
+  function cnt(m){return m===1?'1 step':m+' steps';}
+
+  // ---- demo toast (demo chrome, not site ink)
+  var toast=document.createElement('div'); toast.id='toast';
+  document.body.appendChild(toast);
+  function flash(msg){
+    toast.textContent=msg; toast.style.display='block';
+    clearTimeout(flash._t); flash._t=setTimeout(function(){toast.style.display='none';},3500);
+  }
+  function note(v,msg){
+    var n=document.querySelector('[data-note="'+v+'"]'); if(!n) return;
+    n.textContent=msg;
+    clearTimeout(n._t); n._t=setTimeout(function(){n.textContent='';},5000);
+  }
+
+  // ---- shared mock-page pieces (the shipped v1 chrome + §5 ledger, values verbatim)
+  var KOMA_BRAND='<svg xmlns="'+NS+'" viewBox="0 0 16.28 22" width="16.28" height="22" aria-hidden="true">'+
+    '<path d="M8.14 0 L14.52 4.84 L16.28 22 L0 22 L1.76 4.84 Z" fill="'+WASHI+'" stroke="'+SUMI+'" stroke-width="0.88" stroke-linejoin="miter"/>'+
+    '<text x="8.14" y="13.42" fill="'+SUMI+'" font-size="9.24" text-anchor="middle" dominant-baseline="central" '+
+    'font-family="\'Hiragino Mincho ProN\',\'Yu Mincho\',\'Noto Serif JP\',serif">歩</text></svg>';
+  var KOMA_GOLD_12='<svg xmlns="'+NS+'" viewBox="0 0 8.88 12" width="8.88" height="12" class="koma-mark" aria-hidden="true">'+
+    '<path d="M4.44 0 L7.92 2.64 L8.88 12 L0 12 L0.96 2.64 Z" fill="'+GOLD+'" stroke="none"/></svg>';
+
+  function mockHeader(){
+    var links=DOORS.map(function(d,i){
+      return '<a href="#" class="demo-route" data-route="'+ROUTES[i]+'">'+d+'</a>';
+    }).join('');
+    return '<div class="mock-head"><span class="mock-brand">'+KOMA_BRAND+
+      '<span class="wordmark">hosystem</span></span><nav class="mock-nav" aria-label="primary">'+
+      links+'</nav></div><div class="head-rule"></div>';
+  }
+  function ledgerHTML(){
+    function row(k,v){return '<div class="ledger-row"><span class="ledger-key">'+k+
+      '</span><span class="ledger-val">'+v+'</span></div>';}
+    return '<div class="ledger" aria-label="frontmatter">'+
+      row('created','2026-07-02')+
+      row('status',KOMA_GOLD_12+'complete')+
+      row('type','ho-document')+
+      row('project','sharibako')+
+      row('ho','04.6')+
+      row('builds-on','<a href="#" class="demo-route" data-route="/walk/kamae-2.2-sharibako-ownership-decision/">kamae-2.2-sharibako-ownership-decision.md</a><br>'+
+        '<a href="#" class="demo-route" data-route="/walk/ho-04.2-interactive-init/">ho-process/hos/ho-04.2-interactive-init.md</a>')+
+      row('supersedes','ho-04.4 (the ingest dashboard)—its dashboard surface')+
+      '</div>';
+  }
+  var GHOST='<p class="ghost"><code>sharibako init</code> collects its ingest decisions '+
+    'through a plain line-based prompt instead of a full-screen dashboard. This '+
+    '<button type="button" class="term">supersedes</button> ho-04.4, whose hand-rolled '+
+    'TUI was over-built for a once-per-project command.</p>';
+  var H1='<h1 class="mock-h1">ho-04.6 — Plain-prompt <code>init</code></h1>';
+
+  function crumbHTML(kind){
+    if(kind==='path'){
+      return '<nav class="crumb" aria-label="breadcrumb">'+
+        '<a href="#" class="lnk demo-route" data-route="/walk/">walk</a><span class="sep"> / </span>'+
+        '<a href="#" class="lnk demo-route" data-route="/walk/#sharibako">sharibako</a><span class="sep"> / </span>'+
+        '<span class="cur" aria-current="page">ho-04.6</span></nav>';
+    }
+    if(kind==='parent'){
+      return '<nav class="crumb parent-only" aria-label="breadcrumb">'+
+        '<a href="#" class="lnk demo-route" data-route="/walk/">← the walk</a></nav>';
+    }
+    return '';
+  }
+  // C — the chain idiom at crumb scale: chips + 1 px sumi@.40 forward arrows, head 4 × 3.5
+  function chainCrumbInto(nav,names,routes){
+    nav.setAttribute('aria-label','breadcrumb');
+    names.forEach(function(name,i){
+      var last=(i===names.length-1), n;
+      if(last){
+        n=document.createElement('span'); n.className='chip cur';
+        n.setAttribute('aria-current','page');
+      }else{
+        n=document.createElement('a'); n.className='chip demo-route';
+        n.href='#'; n.setAttribute('data-route',routes[i]);
+      }
+      n.textContent=name; nav.appendChild(n);
+      if(!last){
+        var s=el('svg',{width:15,height:8,viewBox:'0 0 15 8','aria-hidden':'true'},null);
+        el('line',{x1:1,y1:4,x2:9.5,y2:4,stroke:SUMI,'stroke-opacity':.4,'stroke-width':1},s);
+        el('polygon',{points:'13.5,4 9.5,2.25 9.5,5.75',fill:SUMI,'fill-opacity':.4,
+          'stroke-miterlimit':10},s);
+        nav.appendChild(s);
+      }
+    });
+  }
+  /* ---- the trail — §8 verbatim (right-angle edges per the 2026-07-05 propagation);
+         this session adds affordance and meaning only, never geometry ---- */
+  function buildTrail(stripMount,cfg,v){
+    var W=592;
+    var walk=BASE.map(function(s){return {d:s.d,met:s.met.slice()};});
+    var state={m:walk.length,hint:cfg.hint,pinned:null,overlay:null,timers:[]};
+
+    var standing=null;
+    if(cfg.standing){
+      standing=document.createElement('div');
+      standing.className='standing';
+      standing.innerHTML='<span class="lbl">here—</span>'+
+        '<a href="#" class="lnk demo-route" data-route="/walk/">walk</a><span class="sep"> / </span>'+
+        '<a href="#" class="lnk demo-route" data-route="/walk/#sharibako">sharibako</a><span class="sep"> / </span>'+
+        '<span class="cur">ho-04.6</span>';
+      stripMount.appendChild(standing);
+    }
+    var svg=el('svg',{width:W},null);
+    stripMount.appendChild(svg);
+
+    function pitchFor(n){return n<=5?12:Math.max(48/(n-1),6);}
+    function geom(){
+      var capBottom=state.hint?30:16;         // hint adds one 14 px line, first visit only
+      var doorC=capBottom+13, doorB=doorC+5;
+      var bandTop=doorB+30;                   // label slot (labels + 14, §8)
+      return {doorC:doorC,doorB:doorB,bandTop:bandTop};
+    }
+    function xsFor(){var xs=[],i;for(i=0;i<6;i++)xs.push(8+i*(W-16)/5);return xs;}
+
+    function head(g,x,y){ // filled triangle 5 × 4, tip at node top-center, miter
+      el('polygon',{points:x+','+y+' '+(x-2)+','+(y-5)+' '+(x+2)+','+(y-5),
+        fill:SUMI,'stroke-miterlimit':10},g);
+    }
+    function drawEdge(g,x1,y1,x2,y2,pitch){
+      // right-angle routing: down to a lane at mid-pitch, across, down into top-center;
+      // equal-x steps straight vertical — no segment ever travels at a node's y
+      head(g,x2,y2-3);
+      if(x1===x2){
+        el('line',{x1:x1,y1:y1+3,x2:x2,y2:y2-8,stroke:SUMI,'stroke-width':1.25},g);
+      }else{
+        var lane=y1+pitch/2;
+        el('path',{d:'M'+x1+','+(y1+3)+' L'+x1+','+lane+' L'+x2+','+lane+' L'+x2+','+(y2-8),
+          fill:'none',stroke:SUMI,'stroke-width':1.25,'stroke-miterlimit':10},g);
+      }
+    }
+    function drawMet(g,x,y,met){
+      if(!met.length) return;
+      var n=Math.min(met.length,4),j;
+      for(j=0;j<n;j++)
+        el('circle',{cx:x+8.25+j*4,cy:y,r:1.25,fill:SUMI,'fill-opacity':.4},g);
+      if(met.length>4) txt(g,x+8.25+n*4+2,y+3,'+'+(met.length-4),{size:9,op:.4});
+    }
+    function clearExp(){if(state.overlay)state.overlay.innerHTML='';}
+    function showExp(k,G){
+      clearExp();
+      var s=walk[k-1],name=DOORS[s.d],metStr=s.met.length?' · '+s.met.join(', '):'';
+      var x=G.xs[s.d],y=G.bandTop+(k-1)*G.pitch;
+      var wEst=lw(name+metStr,10),ex=x+28,anchor='start';
+      if(ex+wEst>W){ex=x-14;anchor='end';}
+      var t=el('text',{x:ex,y:y+3,'font-family':MONO,'font-size':10,fill:SUMI,
+        'text-anchor':anchor},state.overlay);
+      var a=el('tspan',{'fill-opacity':.7},t); a.textContent=name;
+      if(metStr){var b=el('tspan',{'fill-opacity':.4},t); b.textContent=metStr;}
+    }
+
+    function doorLink(parent,i,op,G){
+      var a=el('a',{href:'#'},parent);
+      a.setAttribute('aria-label',DOORS[i]+' — open '+ROUTES[i]);
+      el('rect',{x:G.xs[i]-12,y:G.doorC-12,width:24,height:24,fill:'transparent',
+        'class':'door-hit'},a);                              // hit target ≥ 24 × 24
+      return a;
+    }
+    function drawDoor(parent,i,op,cur,G){
+      el('rect',{x:G.xs[i]-5,y:G.doorC-5,width:10,height:10,fill:WASHI,stroke:SUMI,
+        'stroke-opacity':op,'stroke-width':1,'stroke-miterlimit':10},parent);
+      var lbl=DOORS[i],w=lw(lbl,10),lx=G.xs[i],anchor='middle';
+      if(lx-w/2<0){lx=0;anchor='start';} else if(lx+w/2>W){lx=W;anchor='end';}
+      txt(parent,lx,G.doorB+14,lbl,{size:10,op:op,anchor:anchor});
+      // touch affordance: solid 1 px underline bero@.70 on the label only
+      var ux1=anchor==='middle'?lx-w/2:(anchor==='start'?lx:lx-w);
+      var u=el('line',{x1:ux1,y1:G.doorB+16.5,x2:ux1+w,y2:G.doorB+16.5,
+        stroke:BERO,'stroke-opacity':.7,'stroke-width':1,visibility:'hidden',
+        'class':'door-u'},parent);
+      return u;
+    }
+
+    function render(m,animate){
+      state.m=m; state.pinned=null;
+      svg.innerHTML='';
+      var G=geom(); G.xs=xsFor(); G.pitch=pitchFor(Math.max(m,1));
+      var H=G.bandTop+Math.max(m-1,0)*G.pitch+3+10;
+      svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+
+      var walked={},k,i;
+      for(k=0;k<m;k++) walked[walk[k].d]=true;
+
+      // ---- caption row
+      var t,tsp;
+      if(cfg.teach){
+        t=el('text',{x:0,y:10,'font-family':MONO,'font-size':11,fill:SUMI},svg);
+        tsp=el('tspan',{'fill-opacity':.7},t); tsp.textContent='your walk so far';
+        if(m>0){tsp=el('tspan',{'fill-opacity':.4},t); tsp.textContent=' · '+cnt(m);}
+        txt(svg,W,10,'plan above · steps below',{size:11,op:.4,anchor:'end'});
+      }else{
+        txt(svg,0,10,'your walk',{size:11,op:.7});
+        if(m>0) txt(svg,W,10,cnt(m),{size:11,op:.4,anchor:'end'});
+      }
+      if(state.hint)
+        txt(svg,0,24,'plan above · your steps beneath · doors open',{size:10,op:.4});
+
+      // ---- plan line + doors
+      el('line',{x1:G.xs[0],y1:G.doorC,x2:G.xs[5],y2:G.doorC,
+        stroke:SUMI,'stroke-opacity':.12,'stroke-width':1},svg);
+      var cur=m>0?walk[m-1].d:null;
+      for(i=0;i<6;i++){
+        var op=walked[i]?1:(PAST[i]?.7:.4);
+        if(cfg.doorsNav){
+          var a=doorLink(svg,i,op,G);
+          var u=drawDoor(a,i,op,cur,G);
+          (function(a,u,i){
+            function on(){u.setAttribute('visibility','visible');}
+            function off(){u.setAttribute('visibility','hidden');}
+            a.addEventListener('mouseenter',on); a.addEventListener('mouseleave',off);
+            a.addEventListener('focus',on); a.addEventListener('blur',off);
+            a.addEventListener('click',function(e){
+              e.preventDefault(); e.stopPropagation();
+              navigateDoor(i);
+            });
+          })(a,u,i);
+        }else{
+          drawDoor(svg,i,op,cur,G);
+        }
+      }
+
+      // ---- the thread (right-angle edges, all steps equal ink)
+      for(k=1;k<=m;k++){
+        var g=el('g',{},svg);
+        if(animate&&k===m) g.setAttribute('class','arrive');
+        var x=G.xs[walk[k-1].d],y=G.bandTop+(k-1)*G.pitch;
+        if(k>1) drawEdge(g,G.xs[walk[k-2].d],G.bandTop+(k-2)*G.pitch,x,y,G.pitch);
+        el('rect',{x:x-3,y:y-3,width:6,height:6,fill:SUMI},g);
+        drawMet(g,x,y,walk[k-1].met);
+        var hit=el('rect',{x:x-8,y:y-8,width:16,height:16,fill:'transparent',
+          cursor:'pointer',tabindex:0,role:'button','data-step':k},g);
+        hit.setAttribute('aria-label','step '+k+' — '+DOORS[walk[k-1].d]);
+      }
+      state.G=G;
+      state.overlay=el('g',{},svg);
+    }
+
+    function navigateDoor(i){
+      flash('→ '+ROUTES[i]+' (demo — no navigation)');
+      note(v,'→ '+ROUTES[i]+' · the walk continues — the step arrives with the page');
+      if(state.hint){setHint(false);
+        var box=document.querySelector('.controls[data-variant="'+v+'"] input[data-act="hint"]');
+        if(box) box.checked=false;
+      }
+      state.timers.push(setTimeout(function(){       // 240 ms page transition, then one §4 step
+        walk.push({d:i,met:[]});
+        render(walk.length,!reduced.matches);
+      },reduced.matches?0:240));
+    }
+
+    // ---- §8 expansion on step nodes: hover/focus transient, tap/Enter pins
+    svg.addEventListener('mouseover',function(e){
+      if(state.pinned) return;
+      var d=e.target.dataset||{}; if(d.step) showExp(+d.step,state.G);
+    });
+    svg.addEventListener('mouseout',function(e){
+      if(state.pinned) return;
+      var d=e.target.dataset||{}; if(d.step) clearExp();
+    });
+    svg.addEventListener('click',function(e){
+      var d=e.target.dataset||{}; if(!d.step) return;
+      e.stopPropagation();
+      var key='s'+d.step;
+      if(state.pinned===key){state.pinned=null;clearExp();}
+      else{state.pinned=key;showExp(+d.step,state.G);}
+    });
+    svg.addEventListener('keydown',function(e){
+      var d=e.target.dataset||{};
+      if(d.step&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.target.click();}
+    });
+
+    function replay(){
+      state.timers.forEach(clearTimeout); state.timers=[];
+      walk=BASE.map(function(s){return {d:s.d,met:s.met.slice()};});
+      clearExp(); state.pinned=null;
+      if(reduced.matches){render(walk.length,false);return;}   // instant swap, §4
+      render(0,false);                                          // empty state: doors from step 1
+      var k;
+      for(k=1;k<=walk.length;k++)
+        (function(kk){state.timers.push(setTimeout(function(){render(kk,true);},
+          240+(kk-1)*380));})(k);                               // page in, then the 380 ms beat
+    }
+    function setHint(on){state.hint=on;render(state.m,false);}
+    function dismiss(){state.pinned=null;clearExp();}
+
+    render(walk.length,false);
+    var inst={svg:svg,replay:replay,setHint:setHint,dismiss:dismiss};
+    TRAILS.push(inst);
+    return inst;
+  }
+
+  // ---- assemble the four mock pages
+  var INSTANCES={};
+  document.querySelectorAll('.frame[data-page]').forEach(function(mount){
+    var v=mount.getAttribute('data-page'),cfg=CFG[v];
+    var body=document.createElement('div'); body.className='mock-body';
+    var html='';
+    if(cfg.crumb==='path'||cfg.crumb==='parent') html+=crumbHTML(cfg.crumb);
+    html+=H1;
+    if(cfg.crumb==='chain') html+='<nav class="crumb-chain" data-mkchain="1"></nav>';
+    html+=ledgerHTML()+GHOST;
+    mount.innerHTML=mockHeader();
+    body.innerHTML=html;
+    mount.appendChild(body);
+    var chain=body.querySelector('[data-mkchain]');
+    if(chain) chainCrumbInto(chain,['walk','sharibako','ho-04.6'],
+      ['/walk/','/walk/#sharibako']);
+    var strip=document.createElement('div'); strip.className='strip';
+    body.appendChild(strip);
+    INSTANCES[v]=buildTrail(strip,cfg,v);
+  });
+
+  // ---- sample chain crumbs (the second test case)
+  document.querySelectorAll('nav.crumb-chain[data-chain]').forEach(function(nav){
+    chainCrumbInto(nav,JSON.parse(nav.getAttribute('data-chain')),
+      JSON.parse(nav.getAttribute('data-routes')));
+  });
+
+  // ---- controls
+  document.querySelectorAll('.controls[data-variant]').forEach(function(ctrl){
+    var v=ctrl.getAttribute('data-variant'),inst=INSTANCES[v];
+    var rp=ctrl.querySelector('[data-act="replay"]');
+    if(rp) rp.addEventListener('click',function(){inst.replay();});
+    var hint=ctrl.querySelector('input[data-act="hint"]');
+    if(hint) hint.addEventListener('change',function(e){inst.setHint(e.target.checked);});
+  });
+
+  // ---- crumb / chrome demo links
+  document.addEventListener('click',function(e){
+    var a=e.target.closest?e.target.closest('a.demo-route,.chip.demo-route'):null;
+    if(a){e.preventDefault();flash('→ '+a.getAttribute('data-route')+' (demo — no navigation)');}
+  });
+
+  // ---- Escape / outside-tap dismiss, per §8
+  document.addEventListener('click',function(e){
+    TRAILS.forEach(function(t){if(!t.svg.contains(e.target))t.dismiss();});
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')TRAILS.forEach(function(t){t.dismiss();});
+  });
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-06</h2>
+  <p>Winner: <strong>A (the path line)</strong>, accepted as recommended. The crumb
+  answers &ldquo;where am I&rdquo; in words at the top of every deep page; the trail&rsquo;s
+  doors now navigate (touch affordance only — the resting record look holds); the
+  one-time hint answers &ldquo;what is this strip.&rdquo; Nothing invented: §5&rsquo;s link
+  grammar, §2&rsquo;s ink recession, §8&rsquo;s geometry verbatim. Values landed in
+  <code>design/basis-of-design.md</code> §12.</p>
+</section>
+
+</body>
+</html>

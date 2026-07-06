@@ -42,6 +42,7 @@ never silently.
 | 10 | the threaded split | v2 — not yet open | — |
 | 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
 | 12 | wayfinding | landed 2026-07-06 | [§12](#12--wayfinding) |
+| 13 | the term node | open | — |
 
 ## 1 — the piece
 

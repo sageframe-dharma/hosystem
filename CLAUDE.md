@@ -10,14 +10,23 @@ from it and only from it.
 
 ## State
 
-Founding / design phase. No build code exists yet. The path:
+**v1 is built** (KICKSTART executed 2026-07-06; Eleventy at repo root, 46 pages).
+Sessions 1–9, 11 (narrow trail), and 12 (wayfinding) are landed; the basis of
+design and its propagation ledger are the sole authority for every value.
+Coherence check and spike live in `design/claude-design/` as records — where they
+predate a ledger propagation, the basis wins.
 
-1. Design sessions 1–9 (spec §6) run here, in this repo — **one fresh session per
-   question** (see "Running a design session" below).
-2. Winners land in `design/basis-of-design.md` as numbers.
-3. Coherence check (one hand-built page, all frozen elements together) →
-   design spike in Eleventy against real ingested artifacts.
-4. `KICKSTART.md` builds v1. Its gate checklist must be fully true first.
+- Build/serve: `npm run build` (re-ingests the corpus repos — see
+  `docs/content-updates.md`) · `npm run serve` · `npm run check-links`.
+- Dev affordances: `?tuners` (by-feel motion panel) · `?flip` (replay promotions).
+- **Session 13 (the term node) is open** — prompt committed, not yet run:
+  \*, Actually's node format as contract, rendered in hosystem's idiom.
+- Pending before deploy: fresh-eyes audit (stranger personas walking the built
+  site); Cloudflare Pages wiring + DNS (practitioner's scope, explicitly
+  deferred at the KICKSTART gate).
+- New design questions keep the same discipline: a numbered session prompt in
+  `design/claude-design/prompts/`, one fresh session, winners land in the basis,
+  changes to frozen values only through the propagation ledger.
 
 ## Running a design session
 

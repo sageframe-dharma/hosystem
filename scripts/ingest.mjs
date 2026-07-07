@@ -32,6 +32,7 @@ const SOURCES = {
     // curated subset: only what the rendered pages need
     files: [
       "README.md",
+      "INDEX.md",
       "ho-hanko.png",
       "framework/glossary.md",
       "framework/the-ho-system.md",

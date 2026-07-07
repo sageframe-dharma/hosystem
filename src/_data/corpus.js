@@ -6,7 +6,7 @@ import { basename } from "node:path";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
-import { renderDoc, docTitle, supersessionPanes } from "../../lib/corpus.mjs";
+import { renderDoc, docTitle, supersessionPanes, renderIndex } from "../../lib/corpus.mjs";
 import siteData from "./site.js";
 
 const VENDOR = fileURLToPath(new URL("../../vendor/", import.meta.url));
@@ -108,6 +108,30 @@ export default function () {
   const walkDocs = renderSet(walkRels, "walk", "sharibako");
   const frameworkDocs = renderSet(frameworkRels, "framework", "ho-system");
 
+  // ── on-site page map (repo-relative path → rendered url) for faithful link rewriting ─
+  // Drives the documents index: an INDEX.md entry the site renders as a page points on-site;
+  // everything else falls back to GitHub source (§5). glossary + the index self-link are the
+  // two rendered pages that live outside frameworkRels.
+  const INDEX_URL = "/framework/documents/";
+  const onSitePath = {};
+  for (const rel of frameworkRels) onSitePath[rel.replace(/^ho-system\//, "")] = url("framework", rel);
+  onSitePath["framework/glossary.md"] = "/glossary/";
+  onSitePath["INDEX.md"] = INDEX_URL;
+
+  // ── chain node destinations (§12): each thinking node lands in kamae-project-framing's
+  // own section for that layer (§2.1–2.4); the doing node lands on ho-structure (already
+  // right). Fragments are the headingSlug of §2.N — verified by check-links against the
+  // rendered ids. Five distinct destinations. ──────────────────────────────────────────
+  const framingUrl = onSitePath["framework/structure/kamae-project-framing.md"];
+  const structureUrl = onSitePath["framework/structure/ho-structure.md"];
+  const chainLinks = [
+    `${framingUrl}#21-the-project-seed`,   // Seed
+    `${framingUrl}#22-system-design`,      // System Design
+    `${framingUrl}#23-readme`,             // README
+    `${framingUrl}#24-ho-overview`,        // Ho Overview
+    structureUrl,                          // Per-Ho Documents → ho-structure
+  ];
+
   // sort framework docs: foundation docs first, then structure by frontmatter id
   const rank = (d) => (/the-ho-system|ho-foundations|operating-discipline/.test(d.slug) ? 0 : 1);
   frameworkDocs.sort((a, b) => rank(a) - rank(b) || natCompare(String(a.frontmatter.id || ""), String(b.frontmatter.id || "")));
@@ -140,6 +164,20 @@ export default function () {
       })()
     : "Ho System Skills";
 
+  // each skill's foundational rendered doc (§5 affordance); the kamae-N collaborators point
+  // at the layer they operationalize (same targets as the chain nodes). A skill with no
+  // clean foundational page (index-maintenance is repo mechanics, not a framework concept)
+  // is left source-only — not forced.
+  const skillGround = {
+    "ho-kamae-1-seed-collaborator": { href: `${framingUrl}#21-the-project-seed`, label: "Kamae: Project Framing §2.1" },
+    "ho-kamae-2-system-design-collaborator": { href: `${framingUrl}#22-system-design`, label: "Kamae: Project Framing §2.2" },
+    "ho-kamae-3-readme-collaborator": { href: `${framingUrl}#23-readme`, label: "Kamae: Project Framing §2.3" },
+    "ho-kamae-4-overview-collaborator": { href: `${framingUrl}#24-ho-overview`, label: "Kamae: Project Framing §2.4" },
+    "ho-kamae-5-authoring-collaborator": { href: structureUrl, label: "Ho Structure" },
+    "ho-setup-personal-environment-collaborator": { href: onSitePath["practitioner/operating-discipline.md"], label: "The Operating Discipline" },
+    "ho-setup-project-environment-collaborator": { href: onSitePath["framework/structure/verification-practices.md"], label: "Verification Practices" },
+  };
+
   const skills = hoSystem
     .filter((r) => /skills\/[^/]+\/SKILL\.md$/.test(r))
     .sort(natCompare)
@@ -155,6 +193,7 @@ export default function () {
         name: data.name || dir,
         lede,
         description: desc,
+        ground: skillGround[dir] || null,
         github: `${site.github["ho-system"]}/skills/${dir}/SKILL.md`,
       };
     });
@@ -166,11 +205,24 @@ export default function () {
     { id: "sharibako/ho-04.6", label: "04.6", state: "closed", title: "plain-prompt init", url: registry["ho-04.6-plain-prompt-init.md"] || "/walk/" },
   ];
 
+  // ── the documents index page (§5 faithful render of INDEX.md; §12 crumb) ──────────
+  const indexRel = "ho-system/INDEX.md";
+  const documentsIndex = hoSystem.includes(indexRel)
+    ? {
+        url: INDEX_URL,
+        ...renderIndex(indexRel, { onSitePath, githubBase: site.github["ho-system"] }),
+        crumb: [{ id: "framework", href: "/framework/" }, { id: "documents", current: true }],
+        sourceUrl: `${site.github["ho-system"]}/INDEX.md`,
+      }
+    : null;
+
   return {
     walkDocs, walkKamae, walkHos,
     frameworkDocs,
     templates,
     skills, skillOverview,
+    chainLinks,
+    documentsIndex,
     arc,
     registry,
     showcase: registry["ho-04.6-plain-prompt-init.md"],

@@ -12,10 +12,8 @@ narrative spine is the <strong>Kamae chain</strong>—five documents that carry 
 from opinions to a working session, each step narrowing what is possible. It is the
 obviously-right order, never a locked door.</p>
 
-{%- set framing = corpus.registry["kamae-project-framing.md"] %}
-{%- set structure = corpus.registry["ho-structure.md"] %}
 <figure class="chain-figure">
-  {% chainSvg "full", [framing, framing, framing, framing, structure] %}
+  {% chainSvg "full", corpus.chainLinks %}
   <figcaption class="caption">Four thinking documents narrow a project—its opinions, then its
   decisions, then its scope, then its sequence—into a fifth that a working session carries out.
   When an arrow loops back, an earlier document is being revised because later work taught you
@@ -31,6 +29,8 @@ obviously-right order, never a locked door.</p>
   <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.id %}{{ d.frontmatter.id }} · {% endif %}{{ d.frontmatter.type or "" }}</span></li>
   {%- endfor %}
 </ul>
+<p class="caption">The whole corpus—every document, rendered here or sourced upstream—is
+mapped in the <a class="chain-link" href="{{ corpus.documentsIndex.url }}">index of documents</a>.</p>
 
 <h2>Templates</h2>
 <p>The framework's document templates, tool-agnostic, ready to use. Download the raw

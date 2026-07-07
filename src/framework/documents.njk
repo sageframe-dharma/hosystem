@@ -1,0 +1,14 @@
+---
+layout: base.njk
+door: framework
+permalink: /framework/documents/
+eleventyComputed:
+  title: "{{ corpus.documentsIndex.title }}"
+---
+{% from "crumb.njk" import crumb %}
+{{ crumb(corpus.documentsIndex.crumb) }}
+<h1 class="cjk">{{ corpus.documentsIndex.titleHtml | safe }}</h1>
+{{ corpus.documentsIndex.html | safe }}
+
+<p class="caption">Rendered from the corpus, verbatim ·
+  <a class="chain-link" href="{{ corpus.documentsIndex.sourceUrl }}">source on GitHub →</a></p>

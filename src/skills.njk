@@ -19,7 +19,7 @@ Real-session transcript renderings arrive in v2; for now, the anatomy and the so
 <div class="skill">
   <h3>{{ s.name }}</h3>
   <p>{{ s.lede }}</p>
-  <p class="anatomy">Claude Code skill · <a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
+  <p class="anatomy">Claude Code skill · {% if s.ground %}grounded in <a class="chain-link" href="{{ s.ground.href }}">{{ s.ground.label }} →</a> · {% endif %}<a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
 </div>
 {%- endfor %}
 

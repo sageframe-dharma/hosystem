@@ -210,8 +210,19 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 /* ── §6 diagrams — chain container ─────────────────────────────────────────── */
 .chain-figure { margin: 2.5rem 0; text-align: center; }
 .chain-figure figcaption { margin-top: 0.75rem; }
-.chain-scales { display: flex; align-items: flex-start; gap: 2.5rem; justify-content: center; flex-wrap: wrap; }
-.chain-scale-label { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-70); }
+/* §6 chain nodes as doors — §12 door-link affordance carried on the label only; the
+   diagram never restyles. Underline the node's title on hover/focus; focus-visible
+   outlines the hit area. Node ink and geometry are untouched. */
+.chain-node { cursor: pointer; text-decoration: none; }
+.chain-node .chain-node-label { text-decoration: none; }
+.chain-node:hover .chain-node-label,
+.chain-node:focus-visible .chain-node-label {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--bero-70);
+}
+.chain-node:focus { outline: none; }
+.chain-node:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
 
 /* ── §7 definition-on-touch card ───────────────────────────────────────────── */
 .defcard {

@@ -12,15 +12,17 @@ narrative spine is the <strong>Kamae chain</strong>—five documents that carry 
 from opinions to a working session, each step narrowing what is possible. It is the
 obviously-right order, never a locked door.</p>
 
+{%- set framing = corpus.registry["kamae-project-framing.md"] %}
+{%- set structure = corpus.registry["ho-structure.md"] %}
 <figure class="chain-figure">
-  <div class="chain-scales">
-    <div><div class="chain-scale-label">full ≥480px</div>{% chainSvg "full" %}</div>
-    <div><div class="chain-scale-label">header ≥160px</div>{% chainSvg "header" %}</div>
-    <div><div class="chain-scale-label">glyph &lt;160px</div>{% chainSvg "glyph" %}</div>
-  </div>
-  <figcaption class="caption">One SVG source, three scales by reduction (§6). Kamae 1–4 in
-  bero (thinking), Kamae 5 in sumi (doing); the crossing arrow prints kachi. The koma marks
-  only where work is steppable. Gold never appears here—the chain is structure, not state.</figcaption>
+  {% chainSvg "full", [framing, framing, framing, framing, structure] %}
+  <figcaption class="caption">Four thinking documents narrow a project—its opinions, then its
+  decisions, then its scope, then its sequence—into a fifth that a working session carries out.
+  When an arrow loops back, an earlier document is being revised because later work taught you
+  something; the change is always written down, never made silently. The mark on the last
+  document is where the plan becomes a single bounded step—a
+  <button type="button" class="term" data-term="ho" aria-expanded="false">ho</button>—small
+  enough to pick up and finish. Each box opens the document that defines it.</figcaption>
 </figure>
 
 <h2>The documents</h2>

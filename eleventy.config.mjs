@@ -14,7 +14,9 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "vendor/ho-system/ho-hanko.png": "ho-hanko.png" });
 
   // The canonical Kamae chain, generated at build time from one source (§6).
-  eleventyConfig.addShortcode("chainSvg", (scale = "full") => chainSvg(scale));
+  // `links` (optional) makes each node a door to the framework document that defines
+  // that layer — full scale only; §6 geometry/inks are untouched.
+  eleventyConfig.addShortcode("chainSvg", (scale = "full", links = []) => chainSvg(scale, links));
 
   // A single koma as an inline SVG (live arc trees, the flip, state marks).
   // face: front|promoted · mode: keyline|solid|auto · tint overrides state ink.

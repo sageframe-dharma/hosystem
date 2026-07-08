@@ -1,5 +1,11 @@
 import { chainSvg } from "./lib/chain.mjs";
 import { koma } from "./lib/koma.mjs";
+import { plainCutIndex, slug } from "./lib/corpus.mjs";
+
+// Stage-tag words whose glossary entry is keyed under a fuller name. "orientation" (a shape
+// value) is defined by the glossary's "orientation ho" entry — there is no standalone
+// "orientation" entry — so touching it should rescue the reader with that definition.
+const TERM_ALIAS = { orientation: "orientation-ho" };
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
@@ -17,6 +23,20 @@ export default function (eleventyConfig) {
   // `links` (optional) makes each node a door to the framework document that defines
   // that layer — full scale only; §6 geometry/inks are untouched.
   eleventyConfig.addShortcode("chainSvg", (scale = "full", links = []) => chainSvg(scale, links));
+
+  // Mark a term-of-art in site-authored chrome (Basis §7 definition-on-touch). Emits the same
+  // `.term` button the corpus term pass emits, so defotouch.js wires it up identically — but
+  // only when the glossary actually carries the term (has a plain cut). No entry → plain text,
+  // never a dead button. `key` overrides the derived slug when the word's entry is keyed
+  // differently (e.g. a stage tag → its "… ho" entry). Report unmarked words at the call site.
+  eleventyConfig.addShortcode("term", (text, key) => {
+    const label = String(text);
+    const k = key || TERM_ALIAS[label.toLowerCase()] || slug(label);
+    if (k && plainCutIndex()[k]) {
+      return `<button type="button" class="term" data-term="${k}" aria-expanded="false">${label}</button>`;
+    }
+    return label;
+  });
 
   // A single koma as an inline SVG (live arc trees, the flip, state marks).
   // face: front|promoted · mode: keyline|solid|auto · tint overrides state ink.

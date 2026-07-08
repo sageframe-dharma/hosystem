@@ -7,6 +7,10 @@ description: "The Walk—sharibako's chain and hos rendered as the real document
 ---
 <h1>The Walk</h1>
 
+<p class="lede">sharibako is a real, shipped project—a Swift command-line tool, built under
+this practice. What follows is its genuine build record: the actual documents from the actual
+build, not a demo and not staged data.</p>
+
 <p>The cleanest current-convention instance of the practice: <strong>sharibako</strong>, a
 real project, its whole chain and hos rendered as the documents they are—frontmatter
 visible, styled as the typed metadata it is, not hidden as if it were plumbing. Every
@@ -14,10 +18,9 @@ document here is <a class="chain-link" href="https://github.com/sageframe-no-kaj
 in the public repo</a>.</p>
 
 <h2>The arc, as state</h2>
-<p>Unlike the canonical chain, an arc renders <em>state</em>. A closed ho promotes to gold
-と the first time you witness its closure (the news rule, §9); a superseded ho renders
-pre-flipped at gold@0.40 and never fires—recession, not promotion. Here is sharibako's
-ho-04 arc:</p>
+<p>Unlike the canonical chain, an {% term "arc" %} shows <em>state</em>. A closed step turns
+over to its gold face the first time you see it close; a {% term "superseded", "supersedes" %}
+step rests quietly in gold, already turned. Here is sharibako's ho-04 arc:</p>
 
 <div class="arc">
   {%- for node in corpus.arc %}
@@ -55,6 +58,6 @@ fell beside what replaced it, side by side. Nothing is erased; the record moves 
 <h2>The hos</h2>
 <ul class="doc-list">
   {%- for d in corpus.walkHos %}
-  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{{ d.frontmatter.shape }} · {% endif %}{{ d.frontmatter.status or "" }}</span></li>
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{% term d.frontmatter.shape %} · {% endif %}{{ d.frontmatter.status or "" }}</span></li>
   {%- endfor %}
 </ul>

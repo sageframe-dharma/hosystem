@@ -42,8 +42,8 @@ never silently.
 | 10 | the threaded split | v2 — not yet open | — |
 | 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
 | 12 | wayfinding | landed 2026-07-06 | [§12](#12--wayfinding) |
-| 13 | the term node | open | — |
-| 14 | the header | open | — |
+| 13 | the term node | landed 2026-07-07 | [§13](#13--the-term-node) |
+| 14 | the header | landed 2026-07-07 | [§14](#14--the-header) |
 
 ## 1 — the piece
 
@@ -461,6 +461,81 @@ strip height   the hint adds 14 px to the resting strip on first visit only,
                inside §8's ≤ 128 px budget (§11's ≤ 160 px at narrow)
 ```
 
+## 13 — the term node
+
+_Landed 2026-07-07. Winner: variant D (the seated node), accepted with a
+reservation — re-judge the built pages at the by-feel pass; fresh-eyes check
+before v2. Session record: `claude-design/sessions/session-13-variants.html`._
+
+```
+PAGE  one node per term at  glossary / <id>  · §5 42rem measure · §12 crumb two segments
+      (glossary = ancestor link bero@.70 · <id> = current, sumi 1.00, aria-current)
+LEDGER §5 verbatim — frontmatter (id title type requires related entry_points summary)
+      renders first, nothing hidden · relationships repeat below as the navigable layer
+DIAL  progressive disclosure · depths 1→current stacked, deeper appends the next as ONE §4 step
+      (160ms, cubic-bezier(.2,0,0,1), 8px rise) · shallower removes, instant
+      rail: mono 600 .8125rem ticks, 1.6rem box (≥24px hit) · reached sumi@.70 ·
+      current sumi 1.00 + 1px sumi@.40 box · line 1px sumi@.12, 1.25rem between ticks
+      controls: "↓ deeper" / "↑ less" mono .8125rem bero, solid bero@.70 underline
+      keys ↓/+ deeper, ↑/− less · absent depths (4–5): tick + control simply NOT rendered
+TYPE  depth 1 (plain cut) serif 400 1.1875rem/1.55 sumi · depth 2 & 3 body serif 400 1.0625/1.65
+      depth tag mono .75rem sumi@.40 "· definition" · h1 §3 (1.75/1.25 600)
+RELS  typed lists, foot of node · top rule 1px sumi@.12, padding-top 1.25rem
+      three groups: requires · related · referenced by (derived) · group gap 1rem
+      label mono 600 .8125rem sumi@.70; "(derived)" 400 sumi@.40 · entries serif,
+      each a solid 1px bero@.70 underline link (§5 grammar) · empty group omitted
+BACKLINKS derived from citing entries, never authored · labelled "referenced by (derived)"
+IN    "full entry →" (§7 card) lands at DEPTH 2 · lateral relationship links land at depth 2
+OUT   §12 crumb always present + branch-return: inline "↩ <source>" on the crumb line
+      (mono .8125rem bero) shown only when arrived-from-a-card · restores the source's
+      exact scroll + line, marks that term MET (§7, no gold) · clears on return
+TOUCH §7 verbatim · in-body terms dotted, define-on-touch, never navigate ·
+      GOLD APPEARS NOWHERE on the term page
+CITES defining-documents line, mono .8125rem, links into rendered corpus (solid bero@.70)
+```
+
+## 14 — the header
+
+_Landed 2026-07-07. Winner: variant D amended at judgment (D′) — step-reveal +
+walk miniature, crumb riding in the revealed header, tightened padding. Session
+record: `claude-design/sessions/session-14-variants.html`._
+
+```
+persistence   step-reveal · absent while reading down · present on upward
+              scroll-direction commitment · near top always shown
+trigger       reveal: cumulative upward scroll ≥ 48 px within a gesture,
+                      OR scrollY ≤ 80 px
+              leave:  cumulative downward scroll ≥ 48 px AND scrollY > 80 px
+              (a discrete event, never scroll-linked)
+step (§4)     160 ms · cubic-bezier(0.2, 0, 0, 1)
+              appear: translateY(-8px)→0, opacity 0→1 · leave: reverse ·
+              never a full-height slide
+height        condensed band 40 px (padding 0 20 px) — PROVISIONAL, tightened at
+              judgment; exact paddings land at the by-feel pass via tuners ·
+              deep pages add a crumb line ~24 px when revealed mid-page ·
+              inner content clamped to the 42 rem measure, centered
+mark          koma solid form, h20, front face 歩 sumi 1.00 (§1 sub-24 inking)
+doors         six · mono 400 · 0.8125rem/1 · gap 18 px · names bind at build
+door ink      current sumi 1.00 · entered-this-walk sumi@.70 · never sumi@.40 ·
+              no gold ever
+door touch    hover/focus-visible: solid 1px underline bero@.70 (§12);
+              focus-visible 1px sumi outline offset 2px
+walk          miniature rides right of the doors: current-door node 10×10 +
+              step node 6×6 + "n steps" mono 10 · §8 inks · a POINTER only —
+              the §8 footer strip remains the walk's authoritative rendering
+              (ledger, 2026-07-07); never diverges, never gold
+crumb         the in-flow crumb (§12, top of content column) is unchanged ·
+              when the header reveals mid-page on a deep page it carries a
+              condensed crumb line (same §12 grammar) · suppressed at
+              scroll-top where the in-flow crumb is visible — no redundancy
+boundary      hairline rule 1px sumi@.12 at base
+z-order       header z-index 5 · §7 card stays z-index 10
+no-reflow     header overlays fixed; body reserves no space
+scroll-margin scroll-margin-top = revealed height + 12 px on h1/h2/h3 + crumb
+reduced       prefers-reduced-motion: present-or-absent at the same triggers,
+              0 ms (§4)
+```
+
 ## Propagation ledger
 
 | date | section | change | reason |
@@ -469,3 +544,4 @@ strip height   the hint adds 14 px to the resting strip on first visit only,
 | 2026-07-04 | §7 timing | card arrival instant (0 ms) → one §4 step (160 ms); dismissal stays instant | Deferred question resolved by the practitioner at the coherence check, overriding the builder's instant recommendation; both behaviors were shown side by side. |
 | 2026-07-05 | §8 edges | angled point-to-point thread → right-angle routing (down · across · down, lane at mid-pitch; equal-x steps straight vertical); head 5 × 4 and all inks unchanged | Practitioner at the session 11 landing: "they read SO MUCH BETTER." Right angles read as steps taken in sequence where diagonals read as abstract graph edges; the routing also makes an edge on a met-dot row geometrically impossible at every width, closing session 11's parked 42 rem crossing risk. Seen moving in session 11's A′ demo; the trail now draws one way at every width. The spike (built 2026-07-04) predates this propagation — v1 implements from the basis, not the spike, on this value. |
 | 2026-07-06 | §8 + §11 thread pitch | pitch floor 6 → 10 (§8) and 7 → 11 (§11); elision tightens from last-9 to last-6 rendered steps | Dense-walk collapse found at the v1 review: at the old floors the right-angle routing had zero vertical clearance against 6 px nodes and collapsed to a horizontal bar with the arrowhead on the node body — the routing (propagated 2026-07-05) was never seen moving at that density. Raised floors restore the verticals (pitch − node ≥ 4 px); the tighter rendered tail keeps the strip inside the frozen height budgets (≤128 / ≤160). Open, not taken: met dots clip when a step lands on the last door's column — candidate mirror-left rule awaits its own ruling. |
+| 2026-07-07 | §8 "no fixed elements" | the revealed header (§14, variant D′) carries a walk miniature — a fixed-position pointer (current-door node + step node + count) | Practitioner judged session 14 as D over the walk-less C recommendation. The §8 footer strip remains the walk's authoritative rendering; the miniature is a pointer that never diverges from it and never carries gold. §8's own geometry, placement, and persistence are untouched. |

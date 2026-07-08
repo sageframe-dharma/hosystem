@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 14 — the header · working demos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ---- frozen palette (§2) ---- */
+  :root{
+    --washi:#eef1ef;
+    --sumi:#1f2123;
+    --bero:#29618e;
+    --gold:#a9832a;
+    --sumi70:rgba(31,33,35,.70);
+    --sumi40:rgba(31,33,35,.40);
+    --sumi12:rgba(31,33,35,.12);
+    --bero70:#648cab;      /* frozen §3/§12 link/mark ink */
+    --serif:'Source Serif 4', Georgia, serif;
+    --mono:'Source Code Pro', ui-monospace, monospace;
+    --cjk:'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP', serif;
+    /* the step, §4 — cited, not invented */
+    --step:160ms cubic-bezier(0.2, 0, 0, 1);
+    --header-h:44px;       /* docked / condensed budget */
+    --measure:42rem;       /* §5 measure */
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--washi);
+    color:var(--sumi);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- page scaffold (the meta-doc, not the site) ---- */
+  .wrap{max-width:64rem;margin:0 auto;padding:40px 24px 96px}
+  .meta h1{font-weight:600;font-size:1.75rem;line-height:1.25;margin:0 0 .25rem}
+  .meta .sub{font-family:var(--mono);font-size:.8125rem;color:var(--sumi70);margin:0 0 1.5rem}
+  .meta p{max-width:42rem}
+  .rule{height:1px;background:var(--sumi12);border:0;margin:2.5rem 0}
+  .kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sumi40);margin:0 0 .5rem}
+
+  .rm-bar{
+    position:sticky;top:0;z-index:50;background:var(--washi);
+    border-bottom:1px solid var(--sumi12);
+    padding:10px 24px;margin:0 -24px 0;
+    display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+    font-family:var(--mono);font-size:.8125rem;color:var(--sumi70);
+  }
+  .rm-bar button{
+    font-family:var(--mono);font-size:.8125rem;
+    background:var(--washi);color:var(--sumi);
+    border:1px solid var(--sumi40);border-radius:0;padding:5px 12px;cursor:pointer;
+  }
+  .rm-bar button[aria-pressed="true"]{background:var(--sumi);color:var(--washi);border-color:var(--sumi)}
+
+  /* ---- variant block ---- */
+  .variant{margin:3.5rem 0}
+  .variant > .head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:.35rem}
+  .variant .tag{font-family:var(--mono);font-weight:600;font-size:1.125rem}
+  .variant .commit{font-family:var(--serif);font-style:italic;color:var(--sumi);font-size:1.0625rem}
+  .variant .axes{font-family:var(--mono);font-size:.75rem;color:var(--sumi70);margin:.25rem 0 1rem;line-height:1.6}
+  .cost{
+    font-family:var(--mono);font-size:.75rem;line-height:1.55;color:var(--sumi);
+    border-left:2px solid var(--gold);padding:.35rem .75rem;margin:.25rem 0 1rem;background:rgba(169,131,42,.06)
+  }
+
+  .demo-row{display:grid;grid-template-columns:15rem 1fr;gap:20px;align-items:start}
+  @media (max-width:820px){ .demo-row{grid-template-columns:1fr} }
+  .instr{font-family:var(--mono);font-size:.8125rem;line-height:1.7;color:var(--sumi70)}
+  .instr b{color:var(--sumi);font-weight:600}
+  .instr ul{margin:.5rem 0 0;padding-left:1.1rem}
+  .instr li{margin:.35rem 0}
+  .instr .num{color:var(--bero)}
+
+  /* ---- the scroll stage (stands in for the window) ---- */
+  .stage{
+    position:relative;height:74vh;min-height:520px;overflow-y:auto;overflow-x:hidden;
+    border:1px solid var(--sumi40);background:var(--washi);
+    scroll-behavior:auto;
+  }
+  .stage .col{max-width:var(--measure);margin:0 auto;padding:0 28px 96px}
+
+  /* ---- the header, condensed/docked form ---- */
+  .site-header{
+    position:sticky;top:0;z-index:5;                 /* §7 card stays the only z:10 layer */
+    height:var(--header-h);
+    background:var(--washi);
+    display:flex;align-items:center;
+  }
+  .site-header .inner{
+    max-width:var(--measure);margin:0 auto;width:100%;
+    padding:0 28px;display:flex;align-items:center;gap:16px;
+  }
+  .site-header .doors{
+    display:flex;gap:18px;flex:1;flex-wrap:nowrap;overflow:hidden;
+  }
+  .door{
+    font-family:var(--mono);font-size:.8125rem;line-height:1;white-space:nowrap;
+    text-decoration:none;padding-bottom:2px;border-bottom:1px solid transparent;
+  }
+  .door.current{color:var(--sumi)}                    /* §8: this-walk current = sumi 1.00 */
+  .door.entered{color:var(--sumi70)}                  /* §8: entered = sumi@.70 */
+  .door.never{color:var(--sumi40)}                    /* §8: never = sumi@.40 */
+  .door:hover,.door:focus-visible{                    /* §12 door-touch grammar */
+    border-bottom-color:var(--bero70);outline:none;
+  }
+  .door:focus-visible{outline:1px solid var(--sumi);outline-offset:2px}
+
+  /* boundary A — hairline rule (§2 sumi@.12) */
+  .edge-hairline{border-bottom:1px solid var(--sumi12)}
+  /* boundary B — washi-on-washi shadowless: a 4px bokashi fold, the one allowed gradient (§2) */
+  .edge-washi{position:relative}
+  .edge-washi::after{
+    content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;pointer-events:none;
+    background:linear-gradient(var(--sumi12), rgba(31,33,35,0));
+  }
+
+  /* the §4 step: appear/leave as one committed 8px rise + opacity — never a full-height slide */
+  .reveal .site-header{
+    transition:transform var(--step), opacity var(--step);
+    will-change:transform,opacity;
+  }
+  .reveal .site-header.hidden{transform:translateY(-8px);opacity:0;pointer-events:none}
+  .reveal .site-header.shown{transform:translateY(0);opacity:1}
+
+  /* the koma mark */
+  .koma-solid{height:20px;width:auto;display:block}    /* §1 sub-24 solid form */
+  .koma-key{height:32px;width:auto;display:block}      /* §1 keyline form ≥24 */
+
+  /* masthead (A, resting at top) */
+  .masthead{
+    display:flex;align-items:center;gap:16px;padding:20px 0 18px;border-bottom:1px solid var(--sumi12);
+  }
+  .masthead .wordmark{font-family:var(--serif);font-weight:600;font-size:1.375rem;line-height:1;color:var(--sumi)}
+  .masthead .doors{display:flex;gap:18px;flex:1;justify-content:flex-end;flex-wrap:wrap}
+
+  /* walk miniature (D only) */
+  .walkmin{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .walkmin svg{display:block}
+  .walkmin .n{font-family:var(--mono);font-size:.625rem;color:var(--sumi40);line-height:1}
+
+  /* ---- article prose (sample) ---- */
+  .col .crumb{
+    font-family:var(--mono);font-weight:400;font-size:.8125rem;line-height:1.5;
+    margin:0 0 1rem;padding-top:20px;color:var(--sumi40);
+    scroll-margin-top:calc(var(--header-h) + 12px);
+  }
+  .col .crumb a{color:var(--sumi70);text-decoration:underline;text-decoration-thickness:1px;
+    text-decoration-color:var(--bero70);text-underline-offset:.2em}
+  .col .crumb .here{color:var(--sumi)}
+  .col .crumb .sep{color:var(--sumi40)}
+  .col h1{font-weight:600;font-size:1.75rem;line-height:1.25;margin:0 0 1.25rem;
+    scroll-margin-top:calc(var(--header-h) + 12px)}
+  .col h2{font-weight:600;font-size:1.375rem;line-height:1.3;margin:2.5rem 0 1rem;
+    scroll-margin-top:calc(var(--header-h) + 12px)}
+  .col p{margin:0 0 1.25rem}
+  .col .emergent{font-style:italic;color:var(--bero);border-left:2px solid var(--bero70);padding-left:1rem;margin:1.5rem 0}
+  .col .marked{text-decoration:underline dotted 1px;text-decoration-color:var(--bero70);text-underline-offset:.2em}
+  .col .anchorbar{font-family:var(--mono);font-size:.75rem;color:var(--sumi70);margin:0 0 1.5rem}
+  .col .anchorbar a{color:var(--bero);text-decoration:underline;text-decoration-color:var(--bero70);text-underline-offset:.2em}
+  .trailnote{
+    margin-top:4rem;border-top:1px solid var(--sumi12);padding-top:12px;
+    font-family:var(--mono);font-size:.6875rem;color:var(--sumi40)
+  }
+
+  /* recommendation + frozen */
+  .rec{border:1px solid var(--sumi40);padding:24px 28px;margin-top:1rem}
+  .rec h3{font-weight:600;font-size:1.375rem;margin:0 0 .75rem}
+  .rec .pick{font-family:var(--mono);color:var(--bero);font-weight:600}
+  .frozen{background:rgba(31,33,35,.03);border:1px solid var(--sumi12);padding:20px 24px;margin-top:1.25rem}
+  .frozen h4{font-family:var(--mono);font-size:.8125rem;letter-spacing:.04em;text-transform:uppercase;color:var(--sumi70);margin:0 0 .75rem}
+  .frozen pre{font-family:var(--mono);font-size:.8125rem;line-height:1.7;color:var(--sumi);white-space:pre-wrap;margin:0}
+  .parked{font-family:var(--mono);font-size:.8125rem;line-height:1.8;color:var(--sumi70);margin-top:1rem}
+  .parked b{color:var(--sumi)}
+
+  /* reduced-motion: no motion at all — header simply present or absent (§4) */
+  body.rm .reveal .site-header{transition:none !important}
+  @media (prefers-reduced-motion:reduce){
+    .reveal .site-header{transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="rm-bar">
+  <span>Session 14 · the header — working demos</span>
+  <button id="rmToggle" aria-pressed="false">Simulate prefers-reduced-motion: reduce</button>
+  <span id="rmState">motion: full (discrete §4 steps)</span>
+</div>
+
+<div class="wrap">
+  <div class="meta">
+    <p class="kicker">hosystem · design session 14</p>
+    <h1>The header — does it persist while reading, and if so how it appears, condenses, and leaves</h1>
+    <p class="sub">born at the v1 walkthrough (2026-07-07): on long framework pages the practitioner reached twice for persistent navigation. Four working demos below. Prose is <b>sample</b>.</p>
+    <p>Every header motion here is bound by <b>§4</b>: nothing eases continuously, nothing is scroll-linked. When a header appears or leaves it does so as <b>one committed step</b> — 160&nbsp;ms, cubic-bezier(0.2,&nbsp;0,&nbsp;0,&nbsp;1), an 8&nbsp;px rise with opacity 0→1 — fired by a <b>discrete trigger</b> (a scroll-direction commitment, or a threshold crossed once). It never slides its full height with your finger; a header that tracks the scroll is drift and is disqualified by the grammar, not by taste. Reduced motion removes even the step: the header is simply present or absent.</p>
+    <p>Two frozen neighbours the header must respect. <b>§8 the trail</b> is a footer strip, in-column, <b>“no fixed elements.”</b> Any header that carries a walk miniature is proposing a §8 propagation — legal only through the ledger, and it says so on the page with the cost. <b>§12 the crumb</b> sits at the very top of the content column (door / collection / record). A docked header and the crumb must read together without redundancy.</p>
+  </div>
+
+  <hr class="rule">
+
+  <!-- ============ VARIANT A ============ -->
+  <section class="variant" id="varA">
+    <div class="head">
+      <span class="tag">A</span>
+      <span class="commit">Static baseline — the header prints once at the top and scrolls away with the page; it never returns.</span>
+    </div>
+    <div class="axes">persistence: <b>static</b> (current behavior) · contents at top: full masthead (keyline koma + wordmark + six doors) · walk: absent · boundary: none (nothing docks)</div>
+    <div class="demo-row">
+      <div class="instr">
+        <b>Scroll it.</b> The masthead leaves with the content. Nothing pins.
+        <ul>
+          <li>Scroll down: chrome is gone, the whole viewport is reading.</li>
+          <li>To navigate: scroll back to the top — or use the crumb (in-column) for where you stand.</li>
+          <li><b>The honest argument:</b> the site is quiet; persistent chrome is <span class="num">44&nbsp;px</span> of reading spent forever. The crumb (§12) already names <span class="num">where in a door</span> you are; the trail footer (§8) holds the walk. There may be nowhere the reader is that the content column can’t already name.</li>
+          <li><b>Where it fails:</b> the reach that opened this session — wanting a door <i>mid-read</i>, without leaving your place.</li>
+        </ul>
+      </div>
+      <div class="stage" data-variant="A"></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANT B ============ -->
+  <section class="variant" id="varB">
+    <div class="head">
+      <span class="tag">B</span>
+      <span class="commit">Always-docked-condensed — a 44&nbsp;px header is pinned from load, present the whole read, doors inked to state.</span>
+    </div>
+    <div class="axes">persistence: <b>always docked</b> · contents: solid koma h20 + six doors + current-door state (§8 door ink) · walk: absent · boundary: <b>hairline rule</b> 1&nbsp;px sumi@.12</div>
+    <div class="demo-row">
+      <div class="instr">
+        <b>Scroll it.</b> The header never moves — it is simply always there.
+        <ul>
+          <li>The current door prints <b>sumi 1.00</b>, doors you’ve entered <b>sumi@.70</b>, doors you haven’t <b>sumi@.40</b> (§8 hierarchy, no gold).</li>
+          <li>Body reserves <span class="num">44&nbsp;px</span> up top — no reflow, ever; headings carry <span class="num">scroll-margin-top&nbsp;56&nbsp;px</span> so anchors clear the bar.</li>
+          <li><b>Crumb vs header:</b> the header names <i>which door</i>; the crumb names <i>where in the door</i>. The header’s current-door ink and the crumb’s first id echo the same door — a control above, a readout below, not a duplication.</li>
+          <li><b>Cost:</b> the 44&nbsp;px is gone for the entire read, whether or not you reach.</li>
+        </ul>
+      </div>
+      <div class="stage" data-variant="B"></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANT C ============ -->
+  <section class="variant" id="varC">
+    <div class="head">
+      <span class="tag">C</span>
+      <span class="commit">Step-reveal on upward commitment — absent while you read down; it arrives in one §4 step when you reach up, leaves in one when you read on.</span>
+    </div>
+    <div class="axes">persistence: <b>step-reveal (upward commitment)</b> · contents: solid koma h20 + six doors + current-door state · walk: absent · boundary: <b>washi-on-washi</b> shadowless — a 4&nbsp;px bokashi fold (§2’s only gradient), no rule, no shadow</div>
+    <div class="demo-row">
+      <div class="instr">
+        <b>Scroll down, then flick up.</b> This is the reach that opened the session.
+        <ul>
+          <li>Read <b>down</b>: after ~48&nbsp;px of committed downward scroll the header <b>leaves</b> in one step (8&nbsp;px lift + fade). Zero chrome while reading.</li>
+          <li>Reach <b>up</b>: ~48&nbsp;px of committed upward scroll and it <b>arrives</b> in one step. Reaching up <i>is</i> the touch — the doors come with it.</li>
+          <li>Near the top (≤80&nbsp;px) it is always shown.</li>
+          <li>The edge is a printed <b>fold</b>, not a bar — bokashi sumi@.12→0. It never reads as chrome furniture.</li>
+          <li>Try <b>reduced motion</b> (top toggle): the header just is/ isn’t, 0&nbsp;ms, same triggers.</li>
+        </ul>
+      </div>
+      <div class="stage reveal" data-variant="C"></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANT D ============ -->
+  <section class="variant" id="varD">
+    <div class="head">
+      <span class="tag">D</span>
+      <span class="commit">Step-reveal carrying a walk miniature — the header also shows the door you’re in and your step count. This costs a §8 propagation.</span>
+    </div>
+    <div class="axes">persistence: <b>step-reveal (upward commitment)</b> · contents: koma + six doors + state + <b>walk miniature</b> (current door node + n) · boundary: <b>hairline rule</b> 1&nbsp;px sumi@.12</div>
+    <div class="cost"><b>§8 propagation cost:</b> a walk mark in a fixed header supersedes §8’s <b>“no fixed elements”</b> and splits the walk into two rendering loci — it requires a ledger entry naming the footer strip authoritative and the header mark a derived summary. (A docked bottom rail duplicating the trail is ruled out entirely.)</div>
+    <div class="demo-row">
+      <div class="instr">
+        <b>Scroll down, then flick up.</b> Same reveal as C, plus the walk rides top-right.
+        <ul>
+          <li>The miniature: the current door’s <b>10×10 node</b> (§8 geometry) + a <b>6×6 filled step node</b> + <span class="num">“n”</span> count.</li>
+          <li>It answers “which door / how far” without scrolling to the footer.</li>
+          <li><b>But:</b> the walk now renders in two places. If the two ever disagree, which is true? That reconciliation is the propagation’s real weight.</li>
+        </ul>
+      </div>
+      <div class="stage reveal" data-variant="D"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ============ RECOMMENDATION ============ -->
+  <section class="rec">
+    <p class="kicker">recommendation</p>
+    <h3>Take <span class="pick">C</span> — step-reveal on upward commitment, doors + current-door state, washi-on-washi fold. Walk stays in the footer.</h3>
+    <p>The session was born from a <b>reach</b>, and the reach has a direction: up. C answers exactly that gesture and nothing else. It costs <b>zero viewport while reading</b> — the header is simply not there on the way down — and it appears the instant the reader reaches for it. The static baseline (A) is the honest quiet-chrome argument, but the twice-repeated reach is the evidence against it: the reader wanted a door mid-read and had none. B is the safe answer, but it spends 44&nbsp;px on every reader for the whole read to serve the minority of moments when navigation is wanted. D buys a locator by reopening a just-frozen, elaborately-landed neighbour (§8/§11/§12) and splitting the walk into two loci — too much cost for a convenience the footer already delivers.</p>
+    <p><b>Two reasons above the rest:</b></p>
+    <p>1. <b>It matches the trigger that generated the session.</b> Reaching up brings the header; reading down dismisses it. The gesture and the behavior are the same motion, so the header is present exactly when reached for and absent exactly when reading — the maximum service at the minimum standing cost.</p>
+    <p>2. <b>It obeys §4 with no strain and stays in the ink economy.</b> Appear and leave are each one 160&nbsp;ms step on a discrete direction-commitment — never scroll-linked — and the boundary is a bokashi fold (§2’s one permitted gradient, endpoint sumi@.12), the quietest print-honest edge available, so the header never hardens into a chrome bar. The walk keeps its single frozen home; no ledger entry is spent.</p>
+    <p style="font-family:var(--mono);font-size:.8125rem;color:var(--sumi70)"><b>One amendment offered for judgment:</b> C authored with doors <i>and</i> current-door state at reveal (borrowed from B) rather than doors-on-touch — reaching up already <i>is</i> the touch, so a second tap to get the doors would be coy. Orientation ink is free of viewport cost. “Mark-only, doors-on-touch” collapses into this and is not proposed separately.</p>
+
+    <div class="frozen">
+      <h4>Frozen if accepted (C)</h4>
+<pre>persistence   step-reveal · absent while reading down · present on upward
+              scroll-direction commitment · near top always shown
+
+trigger       reveal: cumulative upward scroll ≥ 48 px within a gesture,
+                      OR scrollY ≤ 80 px  (near-top always shown)
+              leave:  cumulative downward scroll ≥ 48 px within a gesture
+                      AND scrollY > 80 px
+              (direction commitment — a discrete event, never scroll-linked)
+
+step (§4)     160 ms · cubic-bezier(0.2, 0, 0, 1)
+              appear: translateY(-8px)→0, opacity 0→1
+              leave:  translateY(0)→(-8px), opacity 1→0
+              never a full-height slide — 8 px rise + fade is the whole move
+
+height        docked / condensed = 44 px  (padding 0 28px; content band 24 px)
+              inner content clamped to the 42 rem measure, centered
+
+mark          koma solid form, h20, front face 歩 sumi 1.00 (§1 sub-24 inking),
+              left of the door row
+
+doors         six · mono 400 · 0.8125rem/1 · gap 18 px · labels bind at build
+              (Framework · Practice · Skills · Writing · Walk · Colophon, §8)
+door ink      current sumi 1.00 · entered-this-walk sumi@.70 · never sumi@.40
+              (§8 hierarchy) · no gold ever
+door touch    hover/focus-visible: solid 1px underline bero@.70 #648cab (§12);
+              focus-visible: 1px sumi outline, offset 2px
+
+boundary      washi-on-washi: 4 px bokashi fold at base, linear sumi@.12 → 0
+              (§2, the only permitted gradient) · no rule, no shadow
+
+walk          absent — the walk renders only in the §8 footer strip
+
+crumb (§12)   unchanged · very top of the content column, in-flow, scrolls away
+              header = which door · crumb = where in the door · no redundancy
+
+z-order       header z-index 5 · §7 definition card stays z-index 10
+              (the page's only elevated layer, untouched)
+
+no-reflow     header overlays (position: fixed to the window in production);
+              body reserves no space while reading down; the 44 px slot exists
+              only at scroll-top where the header is shown anyway
+scroll-margin scroll-margin-top: 56 px (44 + 12) on h1 / h2 / h3 and the crumb,
+              so anchors and crumb landings clear the revealed header
+
+reduced       prefers-reduced-motion: header present-or-absent at the same
+              triggers, 0 ms, no rise, no fade (§4)</pre>
+    </div>
+
+    <p class="parked">
+      <b>Parked</b> (one line each, not answered here):<br>
+      <b>·</b> The trail’s own geometry (§8/§11) — frozen; untouched.<br>
+      <b>·</b> Mobile nav beyond the header itself — a drawer is a different question.<br>
+      <b>·</b> Dark-mode printing of the header — deferred with §2’s dark mode.<br>
+      <b>·</b> Whether the header ever carries the wordmark (masthead-at-top) as well as the condensed koma — a top-of-page-only question if C ships.<br>
+      <b>·</b> The exact commitment-distance (48 px) tuned against a real trackpad/touch device at the spike — seen moving before it freezes hard.
+    </p>
+  </section>
+</div>
+
+<!-- koma SVG templates -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="koma-solid-src"><path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></g>
+  </defs>
+</svg>
+
+<script>
+(function(){
+  "use strict";
+  var DOORS = ["Framework","Practice","Skills","Writing","Walk","Colophon"];
+  // demo walk state: current = Framework; entered-this-walk = Practice, Walk; never = the rest
+  var STATE = {Framework:"current", Practice:"entered", Skills:"never", Writing:"never", Walk:"entered", Colophon:"never"};
+  var STEP_COUNT = 4; // sample walk length for the miniature
+
+  function komaSolid(h){
+    return '<svg class="koma-solid" viewBox="0 0 74 100" height="'+h+'" role="img" aria-label="Ho System">'
+      + '<path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#1f2123"/></svg>';
+  }
+  function komaKey(h){
+    // keyline form (§1 ≥24): stroke 0.040H sumi, fill washi, face 歩 sumi
+    return '<svg class="koma-key" viewBox="0 0 74 100" height="'+h+'" role="img" aria-label="Ho System">'
+      + '<path d="M37 0 L66 22 L74 100 L0 100 L8 22 Z" fill="#eef1ef" stroke="#1f2123" stroke-width="4" stroke-linejoin="miter"/>'
+      + '<text x="37" y="61" font-family="\'Hiragino Mincho ProN\',\'Yu Mincho\',\'Noto Serif JP\',serif" font-size="42" fill="#1f2123" text-anchor="middle" dominant-baseline="central">歩</text>'
+      + '</svg>';
+  }
+  function doorsMarkup(){
+    return DOORS.map(function(d){
+      return '<a class="door '+STATE[d]+'" href="#" onclick="return false" '
+        + (STATE[d]==="current" ? 'aria-current="page"' : '') + '>'+d+'</a>';
+    }).join("");
+  }
+  function walkMiniMarkup(){
+    // current door 10x10 node + 6x6 filled step node + count (§8 geometry, riding the header)
+    return '<span class="walkmin" aria-label="your walk, '+STEP_COUNT+' steps, at Framework">'
+      + '<svg width="10" height="10" aria-hidden="true"><rect x="0.5" y="0.5" width="9" height="9" fill="#eef1ef" stroke="#1f2123" stroke-width="1"/></svg>'
+      + '<svg width="6" height="6" aria-hidden="true"><rect width="6" height="6" fill="#1f2123"/></svg>'
+      + '<span class="n">'+STEP_COUNT+'</span></span>';
+  }
+
+  // sample framework prose (labeled sample) — enough to scroll several screens
+  var PROSE = ''
+    + '<h1>The forward-only principle</h1>'
+    + '<p class="anchorbar">Jump: <a href="#s-record" data-anchor>the record</a> · <a href="#s-supersede" data-anchor>supersession</a> · <a href="#s-address" data-anchor>the address space</a></p>'
+    + '<p><b>(sample prose)</b> Closed hos stay closed. When a session surfaces evidence that an earlier ho’s work was incomplete, wrong, or overtaken by what the project now knows, the response is a new ho in the current build slot — not a reopening, a rewrite, or a retroactive edit of the earlier one.</p>'
+    + '<p>The earlier ho is a <span class="marked">historical record</span> of what was known at the time. The new ho is the response to what is known now. This is the structural rule that keeps the timeline legible: a reader of the arc can always see what the project believed at each step.</p>'
+    + '<div class="emergent">The practitioner’s temptation, on discovering that a prior design didn’t hold, is to quietly fix it. That corrupts the timeline — and opens the door to endless re-litigation.</div>'
+    + '<h2 id="s-record">The record is immutable</h2>'
+    + '<p>Every closed ho becomes a fixed point. The address space and the content are both frozen once closed. The mechanical exceptions are typographical — fixing a typo or a broken link is fine; anything that changes what the ho <i>said</i> belongs in a new ho.</p>'
+    + '<p>This has a cost the practitioner pays deliberately: the arc accumulates supersessions rather than edits. The colophon renders them. The reader sees not a clean final state but a walked path, which is the point — the framework is about the walk, not the destination.</p>'
+    + '<p>A document that has drifted out of sync with the project actively misleads. Keeping documents current is the discipline of keeping the bootstrap functional — the next conversation reads current truth, not stale state.</p>'
+    + '<h2 id="s-supersede">Supersession, not reopening</h2>'
+    + '<p>The new ho references the earlier one explicitly, names what changed, and supersedes the relevant pieces in the live system. The supersession is part of the record, not hidden inside an amended document.</p>'
+    + '<p>The question is never “should we reopen Ho&nbsp;5?” The question is always “what new ho responds to what we now know?” The numbering scheme makes this cheap: a superseding ho takes the next number; the abandoned number stays dead.</p>'
+    + '<p>Forward-only restores the structural rule and protects the discipline of <span class="marked">closing work and moving on</span>. Every closed decision that becomes editable is a decision that becomes provisional, and provisional decisions never close.</p>'
+    + '<h2 id="s-address">The address space</h2>'
+    + '<p>Numbers, once assigned, are permanent. Ho-7 becoming ho-7.1 and ho-7.2 is a split made before either closes, not a retroactive renumber. Once closed, the address is immutable in both directions — the number and its content.</p>'
+    + '<p>This is why the documentation chain can serve two readers at once: the human returning after time away, and the fresh agent arriving with no context. Both read the same immutable record, in the same order, and reconstruct the same model of what the project believes.</p>'
+    + '<p>The chain is the bootstrap. README, then system design, then the relevant ho, then the code. The structure of the documents tells each new reader what to read in what order — and none of it lies, because none of it was retroactively edited.</p>'
+    + '<p>That completes the sample. Scroll back up and reach — watch the header answer the reach.</p>'
+    + '<div class="trailnote">— the trail footer (§8) renders here: the walk’s single home. Plan above, your steps threaded beneath. —</div>';
+
+  function crumbMarkup(){
+    return '<nav class="crumb" aria-label="breadcrumb">'
+      + '<a href="#" onclick="return false">framework</a>'
+      + '<span class="sep"> / </span>'
+      + '<a href="#" onclick="return false">structure</a>'
+      + '<span class="sep"> / </span>'
+      + '<span class="here" aria-current="page">ho-structure</span></nav>';
+  }
+
+  function buildStage(stage){
+    var v = stage.getAttribute("data-variant");
+    var header = "";
+    if (v === "A"){
+      // static masthead, in-flow, scrolls away
+      header = '<div class="col"><div class="masthead">'
+        + komaKey(32)
+        + '<span class="wordmark">Ho&nbsp;System</span>'
+        + '<div class="doors">'+doorsMarkup()+'</div>'
+        + '</div></div>';
+    } else {
+      var edge = (v === "C") ? "edge-washi" : "edge-hairline";
+      var mini = (v === "D") ? walkMiniMarkup() : "";
+      var startClass = (v === "B") ? "shown" : "shown"; // B always shown; C/D start shown (near top)
+      header = '<header class="site-header '+edge+' '+startClass+'" data-header>'
+        + '<div class="inner">'
+        + komaSolid(20)
+        + '<nav class="doors" aria-label="site">'+doorsMarkup()+'</nav>'
+        + mini
+        + '</div></header>';
+    }
+    stage.innerHTML = header + '<div class="col">' + crumbMarkup() + PROSE + '</div>';
+
+    // in-panel anchor jumps use scroll-margin-top so landings clear the header
+    stage.querySelectorAll('[data-anchor]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        var t = stage.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({behavior:'auto', block:'start'});
+      });
+    });
+
+    if (v === "C" || v === "D") wireReveal(stage);
+  }
+
+  function wireReveal(stage){
+    var header = stage.querySelector('[data-header]');
+    var lastY = stage.scrollTop, accUp = 0, accDown = 0;
+    function show(){ header.classList.add('shown'); header.classList.remove('hidden'); }
+    function hide(){ header.classList.add('hidden'); header.classList.remove('shown'); }
+    stage.addEventListener('scroll', function(){
+      var y = stage.scrollTop;
+      var dy = y - lastY;
+      if (y <= 80){ show(); accUp = 0; accDown = 0; }
+      else if (dy < 0){ accUp += -dy; accDown = 0; if (accUp >= 48) show(); }
+      else if (dy > 0){ accDown += dy; accUp = 0; if (accDown >= 48) hide(); }
+      lastY = y;
+    }, {passive:true});
+  }
+
+  document.querySelectorAll('.stage').forEach(buildStage);
+
+  // reduced-motion simulation toggle
+  var btn = document.getElementById('rmToggle');
+  var state = document.getElementById('rmState');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('rm');
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    state.textContent = on ? 'motion: reduced (present/absent, 0 ms)' : 'motion: full (discrete §4 steps)';
+  });
+})();
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-07</h2>
+  <p>Winner: <strong>D, amended at judgment (D′)</strong> — step-reveal with the
+  walk miniature, plus the practitioner's two amendments: the crumb rides in the
+  revealed header on deep pages, and the padding tightens (exact paddings land at
+  the by-feel pass via tuners — provisional numbers in §14). C's reveal demo failed
+  to fire for the practitioner in his browser; its mechanics live on inside D′
+  regardless. The walk miniature supersedes §8's "no fixed elements" — recorded in
+  the propagation ledger; the footer strip remains the walk's authoritative
+  rendering. Values landed in <code>design/basis-of-design.md</code> §14.</p>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 13 — the term node · variants A–D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Frozen §3 families: Source Serif 4 (400, 400i, 600) + Source Code Pro (400, 600). No CJK webfont. -->
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ── Frozen tokens (§2 palette, §3 type, §4 step) ─────────────────────────────
+   gold (#a9832a) is deliberately ABSENT: terms carry no state, so no gold on a
+   term page (session-13 standing constraint). It appears nowhere below. */
+:root{
+  --washi:#eef1ef; --sumi:#1f2123; --bero:#29618e;
+  --sumi-70:#5d5f60; --sumi-40:#9b9e9d; --sumi-12:#d5d8d7;
+  --bero-70:#648cab; --bero-40:#9fb7c8;
+  --serif:'Source Serif 4','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+  --mono:'Source Code Pro','Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',monospace;
+  --step-dur:160ms; --step-ease:cubic-bezier(0.2,0,0,1);
+  --col:42rem;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--washi); color:var(--sumi);
+  font-family:var(--serif); font-weight:400;
+  font-size:1.0625rem; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+/* §4 the step — the one motion unit; reduced-motion collapses it to 0ms */
+@keyframes ho-step{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.arrive{animation:ho-step var(--step-dur) var(--step-ease)}
+@media (prefers-reduced-motion: reduce){ .arrive{animation:none} }
+
+/* ── page chrome (not part of the frozen node design — study scaffolding) ── */
+.page{max-width:64rem;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.masthead{border-bottom:1px solid var(--sumi-12);padding-bottom:1.25rem;margin-bottom:2rem}
+.masthead h1{font-weight:600;font-size:1.75rem;line-height:1.25;margin:0 0 .4rem}
+.masthead .sub{font-family:var(--mono);font-size:.8125rem;color:var(--sumi-70);line-height:1.5;margin:0}
+.masthead .note{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);margin:.75rem 0 0;line-height:1.55}
+.variant{margin:3.25rem 0 0;border-top:1px solid var(--sumi-40);padding-top:1.5rem}
+.variant > .vhead{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap;margin-bottom:.35rem}
+.variant .badge{font-family:var(--mono);font-weight:600;font-size:1.125rem;color:var(--sumi)}
+.variant .vname{font-weight:600;font-size:1.125rem}
+.variant .commit{font-family:var(--mono);font-size:.8125rem;color:var(--sumi-70);line-height:1.5;margin:0 0 1rem;max-width:52rem}
+.demo-bar{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.demo-bar button{font-family:var(--mono);font-size:.75rem;background:none;border:1px solid var(--sumi-12);color:var(--sumi-70);padding:.15rem .5rem;cursor:pointer;border-radius:0}
+.demo-bar button:hover{border-color:var(--sumi-40)}
+.demo-bar button[aria-pressed=true]{color:var(--sumi);border-color:var(--sumi-40)}
+.demo-bar .grow{flex:1}
+
+/* the demo "stage" holds a source panel + the node page; positioned for card placement */
+.stage{position:relative;background:var(--washi)}
+.stage:focus{outline:none}
+
+/* ── source panel: simulates the paragraph in ho-structure the card was spawned from ── */
+.src{border:1px dashed var(--sumi-40);padding:.85rem 1rem;margin-bottom:1.5rem;max-width:var(--col)}
+.src .lbl{font-family:var(--mono);font-size:.6875rem;color:var(--sumi-40);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.src p{margin:0;font-size:1.0rem;line-height:1.6}
+
+/* ── the node page (frozen design under test) ── */
+.node{max-width:var(--col)}
+.node.wide{max-width:52rem} /* variant C mini-graph needs a little air */
+
+/* §12 crumb */
+.crumb{font-family:var(--mono);font-weight:400;font-size:.8125rem;line-height:1.5;margin:0 0 1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb .anc{color:var(--sumi-70)}
+.crumb .cur{color:var(--sumi)}
+.crumb .sep{color:var(--sumi-40)}
+.crumb .ret-inline{font-family:var(--mono);font-size:.8125rem;background:none;border:none;color:var(--bero);cursor:pointer;padding:0 0 0 .5rem;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em}
+
+/* return affordances (branch-return) */
+.ret-banner{font-family:var(--mono);font-size:.8125rem;color:var(--sumi-70);border-left:2px solid var(--sumi-40);padding:.35rem .75rem;margin:0 0 1rem}
+.ret-banner button{font-family:var(--mono);font-size:.8125rem;background:none;border:none;color:var(--bero);cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em;padding:0}
+.node-head{position:relative}
+.ret-chip{position:absolute;top:.1rem;right:0;font-family:var(--mono);font-size:.75rem;color:var(--sumi-70);background:none;border:1px solid var(--sumi-40);padding:.15rem .5rem;cursor:pointer;border-radius:0}
+.ret-chip:hover{color:var(--sumi)}
+
+/* h1 (§3) */
+.node h1{font-weight:600;font-size:1.75rem;line-height:1.25;margin:0 0 1.25rem;padding-right:9rem}
+
+/* §5 frontmatter ledger */
+.ledger{border:1px solid var(--sumi-40);margin:0 0 2.5rem;font-family:var(--mono);font-size:.875rem;line-height:1.6}
+.ledger .row{display:grid;grid-template-columns:9rem 1fr;padding:.5rem .875rem;border-bottom:1px solid var(--sumi-12)}
+.ledger .row:last-child{border-bottom:none}
+.ledger .k{color:var(--sumi-70)}
+.ledger .v{color:var(--sumi)}
+
+/* depth sections */
+.depths{margin:0}
+.depth{margin:0 0 1.25rem}
+.depth .tag{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);margin:0 0 .3rem}
+.depth-1 .body{font-size:1.1875rem;line-height:1.55} /* plain-cut lead */
+.depth .body{margin:0}
+
+/* progressive dial (A / D) — stepped you-are-here rail + committed step controls */
+.dial-prog{display:flex;align-items:center;gap:.9rem;margin:0 0 1.5rem}
+.dial-prog .rail{display:flex;align-items:center;gap:.5rem}
+.dial-prog .tick{font-family:var(--mono);font-weight:600;font-size:.8125rem;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;border:1px solid transparent}
+.dial-prog .tick.reached{color:var(--sumi-70)}
+.dial-prog .tick.current{color:var(--sumi);border-color:var(--sumi-40)}
+.dial-prog .tick.ahead{color:var(--sumi-40)} /* only rendered for depths that exist */
+.dial-prog .rail-line{flex:0 0 1.25rem;height:1px;background:var(--sumi-12)}
+.dial-btn{font-family:var(--mono);font-size:.8125rem;background:none;border:none;color:var(--bero);cursor:pointer;padding:.2rem .1rem;min-height:1.6rem;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em}
+.dial-btn:disabled{display:none} /* absent depths are invisible-graceful, never a disabled stub */
+
+/* single-pane dial (B) — segmented 1·2·3, content swaps */
+.dial-seg{display:flex;gap:.4rem;margin:0 0 1.5rem}
+.dial-seg button{font-family:var(--mono);font-weight:400;font-size:.8125rem;background:none;border:none;color:var(--sumi-70);cursor:pointer;padding:.15rem .1rem;min-width:1.6rem;min-height:1.6rem}
+.dial-seg button[aria-current=true]{color:var(--sumi);text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em}
+.dial-seg .lbl{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);align-self:center;margin-right:.25rem}
+
+/* all-visible margin rail (C) */
+.allviz{display:grid;grid-template-columns:1fr 3.5rem;gap:0}
+.allviz .col{min-width:0}
+.allviz .rail{position:sticky;top:1rem;align-self:start;display:flex;flex-direction:column;gap:.6rem;padding-left:1rem;border-left:1px solid var(--sumi-12)}
+.allviz .rtick{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);background:none;border:none;text-align:left;cursor:pointer;padding:.1rem 0;line-height:1.3}
+.allviz .rtick .n{font-weight:600}
+.allviz .rtick.on{color:var(--sumi)}
+
+/* marked terms (§3 resting look; §7 open/met behaviour) */
+.term{color:var(--sumi);text-decoration:underline;text-decoration-style:dotted;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em;cursor:help}
+.term:focus-visible{outline:1px solid var(--sumi);outline-offset:2px}
+.term.open{text-decoration-style:solid} /* open reveal: dotted → solid, same bero@0.70 */
+.term.met{text-decoration-color:var(--sumi-40)} /* met: recede bero@0.70 → sumi@0.40 (no gold) */
+
+/* links (§5: solid = link) */
+.link{color:var(--sumi);text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--bero-70);text-underline-offset:.2em;cursor:pointer}
+.link:focus-visible{outline:1px solid var(--sumi);outline-offset:2px}
+
+/* relationship blocks — typed lists (A / D) */
+.rels{margin:2rem 0 0;border-top:1px solid var(--sumi-12);padding-top:1.25rem}
+.rels .grp{margin:0 0 1rem}
+.rels .grp:last-child{margin-bottom:0}
+.rels .grp .lbl{font-family:var(--mono);font-weight:600;font-size:.8125rem;color:var(--sumi-70);margin:0 0 .35rem}
+.rels .grp .lbl .derived{font-weight:400;color:var(--sumi-40)}
+.rels .grp .items{display:flex;flex-wrap:wrap;gap:.15rem .9rem;font-family:var(--serif)}
+.rels .grp .items a{white-space:nowrap}
+
+/* relationship rail (B) */
+.node.railed{display:grid;grid-template-columns:11rem 1fr;gap:1.75rem;max-width:52rem}
+.rail-rels{position:sticky;top:1rem;align-self:start;font-size:.9375rem}
+.rail-rels .grp{margin:0 0 1.1rem}
+.rail-rels .grp .lbl{font-family:var(--mono);font-weight:600;font-size:.75rem;color:var(--sumi-70);margin:0 0 .3rem}
+.rail-rels .grp .lbl .derived{font-weight:400;color:var(--sumi-40)}
+.rail-rels .grp .items{display:flex;flex-direction:column;gap:.2rem}
+.rail-body{min-width:0}
+
+/* mini-graph (C) */
+.graph-wrap{margin:2rem 0 0;border-top:1px solid var(--sumi-12);padding-top:1.25rem}
+.graph-wrap .cap{font-family:var(--mono);font-size:.75rem;color:var(--sumi-40);margin:0 0 .5rem}
+.graph svg{max-width:100%;height:auto;display:block}
+.graph .gnode rect{fill:var(--washi)}
+.graph .gnode text{font-family:var(--mono);font-size:10px;fill:var(--sumi)}
+.graph a{cursor:pointer}
+
+/* citations */
+.cites{font-family:var(--mono);font-size:.8125rem;color:var(--sumi-70);margin:1.25rem 0 0}
+.cites .link{font-family:var(--mono)}
+
+/* §7 card */
+.card{position:absolute;z-index:10;width:min(24rem,var(--col) - 1rem);background:var(--washi);border:1px solid var(--sumi-40);border-radius:0;padding:.625rem .875rem}
+.card p{margin:0;font-family:var(--serif);font-weight:400;font-size:.9375rem;line-height:1.55;color:var(--sumi)}
+.card .full{display:inline-block;margin-top:.4rem;font-family:var(--mono);font-size:.8125rem;color:var(--bero);background:none;border:none;padding:0;cursor:pointer}
+.card .miss{display:inline-block;margin-top:.4rem;font-family:var(--mono);font-size:.75rem;color:var(--sumi-40)}
+
+/* recommendation block */
+.reco{margin-top:4rem;border-top:2px solid var(--sumi);padding-top:1.5rem;max-width:52rem}
+.reco h2{font-weight:600;font-size:1.375rem;line-height:1.3;margin:0 0 .75rem}
+.reco h3{font-weight:600;font-size:1.125rem;line-height:1.4;margin:1.5rem 0 .5rem}
+.reco p{margin:0 0 .75rem}
+.reco ul{margin:0 0 .75rem;padding-left:1.2rem}
+.reco li{margin:0 0 .35rem}
+.reco code, .frozen code{font-family:var(--mono);font-size:.875em}
+.frozen{background:none;border:1px solid var(--sumi-40);padding:1rem 1.25rem;font-family:var(--mono);font-size:.8125rem;line-height:1.65;color:var(--sumi);white-space:pre-wrap;margin:.5rem 0 0}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="masthead">
+    <h1>Session 13 — the term node</h1>
+    <p class="sub">How a term's node page renders: the depth dial, the relationships, the way in and out.<br>
+    Four working demos. Same three real glossary terms — forward-only · ho · tuner — rendered as full node pages in each.</p>
+    <p class="note">Rendered in hosystem's frozen system only (§2 inks, §3 type, §4 step, §5 ledger + link grammar, §7 touch, §12 crumb).
+    No gold anywhere — terms carry no state. Depths 4–5 are unauthored; every dial shows only what exists (1–3) and ends clean.
+    Dashed boxes and the "term:" bar are study scaffolding, not part of the design. Touch a dotted term to define (never navigates);
+    click a solid link to travel. Depth moves on ↑/↓ (or ←/→ / 1·2·3) as committed steps.</p>
+  </div>
+  <div id="variants"></div>
+  <div id="reco"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DATA — three real terms derived from framework/glossary.md (read-only).
+   [[key|text]] marks a term of art (dotted, define-on-touch). Citations link
+   into the rendered corpus. Backlinks are DERIVED (entries that cite this one).
+   ───────────────────────────────────────────────────────────────────────── */
+const LABELS = {
+  'forward-only':'forward-only','ho':'ho','tuner':'tuner','closure':'closure',
+  'supersedes':'supersedes','mutability':'mutability','frozen':'frozen','sealed':'sealed',
+  'living':'living','ho-document':'ho document','arc':'arc','shape':'shape',
+  'ho-overview':'ho overview','kamae-addendum':'Kamae addendum','landing-ho':'landing ho',
+  'kagen':'kagen','design-tuning':'design tuning','basis-of-design':'Basis of Design','spike':'spike'
+};
+const PLAIN = {
+  'forward-only':'Finished work stays finished; a mistake is answered with a new document, never by editing the old one.',
+  'ho':'One bounded, deliverable session of work that leaves a record when it closes.',
+  'tuner':'A live control that lets you move a visual or behavioral value and watch it change before committing to a number.',
+  'closure':'The moment a unit of work and its look-back are finished and its status is marked done.',
+  'supersedes':'Names exactly what a newer document overtakes; the older one keeps a pointer back, and nothing is erased.',
+  'mutability':'How much an artifact may change over its life — living (revised freely), frozen (changed only by override), or sealed (never again).',
+  'frozen':'A mutability regime: not edited in place, changed only by a superseding addendum.',
+  'sealed':'A mutability regime: final; a later document may respond, but nothing supersedes it in force.',
+  'living':'A mutability regime: revised freely in place.',
+  'ho-document':'The written scope for one working session — its decisions, boundaries, and checks — read by the person doing the work.',
+  'arc':'The full sequence of steps that carries a project from first idea to running system.',
+  'shape':'The structural form a session document takes, chosen at authoring time, describing the document rather than the person.',
+  'ho-overview':"The build's directional plan, grouping the planned steps into themed clusters with checkpoints and named milestones.",
+  'kamae-addendum':'A follow-on decision document that overrides a named part of an earlier framing document without editing it.',
+  'landing-ho':'A session whose whole job is settling values at their felt-right degree and locking them with a commit.',
+  'kagen':'The felt-right amount for a value — its correct degree, found by feel rather than by rule.',
+  'design-tuning':"Settling a design's feel by building throwaway try-outs, watching real values move, and locking the ones that feel right.",
+  'basis-of-design':"The one file that holds a project's settled design values as explicit numbers, the source of truth everything else builds from.",
+  'spike':"A purpose-built proof that a design's settled values hold up against real code constraints."
+};
+const NODES = {
+  'forward-only':{
+    id:'forward-only', title:'Forward-only', type:'definition',
+    requires:['closure'], related:['supersedes','mutability','ho'],
+    backlinks:['closure','mutability','kamae-addendum'],
+    entry_points:['forward only','can I edit a closed ho','closed hos stay closed'],
+    summary:'Finished work stays finished; a mistake is answered with a new document, never by editing the old one.',
+    depths:{
+      2:'Closed [[ho|hos]] stay closed; closed decisions stay on the record. The response to superseded work is a new document that names what it [[supersedes|supersedes]] — never a reopening, rewrite, or retroactive edit.',
+      3:'Typographical fixes are the only exception. It governs the [[frozen|frozen]] and [[sealed|sealed]] [[mutability|mutability]] regimes; [[living|living]] is the declared exception.'
+    },
+    cites:['ho-structure 2.3 §3.5','operating-discipline']
+  },
+  'ho':{
+    id:'ho', title:'Ho (歩)', type:'definition',
+    requires:[], related:['ho-document','arc','closure','shape'],
+    backlinks:['closure','ho-document','arc','forward-only','ho-overview'],
+    entry_points:['ho','step','unit of work'],
+    summary:'One bounded, deliverable session of work that leaves a record when it closes.',
+    depths:{
+      2:'&ldquo;Step.&rdquo; The fundamental unit of work: bounded, deliverable, traceable, reflective, sequenced — the five invariants.',
+      3:'A session of work that produces something real and leaves a record when it [[closure|closes]].'
+    },
+    cites:['ho-structure 2.3 §1']
+  },
+  'tuner':{
+    id:'tuner', title:'Tuner', type:'definition',
+    requires:['landing-ho','kagen'], related:['design-tuning','basis-of-design','spike'],
+    backlinks:['design-tuning','landing-ho','basis-of-design'],
+    entry_points:['tuner','live control','slider'],
+    summary:'A live control that lets you move a visual or behavioral value and watch it change before committing to a number.',
+    depths:{
+      2:'A live control exposing a visual or behavioral parameter — &ldquo;never hard-code a visual value before you&rsquo;ve seen it move&rdquo;; a named tuner is a named design decision.',
+      3:'Tuners serve the by-feel pass of a [[landing-ho|landing ho]], which lands their values at their [[kagen|kagen]] and locks them as committed defaults.'
+    },
+    cites:['design-work 2.11 §2']
+  }
+};
+const DEMOED = Object.keys(NODES);
+const DEPTH_TAG = {1:'plain',2:'definition',3:'usage',4:'relationships',5:'theory'};
+
+/* Which authored depths exist for a node (graceful: 4–5 simply absent). */
+function depthsOf(node){ return [1, ...Object.keys(node.depths).map(Number).sort()]; }
+function maxDepth(node){ const d=depthsOf(node); return d[d.length-1]; }
+function label(id){ return LABELS[id] || id; }
+
+/* expand [[key|text]] into marked-term spans */
+function expandTerms(html){
+  return html.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (_,key,text)=>
+    `<span class="term" tabindex="0" role="button" data-t="${key}" aria-label="${text}, term of art — activate to define">${text}</span>`);
+}
+
+/* ── one global card at a time (§7) ── */
+let ACTIVE = null; // {el, termEl, pinned, inst, key, fromSource}
+function dismissCard(makeMet){
+  if(!ACTIVE) return;
+  ACTIVE.termEl.classList.remove('open');
+  if(makeMet && ACTIVE.pinned) ACTIVE.inst.met.add(ACTIVE.key), ACTIVE.inst.refreshMet();
+  ACTIVE.el.remove();
+  ACTIVE=null;
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') dismissCard(true); });
+document.addEventListener('click', e=>{
+  if(ACTIVE && ACTIVE.pinned && !ACTIVE.el.contains(e.target) && e.target!==ACTIVE.termEl && !ACTIVE.termEl.contains(e.target))
+    dismissCard(true);
+});
+
+/* ── Demo instance ── */
+class Demo{
+  constructor(cfg, mount){
+    this.cfg=cfg;                 // {dial, rels, wayIn, branchReturn}
+    this.mount=mount;
+    this.met=new Set();
+    this.lastDepth={};            // per-term memory (for wayIn:'last')
+    this.arrived=null;            // {term, scrollNode} branch-return source
+    this.node=null; this.depth=1;
+    this.buildStage();
+  }
+
+  buildStage(){
+    this.stage=document.createElement('div');
+    this.stage.className='stage'; this.stage.tabIndex=-1;
+    // source panel (arrival simulation)
+    const src=document.createElement('div'); src.className='src';
+    src.innerHTML=`<div class="lbl">framework / structure / ho-structure — as you were reading</div>
+      <p>&sect;3.5 &mdash; ${expandTerms('[[forward-only|Forward-only]]')}. Closed ${expandTerms('[[ho|hos]]')} stay closed. When a session surfaces evidence that an earlier ho&rsquo;s design didn&rsquo;t hold up, the response is a new ho in the current build slot &mdash; not a reopening, rewrite, or retroactive edit of the earlier one.</p>`;
+    this.srcPanel=src;
+    this.nodeHost=document.createElement('div');
+    this.stage.appendChild(src);
+    this.stage.appendChild(this.nodeHost);
+    this.mount.appendChild(this.stage);
+    this.wireTerms(src, {source:true});
+    this.load('forward-only', {});
+  }
+
+  // resolve landing depth per the "way in" axis
+  landingDepth(id){
+    if(this.cfg.wayIn==='top') return 1;
+    if(this.cfg.wayIn==='last') return this.lastDepth[id] || 2;
+    return 2; // depth2
+  }
+
+  load(id, {fromSource, atDepth}={}){
+    this.node=NODES[id];
+    this.depth=atDepth || this.landingDepth(id);
+    if(this.cfg.dial==='allvisible') this.depth=1;
+    this.arrived = fromSource ? {term:this.srcPanel.querySelector('.term[data-t="forward-only"]'), scrollNode:this.srcPanel} : this.arrived;
+    if(!fromSource && atDepth===undefined && this.cfg.dial!=='allvisible'){ /* lateral nav keeps arrived context */ }
+    this.render();
+  }
+
+  render(){
+    const n=this.node, cfg=this.cfg, wide=(cfg.rels==='graph');
+    const railed=(cfg.rels==='rail');
+    let html='';
+    html+=`<div class="demo-bar">term:`;
+    DEMOED.forEach(id=> html+=` <button data-term="${id}" aria-pressed="${id===n.id}">${id}</button>`);
+    html+=` <span class="grow"></span><button data-reset="1">reset met</button></div>`;
+    html+=`<div class="node${wide?' wide':''}${railed?' railed':''}">`;
+    if(railed) html+=`<div class="rail-rels">${this.relsHTML()}</div><div class="rail-body">`;
+    html+=this.headHTML();
+    html+=this.ledgerHTML();
+    html+=this.bodyHTML();
+    if(!railed) html+=this.relsHTML();
+    html+=this.citesHTML();
+    if(railed) html+=`</div>`;
+    html+=`</div>`;
+    this.nodeHost.innerHTML=html;
+    this.wireNode();
+    this.refreshMet();
+  }
+
+  headHTML(){
+    const n=this.node, cfg=this.cfg;
+    let crumb=`<nav class="crumb" aria-label="breadcrumb"><a class="anc link" data-glossary="1">glossary</a><span class="sep"> / </span><span class="cur" aria-current="page">${n.id}</span>`;
+    if(cfg.branchReturn && this.arrived && cfg.dial!=='__') { /* D shows an inline crumb return */ }
+    if(cfg.branchReturn==='inline' && this.arrived) crumb+=`<button class="ret-inline" data-return="1">&#8617; ho-structure</button>`;
+    crumb+=`</nav>`;
+    let banner='';
+    if(cfg.branchReturn==='banner' && this.arrived)
+      banner=`<div class="ret-banner">Arrived from <span>ho-structure</span> &mdash; <button data-return="1">return &#8617;</button></div>`;
+    let chip='';
+    if(cfg.branchReturn==='chip' && this.arrived)
+      chip=`<button class="ret-chip" data-return="1">&larr; ho-structure &para;</button>`;
+    return `<div class="node-head">${crumb}${banner}${chip}<h1>${n.title}</h1></div>`;
+  }
+
+  ledgerHTML(){
+    const n=this.node;
+    const rows=[
+      ['id', n.id],
+      ['title', n.title],
+      ['type', n.type],
+      ['requires', n.requires.length? '['+n.requires.map(label).join(', ')+']' : '[]'],
+      ['related', '['+n.related.map(label).join(', ')+']'],
+      ['entry_points', '['+n.entry_points.join(', ')+']'],
+      ['summary', n.summary]
+    ];
+    return `<div class="ledger">`+rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')+`</div>`;
+  }
+
+  // one depth's content block
+  depthSection(nlevel){
+    const n=this.node;
+    let body = nlevel===1 ? n.summary : expandTerms(n.depths[nlevel]||'');
+    return `<div class="depth depth-${nlevel}"><div class="tag">&middot; ${DEPTH_TAG[nlevel]}</div><div class="body">${body}</div></div>`;
+  }
+
+  bodyHTML(){
+    const n=this.node, cfg=this.cfg, exists=depthsOf(n), mx=maxDepth(n);
+    if(cfg.dial==='progressive'){
+      let dial=`<div class="dial-prog" role="group" aria-label="reading depth">`;
+      dial+=`<span class="tag" style="font-family:var(--mono);font-size:.75rem;color:var(--sumi-40)">depth</span><div class="rail">`;
+      exists.forEach((d,i)=>{
+        if(i>0) dial+=`<span class="rail-line"></span>`;
+        const cls = d<this.depth?'reached': d===this.depth?'current':'ahead';
+        dial+=`<span class="tick ${cls}" aria-current="${d===this.depth}">${d}</span>`;
+      });
+      dial+=`</div>`;
+      dial+=`<button class="dial-btn" data-shallower="1" ${this.depth<=1?'disabled':''}>&uarr; less</button>`;
+      dial+=`<button class="dial-btn" data-deeper="1" ${this.depth>=mx?'disabled':''}>&darr; deeper</button>`;
+      dial+=`</div>`;
+      let body=`<div class="depths">`;
+      exists.filter(d=>d<=this.depth).forEach(d=> body+=this.depthSection(d));
+      body+=`</div>`;
+      return dial+body;
+    }
+    if(cfg.dial==='pane'){
+      let seg=`<div class="dial-seg" role="group" aria-label="reading depth"><span class="lbl">depth</span>`;
+      exists.forEach(d=> seg+=`<button data-goto="${d}" aria-current="${d===this.depth}">${d}</button>`);
+      seg+=`</div>`;
+      return seg+`<div class="depths"><div class="pane">${this.depthSection(this.depth)}</div></div>`;
+    }
+    // allvisible
+    let rail=`<div class="rail" role="group" aria-label="jump to depth">`;
+    exists.forEach(d=> rail+=`<button class="rtick" data-jump="${d}"><span class="n">${d}</span> ${DEPTH_TAG[d]}</button>`);
+    rail+=`</div>`;
+    let stacked=`<div class="depths">`;
+    exists.forEach(d=> stacked+=this.depthSection(d));
+    stacked+=`</div>`;
+    return `<div class="allviz"><div class="col">${stacked}</div>${rail}</div>`;
+  }
+
+  relGroup(lbl, ids, derived){
+    if(!ids.length) return '';
+    const items=ids.map(id=>{
+      const demoed=DEMOED.includes(id);
+      return `<a class="link" data-${demoed?'nav':'ext'}="${id}">${label(id)}</a>`;
+    }).join('');
+    const d = derived? ` <span class="derived">(derived)</span>`:'';
+    return `<div class="grp"><div class="lbl">${lbl}${d}</div><div class="items">${items}</div></div>`;
+  }
+
+  relsHTML(){
+    const n=this.node, cfg=this.cfg;
+    if(cfg.rels==='graph') return this.graphHTML();
+    const groups = this.relGroup('requires', n.requires, false)
+                 + this.relGroup('related', n.related, false)
+                 + this.relGroup('referenced by', n.backlinks, true);
+    return `<div class="${cfg.rels==='rail'?'':'rels'}">${groups}</div>`;
+  }
+
+  graphHTML(){
+    const n=this.node, W=560, cx=W/2, nh=26;
+    const rows=[
+      {ids:n.requires, y:12,  kind:'req'},
+      {ids:[{id:n.id,self:true}], y:112, kind:'self'},
+      {ids:n.related, y:212, kind:'rel'},
+      {ids:n.backlinks, y:300, kind:'back'}
+    ];
+    const pos={}; // id -> {x,y,w}
+    let svg='';
+    // place + draw nodes
+    rows.forEach(r=>{
+      const list=r.ids; const cnt=list.length; if(!cnt) return;
+      const nw=Math.max(64, Math.min(132, Math.floor(W/(cnt+1))-8));
+      list.forEach((it,i)=>{
+        const id=it.self?n.id:it; const self=!!it.self;
+        const x=Math.round((W/(cnt+1))*(i+1)-nw/2);
+        pos[(self?'@self':id)]={x,y:r.y,w:nw,cx:x+nw/2};
+        const demoed=self?false:DEMOED.includes(id);
+        const sw=self?1.5:1.0;
+        const rect=`<rect x="${x}" y="${r.y}" width="${nw}" height="${nh}" fill="var(--washi)" stroke="var(--sumi)" stroke-width="${sw}" />`;
+        const tx=`<text x="${x+8}" y="${r.y+17}">${label(id)}</text>`;
+        const g=`<g class="gnode">${rect}${tx}</g>`;
+        svg += demoed ? `<a class="link" data-nav="${id}" tabindex="0" role="link">${g}</a>` : g;
+      });
+    });
+    // edges
+    const self=pos['@self'];
+    // requires -> center (feeds up into center): solid sumi, filled head
+    n.requires.forEach(id=>{ const p=pos[id]; if(!p) return;
+      svg = arrow(p.cx, p.y+nh, self.cx, self.y, 'var(--sumi)', 1.5, 'fill') + svg; });
+    // center -> related : association line, no head, receded
+    n.related.forEach(id=>{ const p=pos[id]; if(!p) return;
+      svg = line(self.cx, self.y+nh, p.cx, p.y, 'var(--sumi-40)', 1.0) + svg; });
+    // backlink -> center : return ink, open chevron (referenced-by = incoming)
+    n.backlinks.forEach(id=>{ const p=pos[id]; if(!p) return;
+      svg = arrow(p.cx, p.y, self.cx, self.y+nh, 'var(--sumi-40)', 1.0, 'chevron') + svg; });
+    function line(x1,y1,x2,y2,c,w){ return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" />`; }
+    function arrow(x1,y1,x2,y2,c,w,head){
+      const ang=Math.atan2(y2-y1,x2-x1); const L=head==='fill'?8:7, Wd=head==='fill'?5:4;
+      const ax=x2-Math.cos(ang)*2, ay=y2-Math.sin(ang)*2;
+      const p1x=ax-Math.cos(ang)*L+Math.sin(ang)*Wd, p1y=ay-Math.sin(ang)*L-Math.cos(ang)*Wd;
+      const p2x=ax-Math.cos(ang)*L-Math.sin(ang)*Wd, p2y=ay-Math.sin(ang)*L+Math.cos(ang)*Wd;
+      const shaft=`<line x1="${x1}" y1="${y1}" x2="${ax}" y2="${ay}" stroke="${c}" stroke-width="${w}" />`;
+      const h= head==='fill'
+        ? `<path d="M${ax} ${ay} L${p1x} ${p1y} L${p2x} ${p2y} Z" fill="${c}" />`
+        : `<path d="M${p1x} ${p1y} L${ax} ${ay} L${p2x} ${p2y}" fill="none" stroke="${c}" stroke-width="${w}" />`;
+      return shaft+h;
+    }
+    return `<div class="graph-wrap"><div class="cap">relationships &mdash; &sect;6 diagram idiom at term scale &middot; requires feed up (filled head) &middot; related tie across &middot; referenced-by return in (open chevron, receded)</div>
+      <div class="graph"><svg viewBox="0 0 ${W} 335" width="${W}" role="img" aria-label="relationship graph for ${n.id}">${svg}</svg></div></div>`;
+  }
+
+  citesHTML(){
+    const n=this.node;
+    return `<p class="cites">Defining documents: `+n.cites.map(c=>`<a class="link cite" data-cite="1">${c}</a>`).join(', ')+`</p>`;
+  }
+
+  // ── interaction wiring ──
+  wireNode(){
+    const host=this.nodeHost;
+    host.querySelectorAll('[data-term]').forEach(b=> b.onclick=()=>{ this.arrived=null; this.load(b.dataset.term,{}); });
+    const reset=host.querySelector('[data-reset]'); if(reset) reset.onclick=()=>{ this.met.clear(); this.refreshMet(); };
+    host.querySelectorAll('[data-nav]').forEach(a=> a.onclick=e=>{ e.preventDefault(); this.load(a.dataset.nav,{}); });
+    host.querySelectorAll('[data-ext]').forEach(a=> a.onclick=e=>{ e.preventDefault(); this.flash(a, label(a.dataset.ext)+' — not in this demo'); });
+    host.querySelectorAll('[data-cite]').forEach(a=> a.onclick=e=>{ e.preventDefault(); this.flash(a,'links into the rendered corpus'); });
+    host.querySelectorAll('[data-glossary]').forEach(a=> a.onclick=e=>{ e.preventDefault(); this.flash(a,'glossary index'); });
+    host.querySelectorAll('[data-return]').forEach(b=> b.onclick=()=> this.doReturn());
+    // depth controls
+    const deeper=host.querySelector('[data-deeper]'); if(deeper) deeper.onclick=()=> this.step(+1);
+    const shallow=host.querySelector('[data-shallower]'); if(shallow) shallow.onclick=()=> this.step(-1);
+    host.querySelectorAll('[data-goto]').forEach(b=> b.onclick=()=> this.goto(+b.dataset.goto));
+    host.querySelectorAll('[data-jump]').forEach(b=> b.onclick=()=> this.jump(+b.dataset.jump, host));
+    // keyboard depth movement on the node
+    const nodeEl=host.querySelector('.node'); if(nodeEl){ nodeEl.tabIndex=0;
+      nodeEl.onkeydown=e=>{
+        if(this.cfg.dial==='pane'){
+          if(e.key==='ArrowRight'){ e.preventDefault(); this.goto(this.depth+1); }
+          if(e.key==='ArrowLeft'){ e.preventDefault(); this.goto(this.depth-1); }
+          if(/^[1-5]$/.test(e.key)){ e.preventDefault(); this.goto(+e.key); }
+        } else if(this.cfg.dial==='progressive'){
+          if(e.key==='ArrowDown'||e.key==='+'){ e.preventDefault(); this.step(+1); }
+          if(e.key==='ArrowUp'||e.key==='-'){ e.preventDefault(); this.step(-1); }
+        }
+      };
+    }
+    this.wireTerms(host,{});
+  }
+
+  step(dir){
+    const mx=maxDepth(this.node);
+    const nd=Math.min(mx, Math.max(1, this.depth+dir));
+    if(nd===this.depth) return;
+    this.depth=nd; this.lastDepth[this.node.id]=nd;
+    this.render();
+    // animate the newly-revealed / swapped block as one §4 step
+    const secs=this.nodeHost.querySelectorAll('.depth');
+    if(dir>0 && secs.length) secs[secs.length-1].classList.add('arrive');
+    this.focusDial();
+  }
+  goto(d){
+    const mx=maxDepth(this.node); if(d<1||d>mx||d===this.depth) return;
+    this.depth=d; this.lastDepth[this.node.id]=d;
+    this.render();
+    const pane=this.nodeHost.querySelector('.pane'); if(pane) pane.classList.add('arrive');
+    this.focusDial();
+  }
+  jump(d, host){
+    const sec=host.querySelector('.depth-'+d);
+    host.querySelectorAll('.rtick').forEach(t=> t.classList.toggle('on', +t.dataset.jump===d));
+    if(sec) sec.scrollIntoView({behavior:'auto', block:'start'}); // discrete, never a scroll-fade (§4)
+    this.depth=d;
+  }
+  focusDial(){
+    const b=this.nodeHost.querySelector('[data-deeper],[aria-current="true"][data-goto],.dial-seg [aria-current="true"]');
+    if(b && b.focus) b.focus();
+  }
+
+  doReturn(){
+    if(!this.arrived) return;
+    this.arrived.scrollNode.scrollIntoView({behavior:'auto', block:'center'});
+    const t=this.arrived.term;
+    if(t){ this.met.add('forward-only'); t.classList.add('met'); t.focus(); }
+    this.arrived=null;
+    this.render();
+  }
+
+  flash(el, msg){
+    const s=document.createElement('span'); s.className='card'; s.style.zIndex=11;
+    s.innerHTML=`<p style="font-family:var(--mono);font-size:.75rem;color:var(--sumi-40)">${msg}</p>`;
+    this.place(s, el); document.body.appendChild(s);
+    setTimeout(()=> s.remove(), 1100);
+  }
+
+  // §7 marked-term touch: hover=transient, click/Enter=pin, second/Esc/outside=dismiss(+met)
+  wireTerms(root, {source}){
+    root.querySelectorAll('.term').forEach(term=>{
+      term.addEventListener('mouseenter', ()=>{ if(!ACTIVE || !ACTIVE.pinned) this.showCard(term, false, source); });
+      term.addEventListener('mouseleave', ()=>{ if(ACTIVE && !ACTIVE.pinned && ACTIVE.termEl===term) dismissCard(false); });
+      term.addEventListener('focus', ()=>{ if(!ACTIVE || !ACTIVE.pinned) this.showCard(term, false, source); });
+      term.addEventListener('blur', ()=>{ if(ACTIVE && !ACTIVE.pinned && ACTIVE.termEl===term) dismissCard(false); });
+      const toggle=(e)=>{ e.preventDefault(); e.stopPropagation();
+        if(ACTIVE && ACTIVE.pinned && ACTIVE.termEl===term){ dismissCard(true); }
+        else { this.showCard(term, true, source); } };
+      term.addEventListener('click', toggle);
+      term.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') toggle(e); });
+    });
+  }
+
+  showCard(term, pin, source){
+    dismissCard(false);
+    const key=term.dataset.t;
+    const el=document.createElement('div'); el.className='card arrive';
+    const demoed=DEMOED.includes(key);
+    let full = demoed
+      ? `<button class="full" data-full="${key}">full entry &rarr;</button>`
+      : `<span class="miss">full entry &rarr; (not in this demo)</span>`;
+    el.innerHTML=`<p>${PLAIN[key]||''}</p>${full}`;
+    this.place(el, term);
+    document.body.appendChild(el);
+    term.classList.add('open');
+    ACTIVE={el, termEl:term, pinned:pin, inst:this, key, fromSource:!!source};
+    const fb=el.querySelector('[data-full]');
+    if(fb) fb.onclick=e=>{ e.stopPropagation();
+      const fromSource = ACTIVE.fromSource;
+      dismissCard(true);
+      this.load(key, {fromSource});
+      this.stage.scrollIntoView({behavior:'auto', block:'nearest'});
+    };
+  }
+
+  // place card 0.5rem below term line box, left-aligned, clamped, flip if short (§7)
+  place(el, term){
+    el.style.visibility='hidden';
+    const tr=term.getBoundingClientRect();
+    const cardW=Math.min(384, this.stage.clientWidth-16);
+    el.style.width=cardW+'px';
+    let left=tr.left+window.scrollX;
+    const maxLeft=window.scrollX+document.documentElement.clientWidth-cardW-8;
+    left=Math.max(window.scrollX+8, Math.min(left, maxLeft));
+    el.style.left=left+'px';
+    document.body.appendChild(el);
+    const h=el.offsetHeight; el.remove();
+    let top=tr.bottom+window.scrollY+8;
+    if(tr.bottom+8+h > window.innerHeight) top=tr.top+window.scrollY-h-8; // flip above
+    el.style.top=top+'px';
+    el.style.visibility='visible';
+  }
+
+  refreshMet(){
+    const all=[this.srcPanel, this.nodeHost];
+    all.forEach(r=> r && r.querySelectorAll('.term').forEach(t=>{
+      t.classList.toggle('met', this.met.has(t.dataset.t));
+    }));
+  }
+}
+
+/* ── mount the four variants ── */
+const VARIANTS=[
+  {k:'A', name:'The descent', cfg:{dial:'progressive', rels:'lists', wayIn:'depth2', branchReturn:false},
+   commit:'Reading is descent: depth appends below (dial = you-are-here), relationships as typed lists at the foot, the card lands at depth 2, the §12 crumb is the only door back.'},
+  {k:'B', name:'The pane', cfg:{dial:'pane', rels:'rail', wayIn:'last', branchReturn:'chip'},
+   commit:'Content swaps in place at depth (segmented 1·2·3), relationships ride a margin rail, the card lands where you last read, a return chip goes back to the paragraph that sent you.'},
+  {k:'C', name:'The spread', cfg:{dial:'allvisible', rels:'graph', wayIn:'top', branchReturn:'banner'},
+   commit:'Every depth in view under a margin depth-rail, relationships as a term-scale §6 mini-graph, entered from the top with the summary, an arrival banner returns you to source.'},
+  {k:'D', name:'The seated node', cfg:{dial:'progressive', rels:'lists', wayIn:'depth2', branchReturn:'inline'},
+   commit:"A's descent and typed lists, landing at depth 2 — plus the branch-return the crumb alone can't give: an inline ↩ that lands you back on the exact line you left."}
+];
+const host=document.getElementById('variants');
+VARIANTS.forEach(v=>{
+  const sec=document.createElement('section'); sec.className='variant';
+  sec.innerHTML=`<div class="vhead"><span class="badge">${v.k}</span><span class="vname">${v.name}</span></div>
+    <p class="commit">${v.commit}</p>`;
+  host.appendChild(sec);
+  const mount=document.createElement('div'); sec.appendChild(mount);
+  new Demo(v.cfg, mount);
+});
+
+/* ── recommendation (also in the return message) ── */
+document.getElementById('reco').innerHTML=`
+<div class="reco">
+  <h2>Recommendation — D, the seated node</h2>
+  <p>Adopt <strong>D</strong>: progressive-disclosure depth (deeper appends below, the dial reads as you-are-here),
+  typed relationship lists at the foot, the card lands at depth&nbsp;2, and a branch-return added on top of the always-present §12 crumb.
+  A and D are a controlled pair — same node, differing only on the way out — so the choice between them is the one real question: is the crumb enough?</p>
+  <h3>Two reasons</h3>
+  <ul>
+    <li><strong>Descent is the term's native motion, and it keeps context.</strong> Progressive disclosure lets the reader see the definition while reading the usage; the single-pane swap (B) hides depth&nbsp;2 the moment you go to 3, and all-visible (C) turns a committed step into a scroll. Typed lists stay corpus, not chrome — the mini-graph (C) is the most beautiful and the most over-built for a terse term.</li>
+    <li><strong>The card spawns mid-read, so the way out has to be exact.</strong> A reader who touched <em>forward-only</em> inside a sentence of ho-structure wants back to that sentence, not to the glossary index the crumb offers. D's inline ↩ restores the exact line and marks it met (§7 grammar, no gold); the crumb still stands for the deliberate "go to the glossary" move. Landing at depth&nbsp;2 respects that the plain cut was already read on the card.</li>
+  </ul>
+  <div class="frozen">Frozen if accepted (session 13 — the term node)
+
+PAGE  one node per term at  glossary / &lt;id&gt;  · §5 42rem measure · §12 crumb two segments
+      (glossary = ancestor link bero@.70 · &lt;id&gt; = current, sumi 1.00, aria-current)
+LEDGER §5 verbatim — frontmatter (id title type requires related entry_points summary)
+      renders first, nothing hidden · relationships repeat below as the navigable layer
+
+DIAL  progressive disclosure · depths 1→current stacked, deeper appends the next as ONE §4 step
+      (160ms, cubic-bezier(.2,0,0,1), 8px rise) · shallower removes, instant
+      rail: mono 600 .8125rem ticks, 1.6rem box (≥24px hit) · reached sumi@.70 ·
+      current sumi 1.00 + 1px sumi@.40 box · line 1px sumi@.12, 1.25rem between ticks
+      controls: "↓ deeper" / "↑ less" mono .8125rem bero, solid bero@.70 underline
+      keys ↓/+ deeper, ↑/− less · absent depths (4–5): tick + control simply NOT rendered
+TYPE  depth 1 (plain cut) serif 400 1.1875rem/1.55 sumi · depth 2 & 3 body serif 400 1.0625/1.65
+      depth tag mono .75rem sumi@.40 "· definition" · h1 §3 (1.75/1.25 600)
+
+RELS  typed lists, foot of node · top rule 1px sumi@.12, padding-top 1.25rem
+      three groups: requires · related · referenced by (derived) · group gap 1rem
+      label mono 600 .8125rem sumi@.70; "(derived)" 400 sumi@.40 · entries serif,
+      each a solid 1px bero@.70 underline link (§5 grammar) · empty group omitted (ho: no requires)
+      demoed target navigates · other targets link into the wider glossary
+BACKLINKS derived from citing entries, never authored · same link ink, labelled "referenced by (derived)"
+
+IN    "full entry →" (mono .8125rem bero, §7 card) lands at DEPTH 2 · lateral relationship
+      links land at depth 2 too
+OUT   §12 crumb always present (site chrome) + branch-return: an inline "↩ ho-structure" on the
+      crumb line (mono .8125rem bero) shown only when arrived-from-a-card · restores the source's
+      exact scroll + line, marks that term MET (bero@.70 → sumi@.40, §7, no gold) · clears on return
+
+TOUCH §7 verbatim — card min(24rem, col−1rem), 1px sumi@.40, .625/.875rem, washi, radius 0, z 10,
+      one at a time, arrives one §4 step, dismiss instant · in-body terms dotted, define-on-touch,
+      never navigate · met recession per §7 · GOLD APPEARS NOWHERE on the term page
+CITES defining documents line, mono .8125rem, links into rendered corpus (solid bero@.70)</div>
+  <h3>Parked</h3>
+  <ul>
+    <li><strong>Depths 4–5 (relationships, theory) authoring</strong> — a ho-system-repo writing project; the format holds their place and the dial already ends clean without them.</li>
+    <li><strong>Node files' move from glossary.md into <code>nodes/</code></strong> — an ingestion/authoring decision in the ho-system repo, not visual.</li>
+    <li><strong>The AI portal / question entry</strong> — needs a server; the site is static. V-later.</li>
+    <li><strong>The glossary index page's own redesign</strong> (where the crumb's "glossary" door lands) — its own question.</li>
+    <li><strong>Whether framework documents beyond terms become nodes</strong> — out of scope here.</li>
+    <li><strong>Authored depth-4 relationship prose vs. the derived frontmatter block</strong> — when depth 4 is written, does its prose sit above or below the typed lists? Deferred to the authoring project.</li>
+  </ul>
+</div>`;
+</script>
+
+<section>
+  <h2>Session record — landed 2026-07-07</h2>
+  <p>Winner: <strong>D (the seated node)</strong>, accepted with a stated
+  reservation: the practitioner found the node model hard to judge in variant form
+  ("it all feels very obtuse to me… we can look at it made") and doubts its clarity
+  to strangers. Landed on that basis: build it, re-judge the real term pages at the
+  by-feel pass, and give them a fresh-eyes check before v2. Progressive descent,
+  typed relationship lists, land at depth 2, crumb + branch-return to the exact
+  source line. Values landed in <code>design/basis-of-design.md</code> §13.</p>
+</section>
+
+</body>
+</html>

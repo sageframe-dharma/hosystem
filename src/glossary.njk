@@ -8,15 +8,14 @@ description: "The Ho System's working vocabulary—the framework's real glossary
 
 <p>The framework's working vocabulary, ingested and rendered verbatim. Every term of art on
 the site is one touch from its plain cut—the one-sentence definition with no term of art
-inside it. Here each term carries both: the plain cut and the full entry, with the defining
-document named.</p>
+inside it. This is the index: each term links to its node page (§13), where the full entry
+opens by progressive depth, with its relationships and defining documents.</p>
 
 <dl class="glossary">
   {%- for entry in glossary %}
-  <dt id="{{ entry.anchor }}" class="cjk"><strong>{{ entry.term }}</strong></dt>
+  <dt id="{{ entry.anchor }}" class="cjk"><a href="/glossary/{{ entry.anchor }}/"><strong>{{ entry.term }}</strong></a></dt>
   <dd class="cjk">
-    {%- if entry.plain %}<span class="plain">{{ entry.plain }}</span><br>{% endif -%}
-    {{ entry.html | safe }}
+    {%- if entry.plain %}<span class="plain">{{ entry.plain }}</span>{% endif -%}
   </dd>
   {%- endfor %}
 </dl>

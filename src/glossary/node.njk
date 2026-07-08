@@ -1,0 +1,97 @@
+---
+pagination:
+  data: terms
+  size: 1
+  alias: node
+layout: base.njk
+permalink: "{{ node.url }}"
+eleventyComputed:
+  title: "{{ node.term }}"
+  description: "{{ node.summary }}"
+---
+{% from "crumb.njk" import crumb %}
+{# §13 the term node — one node per glossary term, derived from the real glossary.
+   §12 crumb (glossary / <id>) + an inline branch-return slot, filled by branch.js only
+   when the reader arrived from a §7 card. GOLD appears nowhere on this page. #}
+<div class="crumb-line">
+{{ crumb(node.crumb) }}<span class="branch-slot" hidden></span>
+</div>
+
+<h1 class="cjk">{{ node.term }}</h1>
+
+{# §5 ledger, verbatim — frontmatter renders first, nothing hidden #}
+<div class="ledger" aria-label="frontmatter">
+  {%- set rows = [
+    { key: "id", value: node.id },
+    { key: "title", value: node.term },
+    { key: "type", value: node.type },
+    { key: "requires", value: node.requires },
+    { key: "related", value: node.related },
+    { key: "entry_points", value: node.entryPoints },
+    { key: "summary", value: node.summary }
+  ] %}
+  {%- for row in rows %}
+  <div class="ledger-row">
+    <span class="ledger-key">{{ row.key }}</span>
+    <span class="ledger-val cjk">
+      {%- if row.key == "related" -%}
+        {%- if node.related.length -%}<ul>{% for r in node.related %}<li>{{ r.text }}</li>{% endfor %}</ul>{%- else -%}[]{%- endif -%}
+      {%- elif row.value is iterable and row.value is not string -%}
+        {%- if row.value.length -%}<ul>{% for item in row.value %}<li>{{ item }}</li>{% endfor %}</ul>{%- else -%}[]{%- endif -%}
+      {%- else -%}
+        {{ row.value }}
+      {%- endif -%}
+    </span>
+  </div>
+  {%- endfor %}
+</div>
+
+{# §13 dial — progressive disclosure. depths 1→current stacked; deeper appends the next as
+   ONE §4 step, shallower removes instant. Keyboard ↓/+ deeper, ↑/− less. absent depths not
+   rendered. dial.js reads data-max-depth and #depth-N; with no JS every depth is visible. #}
+<div class="term-node" data-node="{{ node.anchor }}" data-max-depth="{{ node.maxDepth }}">
+  <div class="dial" role="group" aria-label="definition depth" tabindex="0">
+    <span class="dial-cap">depth</span>
+    <div class="dial-rail">
+      {%- for d in node.depths %}
+      <span class="dial-tick" data-depth="{{ d.level }}" id="tick-{{ d.level }}" aria-current="false">{{ d.level }}</span>
+      {%- endfor %}
+    </div>
+    <button type="button" class="dial-btn dial-less" data-dir="less">↑ less</button>
+    <button type="button" class="dial-btn dial-deeper" data-dir="deeper">↓ deeper</button>
+  </div>
+
+  <div class="depths">
+    {%- for d in node.depths %}
+    <div class="depth-block depth-{{ d.level }}" data-depth="{{ d.level }}" id="depth-{{ d.level }}">
+      <span class="depth-tag">· {{ d.tag }}</span>
+      <div class="depth-body">{{ d.html | safe }}</div>
+    </div>
+    {%- endfor %}
+  </div>
+
+  {# §13 typed relationship lists, foot of node — the navigable layer. Empty groups omitted.
+     The "requires" group (a term→term relationship) has no source in the real corpus yet — it
+     awaits the deferred depth-4/5 relationship-authoring project — so it is omitted here (§13
+     "empty group omitted"). The defining documents the term depends on render once, below, as
+     the CITES line; the ledger's `requires` key records the same, per this build's brief. #}
+  <div class="rels">
+    {%- if node.related.length %}
+    <div class="rel-group">
+      <span class="rel-label">related</span>
+      <span class="rel-items">{% for r in node.related %}{% if not loop.first %} · {% endif %}<a class="chain-link" href="{{ r.href }}">{{ r.text }}</a>{% endfor %}</span>
+    </div>
+    {%- endif %}
+    {%- if node.backlinks.length %}
+    <div class="rel-group">
+      <span class="rel-label">referenced by <span class="rel-derived">(derived)</span></span>
+      <span class="rel-items">{% for r in node.backlinks %}{% if not loop.first %} · {% endif %}<a class="chain-link" href="{{ r.href }}">{{ r.text }}</a>{% endfor %}</span>
+    </div>
+    {%- endif %}
+  </div>
+
+  {# §13 citations — the defining-documents line, links into the rendered corpus #}
+  {%- if node.cites.length %}
+  <p class="cites">defining documents: {% for c in node.cites %}{% if not loop.first %} · {% endif %}<a class="chain-link" href="{{ c.href }}">{{ c.text }}{% if c.section %} §{{ c.section }}{% endif %}</a>{% endfor %}</p>
+  {%- endif %}
+</div>

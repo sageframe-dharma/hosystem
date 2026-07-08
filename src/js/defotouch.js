@@ -10,7 +10,18 @@
   let owner = null;   // the term button currently showing a card
   let pinned = false;
 
-  function build(cut) {
+  // §13 branch-return source: what page/line the reader is on when they follow "full entry →".
+  // Prefer the crumb's current id, then the h1, then the <title>. Kept short — it prints as
+  // "↩ <source>" on the node's crumb line.
+  function sourceLabel() {
+    const c = document.querySelector(".crumb .crumb-current");
+    if (c && c.textContent.trim()) return c.textContent.trim();
+    const h1 = document.querySelector("h1");
+    if (h1 && h1.textContent.trim()) return h1.textContent.trim();
+    return (document.title.split("·")[0] || "").trim() || "back";
+  }
+
+  function build(cut, key) {
     const el = document.createElement("div");
     el.className = "defcard";
     el.setAttribute("role", "tooltip");
@@ -23,6 +34,20 @@
       a.className = "full";
       a.href = cut.fullHref;
       a.textContent = cut.fullLabel || "full entry →";
+      // §13: record the branch so the node page can offer an exact "↩ <source>" return that
+      // restores this scroll + line and marks the term met. Only "full entry →" sets it —
+      // lateral navigation between nodes does not. target = the node this card points to.
+      a.addEventListener("click", () => {
+        try {
+          sessionStorage.setItem("ho.branch", JSON.stringify({
+            from: location.pathname + location.search,
+            scrollY: window.scrollY,
+            term: key,
+            target: key,
+            label: sourceLabel(),
+          }));
+        } catch { /* no storage — the crumb still stands for the deliberate move */ }
+      });
       el.appendChild(a);
     }
     if (!reduce) el.classList.add("arriving");
@@ -58,7 +83,7 @@
     const cut = CUTS[key];
     if (!cut) return;
     dismiss();
-    card = build(cut);
+    card = build(cut, key);
     place(card, term);
     owner = term;
     pinned = !!doPin;

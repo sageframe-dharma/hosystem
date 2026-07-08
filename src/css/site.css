@@ -153,6 +153,19 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
   text-decoration: underline dotted 1px;
   text-decoration-color: var(--bero-70);
   text-underline-offset: 0.2em;
+  position: relative; /* anchor the invisible ≥24 px hit area below */
+}
+/* Invisible pointer target: an absolutely-positioned overlay gives the inline term a
+   ≥24 px-tall hit area (touch/pointer accessibility) WITHOUT altering the §3 resting box —
+   it takes no layout space and paints nothing. Rendering at rest is pixel-identical. */
+.term::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  min-height: 24px;
 }
 .term:focus-visible { outline: 2px solid var(--bero); outline-offset: 2px; }
 .term[aria-expanded="true"] { text-decoration-style: solid; } /* §7 open: dotted → solid */

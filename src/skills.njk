@@ -10,7 +10,9 @@ description: "The Ho System skills—structured collaborators with opinions and 
 <p>A skill is the practice's judgment about one conversation, written down so the
 conversation goes right every time. Not a plugin—a structured collaborator with opinions
 and refusals. The skills are Claude-Code-native; the <a class="chain-link" href="/framework/">artifacts
-they produce</a> are tool-agnostic, and the templates are right there.</p>
+they produce</a> are tool-agnostic, and the <a class="chain-link" href="/framework/#templates">templates</a> are right there.</p>
+
+<p class="go">New to the practice? The on-ramp is <a class="chain-link" href="/start/">the start page →</a></p>
 
 <p class="caption">Each skill is known by what it produces and where it sits in the chain.
 Real-session transcript renderings arrive in v2; for now, the anatomy and the source.</p>
@@ -19,7 +21,7 @@ Real-session transcript renderings arrive in v2; for now, the anatomy and the so
 <div class="skill">
   <h3>{{ s.name }}</h3>
   <p>{{ s.lede }}</p>
-  <p class="anatomy">Claude Code skill · {% if s.ground %}grounded in <a class="chain-link" href="{{ s.ground.href }}">{{ s.ground.label }} →</a> · {% endif %}<a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
+  <p class="anatomy">Claude Code skill · {% if s.ground %}grounded in <a class="chain-link" href="{{ s.ground.href }}">{{ s.ground.label }} →</a> · {% endif %}{% if s.id == "ho-kamae-5-authoring-collaborator" %}authors from the <a class="chain-link" href="/framework/#templates">templates →</a> · {% endif %}<a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
 </div>
 {%- endfor %}
 

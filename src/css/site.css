@@ -163,6 +163,10 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 
 /* ── index lists (Framework / Skills / Walk / Writing) — terse chrome (constraint #0);
       inks from §2 tokens, type from §3 tokens, rules 1px sumi@.12 (§2 ladder) ───────── */
+/* /start/ — numbered first steps: a touch more separation for multi-line steps */
+.steps { margin: 1.25rem 0; }
+.steps li { margin: 0 0 0.75rem; }
+
 .doc-list { list-style: none; padding: 0; margin: 1.5rem 0; }
 .doc-list li { border-top: 1px solid var(--sumi-12); padding: 0.6rem 0; margin: 0; }
 .doc-list li:last-child { border-bottom: 1px solid var(--sumi-12); }

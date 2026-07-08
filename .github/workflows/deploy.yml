@@ -1,0 +1,49 @@
+name: Build and deploy
+
+# Builds the site (ingest → fonts → eleventy), verifies links, and deploys _site to
+# Cloudflare Pages (project: hosystem). Ingest has no local clone or SSH key in CI, so it
+# takes the https shallow-clone path (scripts/ingest.mjs) — pinning is unchanged.
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Nightly rebuild at 09:00 UTC (a quiet hour) so upstream corpus changes land on the
+    # site even without a push here. Ingest re-pins to each source's current HEAD.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check links
+        run: npm run check-links
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy _site --project-name hosystem --branch main

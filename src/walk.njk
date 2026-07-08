@@ -58,6 +58,12 @@ fell beside what replaced it, side by side. Nothing is erased; the record moves 
 <h2>The hos</h2>
 <ul class="doc-list">
   {%- for d in corpus.walkHos %}
-  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{% term d.frontmatter.shape %} · {% endif %}{{ d.frontmatter.status or "" }}{% if d.supersededBy %} · superseded by {% if d.supersededBy.href %}<a class="chain-link" href="{{ d.supersededBy.href }}">{{ d.supersededBy.text }}</a>{% else %}{{ d.supersededBy.text }}{% endif %}{% endif %}</span></li>
+  {#- corpus doctrine (2026-07-07): superseded hos carry status: superseded. When both the
+      status token and the "superseded by …" clause would print "superseded", show the clause
+      once ("shape · superseded by ho-04.6"); any other status keeps both tokens honestly. -#}
+  {%- set st = d.frontmatter.status or "" -%}
+  {%- set supSt = (st | string | lower) == "superseded" -%}
+  {%- set showStatus = not (supSt and d.supersededBy) -%}
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{% term d.frontmatter.shape %} · {% endif %}{% if showStatus %}{{ st }}{% endif %}{% if d.supersededBy %}{% if showStatus and st %} · {% endif %}superseded by {% if d.supersededBy.href %}<a class="chain-link" href="{{ d.supersededBy.href }}">{{ d.supersededBy.text }}</a>{% else %}{{ d.supersededBy.text }}{% endif %}{% endif %}</span></li>
   {%- endfor %}
 </ul>

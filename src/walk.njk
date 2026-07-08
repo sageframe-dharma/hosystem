@@ -58,6 +58,6 @@ fell beside what replaced it, side by side. Nothing is erased; the record moves 
 <h2>The hos</h2>
 <ul class="doc-list">
   {%- for d in corpus.walkHos %}
-  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{% term d.frontmatter.shape %} · {% endif %}{{ d.frontmatter.status or "" }}</span></li>
+  <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.shape %}{% term d.frontmatter.shape %} · {% endif %}{{ d.frontmatter.status or "" }}{% if d.supersededBy %} · superseded by {% if d.supersededBy.href %}<a class="chain-link" href="{{ d.supersededBy.href }}">{{ d.supersededBy.text }}</a>{% else %}{{ d.supersededBy.text }}{% endif %}{% endif %}</span></li>
   {%- endfor %}
 </ul>

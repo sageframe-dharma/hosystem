@@ -61,15 +61,28 @@ export default function () {
     }
     return s;
   };
+  // A middle segment currently points at the same landing as the door (there are no category
+  // pages). A link whose target duplicates an earlier segment's URL implies a page that does
+  // not exist — so drop its href and render it as plain non-interactive text (sumi@.70, no
+  // underline; §12's ellipsis is likewise non-interactive, so this stays in-grammar).
+  const dedupeCrumb = (segs) => {
+    const seen = new Set();
+    for (const s of segs) {
+      if (s.current || !s.href) continue;
+      if (seen.has(s.href)) delete s.href;
+      else seen.add(s.href);
+    }
+    return segs;
+  };
   const crumbFor = (rel, section, source) => {
     const doorUrl = `/${section}/`;
     const rid = recordId(section, slugOf(rel));
     if (section === "walk") {
-      return [
+      return dedupeCrumb([
         { id: "walk", href: doorUrl },
         { id: source, href: doorUrl }, // the project — sharibako
         { id: rid, current: true },
-      ];
+      ]);
     }
     // framework: dirs between source and file; drop a leading "framework" (== the door)
     const dirs = rel.replace(new RegExp(`^${source}/`), "").split("/").slice(0, -1);
@@ -77,7 +90,7 @@ export default function () {
     const out = [{ id: "framework", href: doorUrl }];
     if (rest.length) out.push({ id: rest[0], href: doorUrl });
     out.push({ id: rid, current: true });
-    return out;
+    return dedupeCrumb(out);
   };
 
   // ── registry: basename.md → on-site url (drives link resolution) ──────────
@@ -151,7 +164,23 @@ export default function () {
 
   // split walk display groups: the Kamae chain vs the hos
   const walkKamae = walkDocs.filter((d) => d.slug.startsWith("kamae-"));
-  const walkHos = walkDocs.filter((d) => /ho-\d/.test(d.slug));
+  // hos: carry the frontmatter's `superseded-by:` into the row so the list and the arc agree.
+  // We render the frontmatter faithfully — no status value is invented (the doctrine question,
+  // whether supersession flips `status:`, is the practitioner's and stays open). The successor
+  // links to its own walk page when we render one.
+  const walkHos = walkDocs
+    .filter((d) => /ho-\d/.test(d.slug))
+    .map((d) => {
+      const raw = d.frontmatter["superseded-by"];
+      let supersededBy = null;
+      if (raw) {
+        const m = String(raw).match(/ho-[\d.]+/i);
+        const ref = m ? m[0] : String(raw).trim();
+        const hit = m && walkDocs.find((x) => x.slug === ref || x.slug.startsWith(`${ref}-`));
+        supersededBy = { text: ref, href: hit ? hit.url : null };
+      }
+      return { ...d, supersededBy };
+    });
 
   // ── downloadable templates (spec §5.1 / §9) ───────────────────────────────
   const templates = hoSystem

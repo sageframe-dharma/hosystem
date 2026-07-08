@@ -331,8 +331,16 @@ h1, h2, h3, .crumb, .crumb-line, .depth-block {
 .pane-replaced { border-left: 2px solid var(--gold); padding-left: 0.875rem; color: var(--sumi); }
 
 /* ── §6 diagrams — chain container ─────────────────────────────────────────── */
-.chain-figure { margin: 2.5rem 0; text-align: center; }
+.chain-figure { margin: 2.5rem 0; text-align: center; container-type: inline-size; }
 .chain-figure figcaption { margin-top: 0.75rem; }
+/* §6 scale honesty: full by default; below a 480 px rendered column, swap to the
+   header-scale chain (both are emitted as static SVGs — this only toggles visibility).
+   The container query keys on the figure's own inline size = the reading column width. */
+.chain-header-link { display: none; text-decoration: none; }
+@container (max-width: 480px) {
+  .chain-figure .chain-full { display: none; }
+  .chain-figure .chain-header-link { display: inline-block; }
+}
 /* §6 chain nodes as doors — §12 door-link affordance carried on the label only; the
    diagram never restyles. Underline the node's title on hover/focus; focus-visible
    outlines the hit area. Node ink and geometry are untouched. */

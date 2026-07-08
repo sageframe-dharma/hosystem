@@ -13,7 +13,17 @@ from opinions to a working session, each step narrowing what is possible. It is 
 obviously-right order, never a locked door.</p>
 
 <figure class="chain-figure">
-  {% chainSvg "full", corpus.chainLinks %}
+  {# §6 scale honesty: emit BOTH static SVGs and CSS-toggle on the rendered column width.
+     Below a 480 px column the full diagram would have to shrink past legibility, so we show
+     §6's header-scale chain instead of scaling the full one down. The header variant carries
+     no per-node door targets by frozen definition (chain.header() takes no links), so the
+     whole compact diagram links to the full chain's position on this page (#kamae-chain). #}
+  <div class="chain-full" id="kamae-chain">
+    {% chainSvg "full", corpus.chainLinks %}
+  </div>
+  <a class="chain-header-link" href="#kamae-chain" aria-label="The Kamae chain — five documents, thinking tier into doing tier">
+    {% chainSvg "header" %}
+  </a>
   <figcaption class="caption">Four thinking documents narrow a project—its opinions, then its
   decisions, then its scope, then its sequence—into a fifth that a working session carries out.
   When an arrow loops back, an earlier document is being revised because later work taught you

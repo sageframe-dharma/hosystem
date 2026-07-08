@@ -19,7 +19,10 @@
        ever one rendering of the nav. z-index 5 (the §7 card stays 10). ── #}
   <header class="revealed-header" aria-label="site" data-door="{{ door or '' }}">
     <div class="rh-inner">
-      <a class="rh-brand" href="/" aria-label="hosystem—home">{% koma 20, {"mode":"solid","face":"front"} %}</a>
+      {# §14 home link: koma + wordmark are ONE anchor, one hit target. The §12 touch
+         affordance underlines the wordmark text only — the koma never gets an underline.
+         (Wordmark ruled 2026-07-07; header clamp 42→52rem per the same-day ledger entry.) #}
+      <a class="rh-brand" href="/" aria-label="hosystem—home">{% koma 20, {"mode":"solid","face":"front"} %}<span class="rh-wordmark">hosystem</span></a>
       <nav class="rh-doors" aria-label="primary">
         {%- for d in site.doors %}
         <a href="{{ d.url }}"{% if page.url == d.url or (d.url != "/" and page.url.startsWith(d.url)) %} aria-current="page"{% endif %}>{{ d.name }}</a>

@@ -39,6 +39,11 @@
   --header-band: 40px;    /* condensed band height (§14) */
   --header-pad-x: 20px;   /* band padding 0 20px (§14) */
   --header-crumb: 24px;   /* deep-page crumb line height when revealed mid-page (§14) */
+  --header-inner-max: 52rem;  /* §14 inner clamp 42→52rem (ledger 2026-07-07): the running head
+                                 rides wider than the 42rem reading column so the name and the
+                                 walk both fit. PROVISIONAL — land by feel via ?tuners. */
+  --wordmark-size: 1.0625rem; /* §14 wordmark — sized to sit optically with the h20 koma against
+                                 the 24px content band. PROVISIONAL — land by feel via ?tuners. */
 }
 
 /* ── §3 type — self-hosted faces (§8 no third-party requests) ──────────────── */
@@ -150,12 +155,25 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 }
 .revealed-header.gone { opacity: 0; transform: translateY(-8px); pointer-events: none; } /* §4 step */
 .rh-inner {
-  max-width: var(--measure); margin: 0 auto;
+  max-width: var(--header-inner-max); margin: 0 auto;  /* §14 clamp 52rem (ledger 2026-07-07);
+                                                          the reading column stays 42rem */
   height: var(--header-band); padding: 0 var(--header-pad-x);
   display: flex; align-items: center; gap: 18px;                   /* §14 door gap 18 px */
+  overflow-x: auto; scrollbar-width: none;  /* pan-capable, never document scroll (below) */
 }
-.rh-brand { display: inline-flex; align-items: center; text-decoration: none; }
+.rh-inner::-webkit-scrollbar { display: none; }
+/* §14 home link: koma + wordmark in one anchor, one hit target. Extra air to its right
+   (14px on top of the 18px inner gap = 32px) sets the serif name apart from the mono door
+   row — name and nav read as two things: the wordmark is the site speaking its own name,
+   not a seventh door. */
+.rh-brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 14px; text-decoration: none; }
 .rh-brand .koma { display: block; }
+/* the wordmark — the site's name, lowercase, quiet serif beside the koma (§3 serif 600,
+   §2 sumi 1.00). No gold, no new inks. */
+.rh-wordmark { font-family: var(--serif); font-weight: 600; font-size: var(--wordmark-size); line-height: 1; color: var(--sumi); }
+/* §12 touch affordance — on the wordmark TEXT only; the koma never gets an underline */
+.rh-brand:hover .rh-wordmark, .rh-brand:focus-visible .rh-wordmark { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
+.rh-brand:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
 .rh-doors { display: flex; gap: 18px; font-family: var(--mono); font-weight: 400; font-size: 0.8125rem; line-height: 1; }
 .rh-doors a { color: var(--sumi-70); text-decoration: none; }             /* never sumi@.40; no gold */
 .rh-doors a[aria-current="page"] { color: var(--sumi); }                  /* current sumi 1.00 */
@@ -183,6 +201,19 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .rh-crumb .crumb-current { color: var(--sumi); text-decoration: none; }
 .rh-crumb .crumb-sep { color: var(--sumi-40); }
 .rh-rule { border-top: 1px solid var(--sumi-12); }                        /* §14 hairline boundary at base */
+/* ── §14 narrow degradation (ledger 2026-07-07, order mandated): the wordmark hides FIRST,
+   then the miniature's step-count text drops (nodes stay). The doors never crush or wrap:
+   .rh-inner is pan-capable (above), so in the rare remainder — viewports below the doors'
+   own min-content (642px), or a many-digit step count at a boundary width — the row pans
+   within the header and the document NEVER scrolls sideways. Cutoffs measured against real
+   min-content widths (full row 777px; w/o wordmark ~678px, + count-length headroom). ── */
+@media (max-width: 776px) {
+  .rh-wordmark { display: none; }
+  .rh-brand { margin-right: 0; }  /* the extra air rode with the name */
+}
+@media (max-width: 680px) {       /* near the old 42rem measure the count text yields */
+  .rh-steps { display: none; }    /* the two walk nodes stay */
+}
 @media (prefers-reduced-motion: reduce) { .revealed-header { transition: none; } }
 
 /* §14 scroll-margin-top = revealed height + 12 px on headings + crumb (+ the §13 depth blocks

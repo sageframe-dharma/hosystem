@@ -23,6 +23,8 @@
     ["--header-band", "header band (§14, provisional)", 0, 80, 2, "px"],
     ["--header-pad-x", "header pad-x (§14, provisional)", 0, 48, 2, "px"],
     ["--header-crumb", "header crumb line (§14, provisional)", 0, 48, 2, "px"],
+    ["--header-inner-max", "header inner clamp (§14, provisional)", 42, 60, 1, "rem"],
+    ["--wordmark-size", "wordmark size (§14, provisional)", 0.75, 1.5, 0.0625, "rem"],
   ];
 
   const root = document.documentElement;

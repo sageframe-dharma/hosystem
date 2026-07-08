@@ -536,6 +536,12 @@ reduced       prefers-reduced-motion: present-or-absent at the same triggers,
               0 ms (§4)
 ```
 
+**Wordmark (parked question resolved 2026-07-07):** the header carries the
+site's name — "hosystem", set quietly in the serif beside the koma, one home
+link together, present at rest and in the revealed state alike. Practitioner:
+"Name it. Something nice." The koma earns bareness later; today a first-time
+visitor deserves one word of orientation.
+
 ## Propagation ledger
 
 | date | section | change | reason |

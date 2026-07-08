@@ -30,15 +30,25 @@ npm run build
 this repo's `src/` only — a corpus change is invisible until the next
 `npm run build`. A deployed site is a static snapshot of the pinned SHAs.
 
-## Rebuild automation — decided at Cloudflare wiring (deferred, KICKSTART gate)
+## Rebuild automation — wired 2026-07-08 (GitHub Actions)
 
-When the site is wired to Cloudflare Pages, choose the trigger:
+`.github/workflows/deploy.yml` builds and deploys on every push to main and
+every night at 09:00 UTC (plus manual `workflow_dispatch`). In CI the ingest
+falls back to shallow https clones of the public corpus repos; the manifest
+still pins the SHAs used. Secrets on the GitHub repo: `CLOUDFLARE_API_TOKEN`
+(Pages-Edit scope, Sageframe account — rollable in the Cloudflare dashboard;
+local copy lives in the gitignored `.env`, see `.env.example`) and
+`CLOUDFLARE_ACCOUNT_ID`.
 
-1. **Site-repo push → auto build.** Free with Pages git integration. Covers
-   design/site changes only.
-2. **Corpus push → deploy hook.** One `curl` to a Pages deploy-hook URL from
-   the corpus repos (or by hand) rebuilds the site on content changes.
-3. **Scheduled rebuild.** A nightly hook if push-time hooks are unwanted.
+So, in practice:
 
-Until wired: build locally, deploy deliberately. The propagation rule applies to
-values, not content — corpus updates need no commit here at all.
+- **Site change** — push; it ships itself to the `hosystem` Pages project.
+- **Corpus change** — the nightly run carries it; or trigger the workflow by
+  hand for same-day; or `npm run build && npx wrangler pages deploy _site
+  --project-name hosystem` for right-now.
+- The Pages project is direct-upload by design (no Pages git connection —
+  Actions is the automation, because Pages integration can't watch the two
+  corpus repos anyway).
+
+The propagation rule applies to values, not content — corpus updates need no
+commit here at all.

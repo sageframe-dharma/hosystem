@@ -19,6 +19,10 @@
     ["--interval", "sequence interval (§4)", 0, 800, 20, "ms"],
     ["--page-hold", "page-transition hold (§4)", 0, 300, 10, "ms"],
     ["--flip-dur", "flip duration (§9)", 0, 600, 20, "ms"],
+    // §14 header — marked PROVISIONAL at judgment; land the paddings/heights by feel here.
+    ["--header-band", "header band (§14, provisional)", 0, 80, 2, "px"],
+    ["--header-pad-x", "header pad-x (§14, provisional)", 0, 48, 2, "px"],
+    ["--header-crumb", "header crumb line (§14, provisional)", 0, 48, 2, "px"],
   ];
 
   const root = document.documentElement;

@@ -12,20 +12,26 @@
   <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>
-  <header class="site-head">
-    <div class="bar">
-      <a class="brand" href="/" aria-label="hosystem—home">
-        {% koma 22, {"mode":"keyline","face":"front"} %}
-        <span class="wordmark">hosystem</span>
-      </a>
-      <nav class="nav" aria-label="primary">
+  {# ── §14 the header (variant D′, single-element — 2026-07-07 amendment: ONE header, not two).
+       It rests in its natural slot at the top of the page (sticky, in flow — the slot is
+       reserved so nothing reflows); scrolling down it departs as one §4 step; committed upward
+       scroll brings the SAME element back, docked at top. header.js drives it. There is only
+       ever one rendering of the nav. z-index 5 (the §7 card stays 10). ── #}
+  <header class="revealed-header" aria-label="site" data-door="{{ door or '' }}">
+    <div class="rh-inner">
+      <a class="rh-brand" href="/" aria-label="hosystem—home">{% koma 20, {"mode":"solid","face":"front"} %}</a>
+      <nav class="rh-doors" aria-label="primary">
         {%- for d in site.doors %}
         <a href="{{ d.url }}"{% if page.url == d.url or (d.url != "/" and page.url.startsWith(d.url)) %} aria-current="page"{% endif %}>{{ d.name }}</a>
         {%- endfor %}
       </nav>
+      <div class="rh-mini" aria-hidden="true"></div>
+      {# the client path — right-aligned, set apart from the six doors, never a door ink state #}
+      <a class="rh-engage" href="/engagements/"{% if page.url == "/engagements/" %} aria-current="page"{% endif %}>Engagements</a>
     </div>
+    <div class="rh-crumb" hidden></div>
+    <div class="rh-rule"></div>
   </header>
-  <div class="head-rule"></div>
 
   <main class="wrap{% if not page.reduced %} step{% endif %}">
     {{ content | safe }}
@@ -53,6 +59,10 @@
   <script src="/js/flip.js" defer></script>
   <script src="/js/trail.js" defer></script>
   <script src="/js/crumb.js" defer></script>
+  {# §14 the revealed header; §13 the depth dial + branch-return (after trail.js so ho:met lands) #}
+  <script src="/js/header.js" defer></script>
+  <script src="/js/dial.js" defer></script>
+  <script src="/js/branch.js" defer></script>
   {# dev-only by-feel tuners (spec §7); renders only with ?tuners — inert for visitors #}
   <script src="/js/tuners.js" defer></script>
 </body>

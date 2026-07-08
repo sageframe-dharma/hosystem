@@ -33,6 +33,12 @@
 
   /* ── §5 measure ── */
   --measure: 42rem;
+
+  /* ── §14 the header — condensed band + deep-page crumb line. PROVISIONAL: tightened at
+     judgment, exact paddings/heights land at the by-feel pass via ?tuners (§14). ── */
+  --header-band: 40px;    /* condensed band height (§14) */
+  --header-pad-x: 20px;   /* band padding 0 20px (§14) */
+  --header-crumb: 24px;   /* deep-page crumb line height when revealed mid-page (§14) */
 }
 
 /* ── §3 type — self-hosted faces (§8 no third-party requests) ──────────────── */
@@ -133,17 +139,57 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .term[aria-expanded="true"] { text-decoration-style: solid; } /* §7 open: dotted → solid */
 .term.met { text-decoration-color: var(--sumi-40); }          /* §7 met: recession by opacity */
 
-/* ── site header / nav — quiet chrome (constraint #0; §2 palette, §3 mono) ──── */
-.site-head { max-width: var(--measure); margin: 0 auto; padding: 1.25rem 1.25rem 0; }
-.site-head .bar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.brand { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--sumi); }
-.brand .koma { display: block; }
-.brand .wordmark { font-family: var(--mono); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.02em; }
-.nav { display: flex; gap: 0.9rem; flex-wrap: wrap; font-family: var(--mono); font-size: 0.8125rem; }
-.nav a { color: var(--sumi-70); text-decoration: none; }
-.nav a:hover { color: var(--sumi); }
-.nav a[aria-current="page"] { color: var(--sumi); text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.25em; }
-.head-rule { max-width: var(--measure); margin: 0.75rem auto 0; border-top: 1px solid var(--sumi-12); }
+/* ── §14 the header (variant D′, single-element — 2026-07-07 amendment) ──────────
+   ONE header. Sticky, so it rests in its natural slot at the top (in flow — the slot is
+   reserved, nothing reflows) and the SAME element docks at the top mid-page. header.js toggles
+   `.gone`: departed = the §4 step (8 px rise + fade), present = at rest / docked. z-index 5
+   (the §7 card stays 10). prefers-reduced-motion: present/absent 0 ms. */
+.revealed-header {
+  position: sticky; top: 0; z-index: 5; background: var(--washi);
+  transition: opacity var(--step-dur) var(--step-ease), transform var(--step-dur) var(--step-ease);
+}
+.revealed-header.gone { opacity: 0; transform: translateY(-8px); pointer-events: none; } /* §4 step */
+.rh-inner {
+  max-width: var(--measure); margin: 0 auto;
+  height: var(--header-band); padding: 0 var(--header-pad-x);
+  display: flex; align-items: center; gap: 18px;                   /* §14 door gap 18 px */
+}
+.rh-brand { display: inline-flex; align-items: center; text-decoration: none; }
+.rh-brand .koma { display: block; }
+.rh-doors { display: flex; gap: 18px; font-family: var(--mono); font-weight: 400; font-size: 0.8125rem; line-height: 1; }
+.rh-doors a { color: var(--sumi-70); text-decoration: none; }             /* never sumi@.40; no gold */
+.rh-doors a[aria-current="page"] { color: var(--sumi); }                  /* current sumi 1.00 */
+.rh-doors a:hover, .rh-doors a:focus-visible { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; } /* §12 touch */
+.rh-doors a:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
+/* the walk miniature — rides right of the doors. §8 inks, a pointer only, no gold. */
+.rh-mini { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; }
+.rh-mini svg { display: block; }
+.rh-steps { color: var(--sumi-40); }
+/* the client path — right-aligned, set apart, never a door ink state */
+.rh-engage { margin-left: auto; font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); text-decoration: none; }
+.rh-engage[aria-current="page"] { color: var(--sumi); }
+.rh-engage:hover, .rh-engage:focus-visible { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
+.rh-engage:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
+/* the condensed crumb line — deep pages only, shown when revealed mid-page (§12 grammar) */
+.rh-crumb {
+  max-width: var(--measure); margin: 0 auto; padding: 0 var(--header-pad-x);
+  height: var(--header-crumb); display: flex; align-items: center;
+  font-family: var(--mono); font-size: 0.8125rem; line-height: 1.5;
+  white-space: nowrap; overflow: hidden;
+}
+.rh-crumb[hidden] { display: none; }
+.rh-crumb .crumb-seg { color: var(--sumi-70); }
+.rh-crumb a.crumb-seg { color: var(--sumi-70); text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
+.rh-crumb .crumb-current { color: var(--sumi); text-decoration: none; }
+.rh-crumb .crumb-sep { color: var(--sumi-40); }
+.rh-rule { border-top: 1px solid var(--sumi-12); }                        /* §14 hairline boundary at base */
+@media (prefers-reduced-motion: reduce) { .revealed-header { transition: none; } }
+
+/* §14 scroll-margin-top = revealed height + 12 px on headings + crumb (+ the §13 depth blocks
+   the card lands on). Held at band + crumb + 12 so an anchored jump clears the fixed header. */
+h1, h2, h3, .crumb, .crumb-line, .depth-block {
+  scroll-margin-top: calc(var(--header-band) + var(--header-crumb) + 12px);
+}
 
 /* ── front page onramp (site-authored, terse — §0/§2 vision) ───────────────── */
 .onramp .lede { font-size: 1.375rem; line-height: 1.4; margin: 0 0 1.5rem; }
@@ -159,7 +205,15 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .door-card { border-top: 1px solid var(--sumi-12); padding-top: 0.75rem; }
 .door-card h3 { margin: 0 0 0.25rem; }
 .door-card p { margin: 0 0 0.5rem; }
-.door-card .go { font-family: var(--mono); font-size: 0.8125rem; }
+/* front-page paths as chips — the CTA's grammar (border, padding, §5 link ink), scaled down */
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.5rem; }
+.chip {
+  display: inline-flex; align-items: center;
+  font-family: var(--mono); font-size: 0.8125rem; text-decoration: none; color: var(--sumi);
+  border: 1px solid var(--sumi-40); padding: 0.35rem 0.7rem;
+}
+.chip:hover, .chip:focus-visible { border-color: var(--sumi); }
+.chip:focus-visible { outline: 1px solid var(--bero); outline-offset: 2px; }
 
 /* ── index lists (Framework / Skills / Walk / Writing) — terse chrome (constraint #0);
       inks from §2 tokens, type from §3 tokens, rules 1px sumi@.12 (§2 ladder) ───────── */
@@ -307,7 +361,64 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
   .flip.flipping .face-promoted { animation: none; transform: scaleY(1); }
 }
 
-/* ── glossary ──────────────────────────────────────────────────────────────── */
+/* ── glossary index ────────────────────────────────────────────────────────── */
 .glossary dt { margin-top: 1.25rem; font-family: var(--mono); }
+.glossary dt a { color: var(--sumi); text-decoration: none; }
+.glossary dt a:hover, .glossary dt a:focus-visible { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
 .glossary dd { margin: 0.25rem 0 0; padding-left: 0; }
 .glossary dd .plain { color: var(--sumi-70); font-style: italic; }
+
+/* ── §13 the term node — one node per glossary term, GOLD APPEARS NOWHERE ─────── */
+/* crumb line carries the §12 crumb + the inline branch-return (filled by branch.js) */
+.crumb-line { display: flex; align-items: baseline; margin: 0 0 1rem; }
+.crumb-line .crumb { margin: 0; min-width: 0; flex: 0 1 auto; }
+.branch-slot { flex: 0 0 auto; }
+.branch-slot[hidden] { display: none; }
+.branch-return {
+  font-family: var(--mono); font-size: 0.8125rem; color: var(--bero); cursor: pointer;
+  padding-left: 0.5rem; text-decoration: underline solid 1px;
+  text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; white-space: nowrap;
+}
+
+/* the depth dial — progressive disclosure control (§13) */
+.dial { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0 1rem; }
+.dial:focus-visible { outline: 1px solid var(--bero); outline-offset: 3px; }
+.dial-cap { font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-40); }
+.dial-rail { display: inline-flex; align-items: center; }
+.dial-tick {
+  font-family: var(--mono); font-weight: 600; font-size: 0.8125rem; color: var(--sumi-40);
+  min-width: 1.6rem; height: 1.6rem; display: inline-flex; align-items: center; justify-content: center;
+}
+.dial-tick.reached { color: var(--sumi-70); }                    /* reached sumi@.70 */
+.dial-tick.current { color: var(--sumi); box-shadow: inset 0 0 0 1px var(--sumi-40); } /* current 1.00 + 1px@.40 box */
+.dial-tick + .dial-tick { margin-left: 1.25rem; position: relative; }   /* 1.25rem between ticks */
+.dial-tick + .dial-tick::before { content: ""; position: absolute; left: -1.25rem; top: 50%; width: 1.25rem; height: 1px; background: var(--sumi-12); } /* line 1px sumi@.12 */
+.dial-btn {
+  font-family: var(--mono); font-size: 0.8125rem; color: var(--bero);
+  background: none; border: 0; padding: 0.2rem 0.1rem; min-height: 1.6rem; cursor: pointer;
+  text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em;
+}
+.dial-btn:disabled { display: none; }                            /* at a bound → simply not shown */
+
+/* depth blocks — 1 = plain cut lead, 2 & 3 = body; appended one §4 step at a time */
+.depth-block { margin: 0 0 1rem; }
+.depth-block[hidden] { display: none; }
+.depth-tag { display: block; font-family: var(--mono); font-size: 0.75rem; color: var(--sumi-40); margin-bottom: 0.25rem; }
+.depth-1 .depth-body { font-size: 1.1875rem; line-height: 1.55; }        /* plain cut lead (§13) */
+.depth-2 .depth-body, .depth-3 .depth-body { font-size: 1.0625rem; line-height: 1.65; }
+.depth-body p:last-child { margin-bottom: 0; }
+
+/* typed relationship lists at the foot — the navigable layer (§13) */
+.rels { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--sumi-12); }
+.rel-group { margin-bottom: 1rem; }                              /* group gap 1rem */
+.rel-group:last-child { margin-bottom: 0; }
+.rel-label { display: block; font-family: var(--mono); font-weight: 600; font-size: 0.8125rem; color: var(--sumi-70); margin-bottom: 0.25rem; }
+.rel-derived { font-weight: 400; color: var(--sumi-40); }        /* "(derived)" 400 sumi@.40 */
+.rel-items { font-family: var(--serif); }                        /* entries serif; links = §5 chain-link */
+
+/* the defining-documents citations line (§13) */
+.cites { font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); margin-top: 1.25rem; }
+
+/* ── practitioner identity — §3 type, quiet (item 3) ────────────────────────── */
+.bio { font-size: 0.9375rem; line-height: 1.55; color: var(--sumi-70); }
+.bio a { color: var(--sumi-70); text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }

@@ -85,11 +85,34 @@ export default function () {
   for (const rel of walkRels) registry[basename(rel)] = url("walk", rel);
   for (const rel of frameworkRels) registry[basename(rel)] = url("framework", rel);
 
+  // ── on-site page map (repo-relative path → rendered url) for faithful link rewriting ─
+  // Drives both the documents index and wikilink resolution: a target the site renders as a
+  // page points on-site; everything else falls back to GitHub source (§5). glossary + the
+  // index self-link are the two rendered pages that live outside frameworkRels.
+  const INDEX_URL = "/framework/documents/";
+  const onSitePath = {};
+  for (const rel of frameworkRels) onSitePath[rel.replace(/^ho-system\//, "")] = url("framework", rel);
+  onSitePath["framework/glossary.md"] = "/glossary/";
+  onSitePath["INDEX.md"] = INDEX_URL;
+
+  // ── source path index: basename.md → repo-relative path, per source. Lets wikilink
+  // GitHub-source fallbacks resolve to a correct full path even when the corpus prints only a
+  // bare filename (e.g. a [[template#frag]] reference that carries no parenthetical path).
+  const pathIndex = {};
+  for (const source of ["ho-system", "sharibako"]) {
+    pathIndex[source] = {};
+    for (const rel of manifestFiles(source)) {
+      pathIndex[source][basename(rel)] = rel.replace(new RegExp(`^${source}/`), "");
+    }
+  }
+
   // ── render each document ──────────────────────────────────────────────────
   const renderSet = (rels, section, source) =>
     rels.map((rel) => {
       const doc = renderDoc(rel, {
         registry,
+        onSitePath,
+        sourcePathIndex: pathIndex[source],
         githubBase: site.github[source],
         titleFallback: slugOf(rel),
       });
@@ -107,16 +130,6 @@ export default function () {
 
   const walkDocs = renderSet(walkRels, "walk", "sharibako");
   const frameworkDocs = renderSet(frameworkRels, "framework", "ho-system");
-
-  // ── on-site page map (repo-relative path → rendered url) for faithful link rewriting ─
-  // Drives the documents index: an INDEX.md entry the site renders as a page points on-site;
-  // everything else falls back to GitHub source (§5). glossary + the index self-link are the
-  // two rendered pages that live outside frameworkRels.
-  const INDEX_URL = "/framework/documents/";
-  const onSitePath = {};
-  for (const rel of frameworkRels) onSitePath[rel.replace(/^ho-system\//, "")] = url("framework", rel);
-  onSitePath["framework/glossary.md"] = "/glossary/";
-  onSitePath["INDEX.md"] = INDEX_URL;
 
   // ── chain node destinations (§12): each thinking node lands in kamae-project-framing's
   // own section for that layer (§2.1–2.4); the doing node lands on ho-structure (already

@@ -106,6 +106,20 @@ p { margin: 0 0 1.25rem; }              /* §5 paragraphs 1.25rem */
 ul, ol { margin: 0 0 1.25rem; padding-left: 1.4rem; }
 li { margin: 0.25rem 0; }
 code, kbd { font-family: var(--mono); font-size: 0.875em; background: none; }
+/* §6 code/pre + tables degrade by panning internally — never push the page. Long mono
+   lines and wide markdown tables scroll within their own box; the document never gains a
+   horizontal scrollbar at any width. No frozen value governs this — it is the §6 rule
+   "wrap, shrink, or pan internally" made real for narrow viewports. */
+pre { overflow-x: auto; }
+table { display: block; width: max-content; max-width: 100%; overflow-x: auto; }
+/* Inline code carries long unbreakable tokens (file paths like
+   Sources/SharibakoCLI/Support/DashboardIngestPrompt.swift, env keys, identifiers). Without
+   this they set the line's min-content wider than a narrow phone, forcing the mobile layout
+   viewport to expand (a horizontal-scroll failure). `anywhere` lets such a token wrap at any
+   glyph only when it would otherwise overflow, and — unlike break-word — it feeds the wrap into
+   intrinsic sizing so the paragraph never forces the page wide. Prose stays intact; `pre` is
+   unaffected (white-space:pre governs there, and pre pans). §6 "wrap, shrink" made real. */
+:not(pre) > code { overflow-wrap: anywhere; }
 .caption { font-size: 0.8125rem; line-height: 1.5; color: var(--sumi-70); }
 a { color: var(--bero); }
 hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
@@ -166,7 +180,7 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
    (14px on top of the 18px inner gap = 32px) sets the serif name apart from the mono door
    row — name and nav read as two things: the wordmark is the site speaking its own name,
    not a seventh door. */
-.rh-brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 14px; text-decoration: none; }
+.rh-brand { display: inline-flex; align-items: center; gap: 8px; margin-right: 14px; text-decoration: none; min-height: 24px; }
 .rh-brand .koma { display: block; }
 /* the wordmark — the site's name, lowercase, quiet serif beside the koma (§3 serif 600,
    §2 sumi 1.00). No gold, no new inks. */
@@ -175,7 +189,10 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .rh-brand:hover .rh-wordmark, .rh-brand:focus-visible .rh-wordmark { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
 .rh-brand:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
 .rh-doors { display: flex; gap: 18px; font-family: var(--mono); font-weight: 400; font-size: 0.8125rem; line-height: 1; }
-.rh-doors a { color: var(--sumi-70); text-decoration: none; }             /* never sumi@.40; no gold */
+/* min-height:24px gives each door a ≥24px touch target inside the 40px band; inline-flex centres
+   the 0.8125rem/1 text so the frozen type, gap, and band height are visually unchanged — only the
+   invisible hit area grows (no background per §14). */
+.rh-doors a { color: var(--sumi-70); text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; }             /* never sumi@.40; no gold */
 .rh-doors a[aria-current="page"] { color: var(--sumi); }                  /* current sumi 1.00 */
 .rh-doors a:hover, .rh-doors a:focus-visible { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; } /* §12 touch */
 .rh-doors a:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
@@ -184,7 +201,7 @@ hr { border: 0; border-top: 1px solid var(--sumi-12); margin: 2rem 0; }
 .rh-mini svg { display: block; }
 .rh-steps { color: var(--sumi-40); }
 /* the client path — right-aligned, set apart, never a door ink state */
-.rh-engage { margin-left: auto; font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); text-decoration: none; }
+.rh-engage { margin-left: auto; font-family: var(--mono); font-size: 0.8125rem; color: var(--sumi-70); text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; }
 .rh-engage[aria-current="page"] { color: var(--sumi); }
 .rh-engage:hover, .rh-engage:focus-visible { text-decoration: underline solid 1px; text-decoration-color: var(--bero-70); text-underline-offset: 0.2em; }
 .rh-engage:focus-visible { outline: 1px solid var(--sumi); outline-offset: 2px; }
@@ -273,7 +290,11 @@ h1, h2, h3, .crumb, .crumb-line, .depth-block {
 .ledger-row { display: grid; grid-template-columns: 9rem 1fr; padding: 0.5rem 0.875rem; border-bottom: 1px solid var(--sumi-12); }
 .ledger-row:last-child { border-bottom: 0; }
 .ledger-key { color: var(--sumi-70); }
-.ledger-val { color: var(--sumi); }
+/* min-width:0 lets the 1fr value track shrink below its longest token, and overflow-wrap lets
+   that token (e.g. a 32-char git SHA in the colophon ledger) break instead of forcing the grid —
+   and the mobile viewport — wider than a phone. The frozen §5 `9rem + 1fr` tracks are untouched;
+   this only governs how a long value degrades (§6 "wrap, shrink"). */
+.ledger-val { color: var(--sumi); min-width: 0; overflow-wrap: anywhere; }
 .ledger-val ul { margin: 0; padding-left: 1.1rem; }
 .ledger-val li { margin: 0.1rem 0; }
 

@@ -43,6 +43,7 @@ never silently.
 | 11 | the narrow trail | landed 2026-07-05 | [§11](#11--the-narrow-trail) |
 | 12 | wayfinding | landed 2026-07-06 | [§12](#12--wayfinding) |
 | 13 | the term node | open | — |
+| 14 | the header | open | — |
 
 ## 1 — the piece
 

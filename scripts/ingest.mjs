@@ -8,9 +8,12 @@
 // every clone/CI to init submodules with SSH access.
 //
 // The step PREFERS the local read-only clones already on disk (fast, offline, never
-// modified). If a clone is absent it shallow-clones via SSH into a temp dir — never into
-// either vault. Ingested files land in vendor/ (gitignored): the site renders the corpus,
-// it does not fork it. This mirrors how the Cloudflare Pages build will work.
+// modified). If a clone is absent it shallow-clones into a temp dir — never into either
+// vault — trying HTTPS first (the CI path: public repos, no credentials) and falling back
+// to SSH for exotic environments. Pinning is unchanged: the manifest still records the HEAD
+// SHA of whatever source it read, shallow clone or not. Ingested files land in vendor/
+// (gitignored): the site renders the corpus, it does not fork it. This mirrors how the
+// Cloudflare Pages build works — CI has no local clone and no SSH key, so it takes HTTPS.
 
 import { execFileSync } from "node:child_process";
 import {
@@ -24,10 +27,13 @@ const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const VENDOR = join(ROOT, "vendor");
 
 // Upstream sources. localPath is this machine's read-only clone (preferred, never
-// modified); ssh is the fallback remote for a fresh CI environment.
+// modified). For a fresh environment with no clone (CI), remotes are tried in order:
+// https first (public repo, no credentials — the Cloudflare/GitHub Actions path), then ssh
+// as an exotic fallback. https must be sufficient; ssh must never be required.
 const SOURCES = {
   "ho-system": {
     localPath: "/Users/atmarcus/Vaults/sageframe-no-kaji-dev/ho-system",
+    https: "https://github.com/sageframe-no-kaji/ho-system.git",
     ssh: "git@github.com:sageframe-no-kaji/ho-system.git",
     // curated subset: only what the rendered pages need
     files: [
@@ -48,6 +54,7 @@ const SOURCES = {
   },
   sharibako: {
     localPath: "/Users/atmarcus/Vaults/sageframe-no-kaji-dev/sharibako",
+    https: "https://github.com/sageframe-no-kaji/sharibako.git",
     ssh: "git@github.com:sageframe-no-kaji/sharibako.git",
     files: [
       "README.md",
@@ -93,10 +100,28 @@ for (const [name, src] of Object.entries(SOURCES)) {
 
   if (!existsSync(base)) {
     tmp = mkdtempSync(join(tmpdir(), `hosite-${name}-`));
-    console.log(`[ingest] ${name}: no local clone — shallow-cloning ${src.ssh}`);
-    execFileSync("git", ["clone", "--depth", "1", src.ssh, tmp], { stdio: "inherit" });
-    base = tmp;
-    via = "ssh-clone";
+    // Try remotes in order — https (CI, no credentials) then ssh (exotic fallback).
+    const remotes = [
+      src.https && { url: src.https, via: "https-clone" },
+      src.ssh && { url: src.ssh, via: "ssh-clone" },
+    ].filter(Boolean);
+    let cloned = false;
+    for (const r of remotes) {
+      console.log(`[ingest] ${name}: no local clone — shallow-cloning ${r.url}`);
+      try {
+        // clone into a fresh empty subdir so a failed attempt never blocks the next
+        rmSync(tmp, { recursive: true, force: true });
+        mkdirSync(tmp, { recursive: true });
+        execFileSync("git", ["clone", "--depth", "1", r.url, tmp], { stdio: "inherit" });
+        base = tmp;
+        via = r.via;
+        cloned = true;
+        break;
+      } catch (err) {
+        console.warn(`[ingest] ${name}: ${r.via} failed (${err.message}) — trying next remote`);
+      }
+    }
+    if (!cloned) throw new Error(`[ingest] ${name}: all remotes failed (${remotes.map((r) => r.via).join(", ")})`);
   }
 
   const sha = headSha(base);

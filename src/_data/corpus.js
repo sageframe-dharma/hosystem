@@ -145,17 +145,20 @@ export default function () {
   const frameworkDocs = renderSet(frameworkRels, "framework", "ho-system");
 
   // ── chain node destinations (§12): each thinking node lands in kamae-project-framing's
-  // own section for that layer (§2.1–2.4); the doing node lands on ho-structure (already
-  // right). Fragments are the headingSlug of §2.N — verified by check-links against the
-  // rendered ids. Five distinct destinations. ──────────────────────────────────────────
+  // own section for that layer (§2.1–2.4); the per-ho (doing) node lands on ho-structure; the
+  // State Memory (K6) lands on the 2.14 cross-session-continuity page that defines it — the
+  // same "node → the document that defines this layer" rule K5 follows. Fragments are the
+  // headingSlug of §2.N — verified by check-links against the rendered ids. Six destinations.
   const framingUrl = onSitePath["framework/structure/kamae-project-framing.md"];
   const structureUrl = onSitePath["framework/structure/ho-structure.md"];
+  const continuityUrl = onSitePath["framework/structure/cross-session-continuity.md"];
   const chainLinks = [
     `${framingUrl}#21-the-project-seed`,   // Seed
     `${framingUrl}#22-system-design`,      // System Design
     `${framingUrl}#23-readme`,             // README
     `${framingUrl}#24-ho-overview`,        // Ho Overview
     structureUrl,                          // Per-Ho Documents → ho-structure
+    continuityUrl,                         // State Memory (K6) → cross-session-continuity (2.14)
   ];
 
   // sort framework docs: foundation docs first, then structure by frontmatter id

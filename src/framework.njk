@@ -8,9 +8,10 @@ description: "The Framework—the named parts of the Ho System, rendered with th
 <h1>The Framework</h1>
 
 <p>The named parts of the practice, rendered as the documents that define them. The
-narrative spine is the <strong>Kamae chain</strong>—five documents that carry a project
-from opinions to a working session, each step narrowing what is possible. It is the
-obviously-right order, never a locked door.</p>
+narrative spine is the <strong>Kamae chain</strong>—six links: four framing documents
+carry a project from opinions to a sequence, a fifth carries each working session, and a
+sixth remembers the build between them. It is the obviously-right order, never a locked
+door.</p>
 
 <figure class="chain-figure">
   {# §6 scale honesty: emit BOTH static SVGs and CSS-toggle on the rendered column width.
@@ -21,13 +22,14 @@ obviously-right order, never a locked door.</p>
   <div class="chain-full" id="kamae-chain">
     {% chainSvg "full", corpus.chainLinks %}
   </div>
-  <a class="chain-header-link" href="#kamae-chain" aria-label="The Kamae chain — five documents, thinking tier into doing tier">
+  <a class="chain-header-link" href="#kamae-chain" aria-label="The Kamae chain — six links: four framing documents, a pre-action document per session, and the living State Memory">
     {% chainSvg "header" %}
   </a>
   <figcaption class="caption">Four thinking documents narrow a project—its opinions, then its
-  decisions, then its scope, then its sequence—into a fifth that a working session carries out.
+  decisions, then its scope, then its sequence—into a fifth that a working session carries out,
+  and a sixth that remembers where the build is between sessions.
   When an arrow loops back, an earlier document is being revised because later work taught you
-  something; the change is always written down, never made silently. The mark on the last
+  something; the change is always written down, never made silently. The mark on the per-ho
   document is where the plan becomes a single bounded step—a
   <button type="button" class="term" data-term="ho" aria-expanded="false">ho</button>—small
   enough to pick up and finish. Each box opens the document that defines it.</figcaption>

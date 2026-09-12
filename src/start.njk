@@ -2,49 +2,52 @@
 layout: base.njk
 title: Start
 permalink: /start/
-description: "Start—the practitioner on-ramp to the Ho System: install the skills, develop a seed, follow the chain, open your first ho, keep the record."
+description: "Start a Ho System project: develop the idea, plan the build, prepare a working session, and maintain the project record."
 ---
 <h1>Start</h1>
 
-<p class="lede">You are about to adopt a discipline, not install a tool. You plan the work in
-documents, do it in bounded steps, and keep the record as you go—so the AI writes the code
-while you keep architectural authority and genuine understanding. Walk the chain once and you
-have the shape of every project that follows.</p>
+<p class="lede">Start with a project you want to build. Write down the problem, intended users,
+and constraints before choosing an implementation. Use those decisions to plan the build and
+define its first working session.</p>
 
 <figure class="chain-figure">
   {% chainSvg "full", corpus.chainLinks %}
-  <figcaption class="caption">The Kamae chain: four thinking documents narrow a project—its
-  opinions, then its decisions, then its scope, then its sequence—into a fifth that a working
-  session carries out, and a sixth that remembers where the build is between sessions. Each box
-  opens the document that defines it.</figcaption>
+  <figcaption class="caption">The Kamae chain has four project-framing documents: Seed,
+  System Design, README, and Ho Overview. Per-ho documents define individual sessions, and
+  State Memory records the project's current position between sessions. Each box links to
+  the document that explains it.</figcaption>
 </figure>
 
 <h2>First steps</h2>
 <ol class="steps">
-  <li><strong>Install the skills.</strong> They are Claude-Code-native collaborators, one per
-  conversation in the chain; with them installed the practice runs from inside your editor.
-  <span class="caption">(<a class="chain-link" href="/skills/">the catalog</a> · <a class="chain-link" href="https://github.com/sageframe-no-kaji/ho-system/tree/main/skills">source on GitHub</a>)</span></li>
+  <li><strong>Choose templates or skills.</strong> Download the
+  <a class="chain-link" href="/framework/#templates">Markdown templates</a> to work directly
+  with the documents, or use the Ho skills to guide the planning conversations and setup
+  work. The <a class="chain-link" href="/skills/">catalog</a> describes each skill and links
+  to its source. <span class="caption">(<a class="chain-link"
+  href="https://github.com/sageframe-no-kaji/ho-system/tree/main/skills">Skill source on GitHub</a>)</span></li>
 
-  <li><strong>Run {% term "Kamae" %}&nbsp;1 to develop a {% term "seed" %}.</strong> The seed is
-  your project's opinions written down—what it is, who it's for, the shape you have in mind—before
-  any code exists.</li>
+  <li><strong>Develop a {% term "seed" %} ({% term "Kamae" %}&nbsp;1).</strong> Describe the
+  problem, who the project is for, what already exists, and the constraints it must meet.
+  Record the approach you want to explore and the questions still open.</li>
 
-  <li><strong>Follow the chain.</strong> Kamae&nbsp;2 turns opinions into decisions, 3 into a
-  README that fixes scope, 4 into an ordered sequence of steps. Each one narrows what is still
-  possible, so the last document is easy to write.</li>
+  <li><strong>Frame the build (Kamae&nbsp;2–4).</strong> Develop the System Design to settle
+  the architecture. Write the README to define the intended product and scope, then the Ho
+  Overview to sequence the work and its dependencies.</li>
 
-  <li><strong>Open your first {% term "ho" %}.</strong> Kamae&nbsp;5 authors it: one bounded,
-  verified, recorded step—small enough to pick up and finish in a single session.</li>
+  <li><strong>Prepare the first {% term "ho" %} (Kamae&nbsp;5).</strong> Set up the project's
+  tools and checks, and create its {% term "State Memory", "state-memory" %} (Kamae&nbsp;6).
+  Define the session's deliverable, boundaries, and checks before implementation begins.</li>
 
-  <li><strong>Keep the record.</strong> Each ho closes on the record; a superseded step is never
-  erased, only marked. The {% term "arc" %} of your project is that record, moving forward only.</li>
+  <li><strong>Carry out the work and record the result.</strong> Check the deliverable against
+  the plan, review what you learned, and commit the completed work and its record to version
+  control. Update State Memory whenever a ho closes or a session ends, recording what is
+  complete, what comes next, unresolved issues, and the project's lifecycle stage. Preserve
+  completed records when later decisions supersede them.</li>
 </ol>
 
-<p>The document <a class="chain-link" href="/framework/#templates">templates</a> are tool-agnostic
-and ready to use—download the raw Markdown and the skills author into them. Self-directed
-<a class="chain-link" href="https://github.com/sageframe-no-kaji/ho-system/tree/main/guides">guides</a>
-are taking shape in the repo alongside them.</p>
-
-<p class="caption">That is the whole on-ramp. When you want the named parts in depth, they are one
-door over: <a class="chain-link" href="/framework/">the framework</a> and
-<a class="chain-link" href="/skills/">the skills</a>.</p>
+<p><a class="chain-link"
+href="https://github.com/sageframe-no-kaji/ho-system/tree/main/guides">Draft guides</a> cover
+getting started, choosing a project, and working with AI. The
+<a class="chain-link" href="/framework/">Framework</a> contains the document definitions and
+downloadable templates.</p>

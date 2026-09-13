@@ -1,0 +1,34 @@
+{
+  "ho-kamae-1-seed-collaborator": {
+    "title": "Develop a project seed",
+    "description": "Work through the problem, intended users, constraints, and possible approaches. Draft a seed or revise one you already have."
+  },
+  "ho-kamae-2-system-design-collaborator": {
+    "title": "Design the system",
+    "description": "Use the completed seed to decide the architecture, compare alternatives, and record the reasons for your choices."
+  },
+  "ho-kamae-3-readme-collaborator": {
+    "title": "Write the project README",
+    "description": "Describe the intended product and scope from the seed and system design. Update the README as the project changes."
+  },
+  "ho-kamae-4-overview-collaborator": {
+    "title": "Plan the build sequence",
+    "description": "Organize the work into phases and hos, with dependencies, deferred decisions, and planned release points."
+  },
+  "ho-kamae-5-authoring-collaborator": {
+    "title": "Prepare a working session",
+    "description": "Define a ho's scope, decisions, and checks from the project plan. Update the document as the work develops and record the results afterward."
+  },
+  "ho-setup-personal-environment-collaborator": {
+    "title": "Set up your Claude Code environment",
+    "description": "Configure the operating instructions, practitioner context, language conventions, and templates used across your Ho projects."
+  },
+  "ho-setup-project-environment-collaborator": {
+    "title": "Set up a project",
+    "description": "Create the repository structure and configure its development tools and checks using your Ho environment."
+  },
+  "ho-tool-index-maintenance": {
+    "title": "Maintain the framework index",
+    "description": "Update document metadata and INDEX.md entries in the Ho System repository."
+  }
+}

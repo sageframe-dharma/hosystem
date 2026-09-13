@@ -3,31 +3,23 @@ layout: base.njk
 title: The Walk
 door: walk
 permalink: /walk/
-description: "The Walk—sharibako's chain and hos rendered as the real documents they are, supersession live, the arc rendered as state."
+description: "Follow Sharibako's project plans, working-session records, and the replacement of its setup dashboard with plain prompts."
 ---
 <h1>The Walk</h1>
 
-<p class="lede">sharibako is a real, shipped project—a Swift command-line tool, built under
-this practice. What follows is its genuine build record: the actual documents from the actual
-build, not a demo and not staged data.</p>
+<p class="lede">Sharibako is a Mac app and command-line tool for storing API keys and environment variables in an encrypted local vault. These documents record its plans, implementation work, and revisions.</p>
 
-<p>The cleanest current-convention instance of the practice: <strong>sharibako</strong>, a
-real project, its whole chain and hos rendered as the documents they are—frontmatter
-visible, styled as the typed metadata it is, not hidden as if it were plumbing. Every
-document here is <a class="chain-link" href="https://github.com/sageframe-no-kaji/sharibako">verifiable
-in the public repo</a>.</p>
+<p>Start with the change to the setup command below, then follow the project-framing documents and individual ho records. The source documents are available in <a class="chain-link" href="https://github.com/sageframe-no-kaji/sharibako">Sharibako's public repository</a>.</p>
 
-<h2>The arc, as state</h2>
-<p>Unlike the canonical chain, an {% term "arc" %} shows <em>state</em>. A closed step turns
-over to its gold face the first time you see it close; a {% term "superseded", "supersedes" %}
-step rests quietly in gold, already turned. Here is sharibako's ho-04 arc:</p>
+<h2>The setup sequence</h2>
+<p>This {% term "arc" %} follows three versions of Sharibako's setup command. Gold marks indicate closed steps; the lighter gold mark identifies the superseded dashboard. Select a step to read its record.</p>
 
 <div class="arc">
   {%- for node in corpus.arc %}
   <div class="arc-node">
     <a href="{{ node.url }}">
     {%- if node.state == "superseded" -%}
-      <span title="superseded: recession, not promotion">{% koma 28, {"mode":"keyline","face":"promoted","tint":"#d2c5a0"} %}</span>
+      <span title="Superseded by ho-04.6">{% koma 28, {"mode":"keyline","face":"promoted","tint":"#d2c5a0"} %}</span>
     {%- else -%}
       <span class="state-mark" data-record="{{ node.id }}" data-state="{{ node.state }}">
         <span class="flip">
@@ -42,11 +34,8 @@ step rests quietly in gold, already turned. Here is sharibako's ho-04 arc:</p>
   {%- endfor %}
 </div>
 
-<h2>The visible architecture change</h2>
-<p>The most persuasive single thing the practice can show is a plan meeting reality on the
-record. <a class="chain-link" href="{{ corpus.showcase }}">ho-04.6—plain-prompt init</a>
-supersedes ho-04.4's dashboard surface. Open its <code>supersedes</code> marker to see what
-fell beside what replaced it, side by side. Nothing is erased; the record moves forward only.</p>
+<h2>Replacing the dashboard</h2>
+<p>The dashboard built in ho-04.4 passed automated tests but trapped the user during a terminal walkthrough. Ho-04.6 replaced it with line-by-line prompts while retaining the underlying import logic. Open <a class="chain-link" href="{{ corpus.showcase }}">ho-04.6—plain-prompt init</a>, then select the entry in its <code>supersedes</code> row to compare the earlier and replacement records.</p>
 
 <h2>The Kamae chain</h2>
 <ul class="doc-list">
@@ -55,7 +44,7 @@ fell beside what replaced it, side by side. Nothing is erased; the record moves 
   {%- endfor %}
 </ul>
 
-<h2>The hos</h2>
+<h2>Working-session records</h2>
 <ul class="doc-list">
   {%- for d in corpus.walkHos %}
   {#- corpus doctrine (2026-07-07): superseded hos carry status: superseded. When both the

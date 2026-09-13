@@ -3,15 +3,11 @@ layout: base.njk
 title: The Framework
 door: framework
 permalink: /framework/
-description: "The Framework—the named parts of the Ho System, rendered with the canonical Kamae chain, plus downloadable templates."
+description: "Ho System definitions, project documents, and downloadable Markdown templates."
 ---
 <h1>The Framework</h1>
 
-<p>The named parts of the practice, rendered as the documents that define them. The
-narrative spine is the <strong>Kamae chain</strong>—six links: four framing documents
-carry a project from opinions to a sequence, a fifth carries each working session, and a
-sixth remembers the build between them. It is the obviously-right order, never a locked
-door.</p>
+<p>The framework documents define how Ho projects are planned, carried out, checked, and recorded. Use the diagram to follow the project documents, or browse the definitions and download templates below.</p>
 
 <figure class="chain-figure">
   {# §6 scale honesty: emit BOTH static SVGs and CSS-toggle on the rendered column width.
@@ -25,14 +21,7 @@ door.</p>
   <a class="chain-header-link" href="#kamae-chain" aria-label="The Kamae chain — six links: four framing documents, a pre-action document per session, and the living State Memory">
     {% chainSvg "header" %}
   </a>
-  <figcaption class="caption">Four thinking documents narrow a project—its opinions, then its
-  decisions, then its scope, then its sequence—into a fifth that a working session carries out,
-  and a sixth that remembers where the build is between sessions.
-  When an arrow loops back, an earlier document is being revised because later work taught you
-  something; the change is always written down, never made silently. The mark on the per-ho
-  document is where the plan becomes a single bounded step—a
-  <button type="button" class="term" data-term="ho" aria-expanded="false">ho</button>—small
-  enough to pick up and finish. Each box opens the document that defines it.</figcaption>
+  <figcaption class="caption">The Kamae chain begins with Seed, System Design, README, and Ho Overview. Per-ho documents define individual working sessions; State Memory records the project's current position between sessions. Later work can lead you to revise an earlier document; record the revision and its reason.</figcaption>
 </figure>
 
 <h2>The documents</h2>
@@ -41,12 +30,10 @@ door.</p>
   <li><a href="{{ d.url }}">{{ d.title }}</a> <span class="meta">{% if d.frontmatter.id %}{{ d.frontmatter.id }} · {% endif %}{{ d.frontmatter.type or "" }}</span></li>
   {%- endfor %}
 </ul>
-<p class="caption">The whole corpus—every document, rendered here or sourced upstream—is
-mapped in the <a class="chain-link" href="{{ corpus.documentsIndex.url }}">index of documents</a>.</p>
+<p class="caption">The <a class="chain-link" href="{{ corpus.documentsIndex.url }}">index of documents</a> lists the framework's documents and their source locations.</p>
 
 <h2 id="templates">Templates</h2>
-<p>The framework's document templates, tool-agnostic, ready to use. Download the raw
-Markdown; the skills that author them are one door over.</p>
+<p>Download a Markdown template to begin a project document. The <a class="chain-link" href="/skills/">Ho skills</a> can guide you through developing these documents.</p>
 <ul class="tmpl-list">
   {%- for t in corpus.templates %}
   <li><span>{{ t.title }}</span> <span class="dl"><a class="chain-link" href="{{ t.href }}" download>download .md</a> · <a class="chain-link" href="{{ t.github }}">source</a></span></li>

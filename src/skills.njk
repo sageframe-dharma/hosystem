@@ -3,27 +3,40 @@ layout: base.njk
 title: The Skills
 door: skills
 permalink: /skills/
-description: "The Ho System skills—structured collaborators with opinions and refusals. The catalog, one page."
+description: "Choose a Ho skill for project planning, environment setup, or document maintenance, and install the seed skill in Claude Code."
 ---
 <h1>The Skills</h1>
 
-<p>A skill is the practice's judgment about one conversation, written down so the
-conversation goes right every time. Not a plugin—a structured collaborator with opinions
-and refusals. The skills are Claude-Code-native; the <a class="chain-link" href="/framework/">artifacts
-they produce</a> are tool-agnostic, and the <a class="chain-link" href="/framework/#templates">templates</a> are right there.</p>
+<p>Each Ho skill gives an AI assistant instructions for a planning, setup, or maintenance task. It specifies what to ask, which documents to use, and what to produce. You review the decisions and resulting work.</p>
 
-<p class="go">New to the practice? The on-ramp is <a class="chain-link" href="/start/">the start page →</a></p>
+<p>The setup skills configure a Claude Code environment. The planning skills produce Markdown documents that you can read and edit independently. You can also begin directly with the <a class="chain-link" href="/framework/#templates">document templates</a>.</p>
 
-<p class="caption">Each skill is known by what it produces and where it sits in the chain.
-Real-session transcript renderings arrive in v2; for now, the anatomy and the source.</p>
+<p class="go"><a class="chain-link" href="/start/">Start a Ho project →</a></p>
 
+<h2>Try the seed skill in Claude Code</h2>
+<p>You need Git and Claude Code installed. In Terminal, open the project directory where you want to develop the idea, then run:</p>
+<pre><code>ho_skill_source="$(mktemp -d)"
+git clone --depth 1 https://github.com/sageframe-no-kaji/ho-system.git "$ho_skill_source/ho-system" &amp;&amp;
+mkdir -p .claude/skills &amp;&amp;
+if [ -e .claude/skills/ho-kamae-1-seed-collaborator ]; then
+  echo "The seed skill is already installed; keep it or review an update separately."
+else
+  cp -R "$ho_skill_source/ho-system/skills/ho-kamae-1-seed-collaborator" .claude/skills/
+fi</code></pre>
+
+<p>This copies the seed skill and its references into <code>.claude/skills/</code> for this project. Open Claude Code in the same directory and type <code>/ho-kamae-1-seed-collaborator</code>, followed by a description of the project you want to develop. Confirm that the command is available before beginning the conversation.</p>
+
+<p>To use another skill, copy its whole directory from the <a class="chain-link" href="https://github.com/sageframe-no-kaji/ho-system/tree/main/skills">Ho repository</a> into <code>.claude/skills/</code>. Keep its reference files with it. <a class="chain-link" href="https://code.claude.com/docs/en/skills">Claude Code's skill documentation</a> describes installation across all your projects and other locations.</p>
+
+<h2>Choose a skill</h2>
 {%- for s in corpus.skills %}
+{%- set copy = skillCopy[s.id] %}
 <div class="skill">
-  <h3>{{ s.name }}</h3>
-  <p>{{ s.lede }}</p>
-  <p class="anatomy">Claude Code skill · {% if s.ground %}grounded in <a class="chain-link" href="{{ s.ground.href }}">{{ s.ground.label }} →</a> · {% endif %}{% if s.id == "ho-kamae-5-authoring-collaborator" %}authors from the <a class="chain-link" href="/framework/#templates">templates →</a> · {% endif %}<a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
+  <h3>{{ copy.title or s.name }}</h3>
+  <p><code>{{ s.id }}</code></p>
+  <p>{{ copy.description or s.lede }}</p>
+  <p class="anatomy">{% if s.ground %}Framework reference: <a class="chain-link" href="{{ s.ground.href }}">{{ s.ground.label }} →</a> · {% endif %}{% if s.id == "ho-kamae-5-authoring-collaborator" %}<a class="chain-link" href="/framework/#templates">Document templates →</a> · {% endif %}<a class="chain-link" href="{{ s.github }}">SKILL.md source →</a></p>
 </div>
 {%- endfor %}
 
-<p class="caption" style="margin-top:1.5rem">The full catalog and the two scopes it spans—practitioner and project—are described in the framework's
-<a class="chain-link" href="https://github.com/sageframe-no-kaji/ho-system/blob/main/skills/ho-skill-overview.md">skills overview</a>.</p>
+<p class="caption" style="margin-top:1.5rem">The <a class="chain-link" href="https://github.com/sageframe-no-kaji/ho-system/blob/main/skills/ho-skill-overview.md">skills overview</a> describes when to use each skill and distinguishes practitioner setup from project work.</p>

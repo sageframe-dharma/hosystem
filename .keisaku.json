@@ -1,0 +1,47 @@
+{
+  "keisaku": 1,
+  "works": [
+    {
+      "id": "hosystem",
+      "name": "hosystem",
+      "tags": [
+        "javascript",
+        "11ty-eleventy",
+        "gray-matter",
+        "markdown-it"
+      ],
+      "media": [
+        "software"
+      ],
+      "repo": "git@github-dharma:sageframe-dharma/hosystem.git",
+      "tech_stack": "JavaScript (@11ty/eleventy, gray-matter, markdown-it)",
+      "created": "2026-07-03",
+      "last_updated": "2026-09-12",
+      "_keisaku": {
+        "generated_at": "2026-11-16T10:49:46",
+        "generator_version": "1",
+        "sources": {
+          "readme": "README.md",
+          "manifest": "package.json"
+        },
+        "derived_defaults": {
+          "id": "hosystem",
+          "name": "hosystem",
+          "media": [
+            "software"
+          ],
+          "created": "2026-07-03",
+          "tags": [
+            "javascript",
+            "11ty-eleventy",
+            "gray-matter",
+            "markdown-it"
+          ]
+        },
+        "contract_issues": [
+          "no-contract-source"
+        ]
+      }
+    }
+  ]
+}

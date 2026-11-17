@@ -11,7 +11,7 @@
         "markdown-it"
       ],
       "media": [
-        "software"
+        "website"
       ],
       "repo": "git@github-dharma:sageframe-dharma/hosystem.git",
       "tech_stack": "JavaScript (@11ty/eleventy, gray-matter, markdown-it)",

@@ -4,6 +4,7 @@
     {
       "id": "hosystem",
       "name": "hosystem",
+      "importance": 9,
       "tags": [
         "javascript",
         "11ty-eleventy",
@@ -15,9 +16,17 @@
       ],
       "status": "shipped",
       "repo": "git@github-dharma:sageframe-dharma/hosystem.git",
+      "deployment": [
+        {
+          "label": "hosystem.sageframe.net",
+          "url": "https://hosystem.sageframe.net",
+          "role": "live"
+        }
+      ],
       "tech_stack": "JavaScript (@11ty/eleventy, gray-matter, markdown-it)",
       "created": "2026-07-03",
       "last_updated": "2026-09-12",
+      "availability": "published",
       "_keisaku": {
         "generated_at": "2026-11-17T15:26:31",
         "generator_version": "1",

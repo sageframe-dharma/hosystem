@@ -221,6 +221,7 @@ export default function () {
     "ho-kamae-5-authoring-collaborator": { href: structureUrl, label: "Ho Structure" },
     "ho-setup-personal-environment-collaborator": { href: onSitePath["practitioner/operating-discipline.md"], label: "The Operating Discipline" },
     "ho-setup-project-environment-collaborator": { href: onSitePath["framework/structure/verification-practices.md"], label: "Verification Practices" },
+    "ho-antagonist-review": { href: onSitePath["framework/structure/verification-practices.md"], label: "Verification Practices" },
   };
 
   const skills = hoSystem
